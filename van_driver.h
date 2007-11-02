@@ -1,0 +1,93 @@
+#ifndef _VAN_DRIVER
+#define _VAN_DRIVER
+
+#include <van.h>
+#include <pthread.h>
+#include <bqueue.h>
+#include "rtable.h"
+
+#include <curses.h>
+#include <panel.h>
+#include <menu.h>
+
+typedef enum {	
+	MSG_LOG,
+	MSG_WARNING,
+	MSG_ERROR,
+} msg_type;
+
+typedef struct {
+
+	int use_curses;
+
+	WINDOW *rtable_win;
+	PANEL	*rtable_pan;
+	
+	WINDOW *log_win;
+	PANEL *log_pan;
+
+	WINDOW *menu_win;
+	PANEL *menu_pan;
+} curses_out_t;
+
+typedef struct {
+	unsigned char cur_state;
+	unsigned char old_state;
+	int peer; /* address of peer on the other end of this link */
+	time_t age; /* time when last packet was recieved */
+	unsigned char timed_out;
+	pthread_cond_t cond;
+	pthread_mutex_t lock;
+	pthread_mutex_t age_lock;
+} iface_t;
+
+typedef struct {
+	van_node_t *van_node;
+	pthread_t *sending_thread;
+	pthread_t *listening_thread[VAN_MAXINTERFACES];
+	pthread_t *rip_thread;
+	pthread_t *rip_monitor_thread;
+	pthread_t *link_state_thread;
+	bqueue_t *sending_q;
+	bqueue_t *receiving_q;
+	bqueue_t *rip_q;
+	rtable_t *route_table;
+	iface_t *ifaces;
+
+} ip_node_t;
+
+
+typedef struct {
+	ip_node_t *node;
+	int iface;
+} node_and_num_t;
+
+typedef struct {
+	int iface;
+	void *packet;
+	int packet_size;
+	unsigned int addr_type;
+} ip_packet_t;
+
+typedef struct {
+	int iface;
+	char *packet;
+} rip_packet_t;
+
+int van_driver_loaded();
+
+ip_node_t *van_driver_init(char *fname, int num, int use_curses);
+void van_driver_destory(ip_node_t *node);
+
+int get_if_state(ip_node_t *node, int iface);
+int set_if_state(ip_node_t *node, int iface, int state);
+int van_driver_sendto (ip_node_t *node, char *buf, int size, int to);
+int van_driver_recvfrom (ip_node_t *node, char *buf, int size) ;
+
+/* High level functionality. */
+void entry_to_vaddr(rtable_entry_t* entry, vanaddr_t* vaddr);
+rtable_entry_t* lookup_route(ip_node_t* node, int addr);
+int add_route(ip_node_t* node, int addr, int iface, int cost, int next_hop);     /* TODO: Expand for RIP. */
+int update_route(ip_node_t *node, int addr, int iface, int cost, int next_hop);
+
+#endif

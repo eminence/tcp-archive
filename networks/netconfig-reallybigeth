@@ -1,0 +1,70 @@
+# link definitions
+# link <type> <drop> <garble> <delay base [secs]> <delay delta [msecs]> <mtu>
+link  eth 0.0 0.0 0.2 0.1 1024
+link  eth 0.0 0.0 0.2 0.1 1024
+link  eth 0.0 0.0 0.2 0.1 1024
+link  eth 0.0 0.0 0.2 0.1 1024
+link  eth 0.0 0.0 0.2 0.1 1024
+link  eth 0.0 0.0 0.2 0.1 1024
+link  eth 0.0 0.0 0.2 0.1 1024
+
+# node definitions
+
+# This file will eventually be post-processed by our own code to extract
+# additional options.  These additional options are as follows:
+#
+# After each if line, there is an additional ip-address and subnet-mask
+# fields. This makes it easier to manage real IP addresses.  If no
+# subnet-mask field is specified, then it is assumed to be 
+# 255.255.255.0
+#
+# Each node can also have any number of 'rt' lines which specifies
+# a hardcoded route to be added to the forwarding table.  Use the
+# IP address 0.0.0.0 to change the default route.  For nodes with
+# just one p2p connection, the default route is automatically set.
+# For every other node, there is no default route.
+
+#        |-----|
+#        |     |
+#  1-|   |   |-6-|
+#    |-3-|-4-|   |
+#  2-|   |   |   |
+#    |   |-5-|-7-|-9
+#    |           |
+#    |---------8-|
+#
+
+
+node
+    if eth 0 1024    # 200.0.0.1
+
+node
+    if eth 0 1024    # 200.0.0.2
+
+node
+    if eth 0 1024    # 200.0.0.3
+    if eth 1 1024    # 201.0.0.3
+
+node
+    if eth 1 1024    # 201.0.0.4
+    if eth 2 1024    # 202.0.0.4
+
+node
+    if eth 1 1024    # 201.0.0.5
+    if eth 2 1024    # 202.0.0.5
+
+node
+    if eth 1 1024    # 201.0.0.6
+    if eth 2 1024    # 202.0.0.6
+    if eth 3 1024    # 203.0.0.6
+
+node
+    if eth 2 1024    # 202.0.0.7
+    if eth 3 1024    # 203.0.0.7
+
+node
+    if eth 0 1024    # 200.0.0.8
+    if eth 3 1024    # 203.0.0.8
+
+node
+    if eth 3 1024    # 203.0.0.9

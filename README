@@ -1,0 +1,44 @@
+project: IP
+achin && bdiamond;
+
+Notes:
+
+While running our code in valgrind, it seems that the van code is leaking memory (but ours is awesome)! 
+
+
+Network tests we ran:
+ * two directly connected nodes
+ * three nodes in a triangle loop
+ * silently failing a link
+ * redundant links (picking the best route)
+ * failing one of two redundant links (resorting to the less than optimal route)
+ * cases to test split horizon and poison reverse
+ * and other stuffs
+
+
+General design:
+ * one listening thread per interface
+ * one thread to monitor the link state of each interface (and can timeout dead links)
+ * one sending thread (which monitors a sending queue)
+ * one rip thread (periodical sends RIP packets)
+ * one rip processing thread (monitors the queue of incoming RIP packets)
+ 
+ * each thread has access to a mutex-guarded routing table
+ * all variables shared by threads are also mutex-protected
+
+ * one blocking queue for packets to be delivered to the next layer
+ * one blocking queue for packets from the next layer that need to be sent out
+ * one blocking queue for incoming RIP packets
+
+
+IP Driver:
+ * provides a method of bring up and down links
+ * can report on the status of a link
+ * can send arbitrary data to any other node
+ * and print out any data that has been sent to the local node
+ * prints out copious and annoying diagnostic messages to the terminal
+
+
+
+
+

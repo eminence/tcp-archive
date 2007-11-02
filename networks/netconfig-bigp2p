@@ -1,0 +1,33 @@
+# link definitions
+# link <type> <drop> <garble> <delay base [secs]> <delay delta [msecs]> <mtu>
+link  p2p 0.0 0.0 0.2 0.1 1024 localhost 10003
+link  p2p 0.0 0.0 0.2 0.1 1024 localhost 10004
+link  p2p 0.0 0.0 0.2 0.1 1024 localhost 10005
+link  p2p 0.0 0.0 0.2 0.1 1024 localhost 10006
+#link  loop 0.0 0.0 0.0 0.0 1024
+
+
+#                    [0]4[1]
+#                   /     \
+#                 [2]      [1]
+#     1[0] --- [0]2[1] - [0]3
+
+node # node 1
+#    if loop 0 1024
+    if p2p 0 1024 a  # 200.0.0.1
+
+node # node 2
+#    if loop 0 1024
+    if p2p 0 1024 p  # 200.0.0.2
+    if p2p 1 1024 a  # 201.0.0.2
+    if p2p 2 1024 a  # 202.0.0.2
+
+node # node 3
+#    if loop 0 1024
+    if p2p 1 1024 p  # 201.0.0.3
+    if p2p 3 1024 a  # 203.0.0.3
+
+node #node 4
+#    if loop 0 1024
+    if p2p 2 1024 p  # 202.0.0.4
+    if p2p 3 1024 p  # 203.0.0.4
