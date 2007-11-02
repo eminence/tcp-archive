@@ -55,9 +55,9 @@ int main( int argc, char* argv[] ) {
 
 		//sscanf(buf, "%d", &i);
 		i = get_key();
-		printf("Got key: %d\n", i);
+		//printf("Got key: %d\n", i);
 		switch( i ) {
-			case KEY_F(1):
+			case '1':
 				/* read */
 
 				retval = van_driver_recvfrom(node, data, 1000);
@@ -67,7 +67,7 @@ int main( int argc, char* argv[] ) {
 
 				break;
 
-			case KEY_F(2):
+			case '2':
 				/* write */
 
 				printf( "Dest node: " );
@@ -80,27 +80,17 @@ int main( int argc, char* argv[] ) {
 
 				break;
 
-			case KEY_F(3):
-				/* get link status */
-
-				printf( "Interface: " );
-				scanf( "%d", &in );
-
-				printf("Interface %d is %d\n", in, get_if_state(node, in));
-
-				break;
-
-			case KEY_F(4):
+			case '3':
 				/* set link status */
 
-				printf( "Interface: " );
-				scanf( "%d", &in );
-
+				in = get_number("Interface:");
 				if (get_if_state(node, in)) set_if_state(node, in, 0);
 				else set_if_state(node, in, 1);
+				break;
 
-				printf("Interface %d is now %d\n", in, get_if_state(node, in));
-
+			case KEY_UP:
+			case KEY_DOWN:
+				scroll_logwin(i);
 				break;
 		}
 	}

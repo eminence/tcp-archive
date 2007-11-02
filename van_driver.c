@@ -54,8 +54,8 @@ void bqueue_poorly_implemented_cleanup(bqueue_t* queue) {
 #ifdef __LOSER__
 	static int atm = 0xDEADBEEF;
 #endif
-	printf("Woah!  Manually unlocking a muxtexerthigny\n");
-	fflush(stdout);
+	//nlog(MSG_LOG,"cleanup","Woah!  Manually unlocking a muxtexerthigny");
+	//fflush(stdout);
 
 	queue->q_count = 0;
 	pthread_mutex_unlock(&queue->q_mtx);
@@ -126,7 +126,7 @@ void *link_state_thread (void *arg) {
 
 		for (i = 0; i < nifs; i++) {
 			van_node_getifopt(node->van_node, i, VAN_IO_UPSTATE, (char*)&link_state, sizeof(int));
-
+			update_link_line(i,link_state);
 			//printf("it is now %d -- Last packet received on iface %d was %d seconds ago\n", time(NULL), i, time(NULL) - node->ifaces[i].age);
 			pthread_mutex_lock(&node->ifaces[i].age_lock);
 			age = node->ifaces[i].age;
@@ -140,7 +140,7 @@ void *link_state_thread (void *arg) {
 				node->ifaces[i].timed_out = 1;
 				pthread_mutex_unlock(&node->ifaces[i].age_lock);
 
-				printf("Havn't heard anything on interface %d in over %d seconds.  Will now poison all routes that use this interface!\n", i, LINK_TIMEOUT);
+				nlog(MSG_LOG,"linkstate","Havn't heard anything on interface %d in over %d seconds.  Will now poison all routes that use this interface!", i, LINK_TIMEOUT);
 				send_route_table(node);
 				rtable_dump(node->route_table);
 			}
@@ -148,7 +148,7 @@ void *link_state_thread (void *arg) {
 			if (link_state == node->ifaces[i].cur_state) continue;
 
 			if ((link_state) && (node->ifaces[i].cur_state == 0)) {
-				printf("[Node %d] The link on iface %d just came up!\n", node->van_node->vn_num, i);
+				nlog(MSG_LOG,"linkstate","[Node %d] The link on iface %d just came up!", node->van_node->vn_num, i);
 				pthread_mutex_lock(&node->ifaces[i].lock);
 				pthread_cond_signal(&node->ifaces[i].cond);
 				pthread_mutex_unlock(&node->ifaces[i].lock);
@@ -156,7 +156,7 @@ void *link_state_thread (void *arg) {
 				send_route_table(node);
 
 			} else if ( (!link_state) && (node->ifaces[i].cur_state == 1)) {
-				printf("[Node %d] The link on iface %d just went down!\n", node->van_node->vn_num, i);
+				nlog(MSG_LOG,"linkstate","[Node %d] The link on iface %d just went down!", node->van_node->vn_num, i);
 				rtable_poison_iface(node->route_table, i);
 
 
@@ -197,7 +197,7 @@ void *rip_monitor (void *arg) {
 		total_length = get_total_len(rip->packet);
 		iface = rip->iface;
 
-		printf("[Node %d] Processing an incoming RIP packet from interface %d\n",node->van_node->vn_num, iface);
+		nlog(MSG_LOG,"rip","[Node %d] Processing an incoming RIP packet from interface %d",node->van_node->vn_num, iface);
 
 		// do we have a route TO the node which just sent us a packet?
 		if (update_route(node, from, iface, 1, from)) {
@@ -214,7 +214,7 @@ void *rip_monitor (void *arg) {
 
     /* If we've changed our route table, advertise. */
 		if(rtable_merge(node->van_node->vn_num, node->route_table, new_rtable, lookup_route(node, from))) {
-			printf("It appears that rtable_merge has updated our local route table.  Broadcasting it to everyone\n");
+			nlog(MSG_LOG,"rip","It appears that rtable_merge has updated our local route table.  Broadcasting it to everyone");
       	send_route_table(node);
     	}
 		
@@ -222,8 +222,8 @@ void *rip_monitor (void *arg) {
 		//printf("\nA dump of the incoming route table:\n");
 		//rtable_dump(new_rtable);
 
-		printf("\nA dump of our newly merged route table:\n");
-		rtable_dump(node->route_table);
+		//("\nA dump of our newly merged route table:\n");
+		//rtable_dump(node->route_table);
 
 		rtable_destroy(new_rtable);
 		free(new_rtable);
@@ -317,10 +317,10 @@ void *sender (void *arg) {
 		pthread_cleanup_pop(0);
 
 		if (rval == -EINVAL) {
-			fprintf(stderr, "[sending thread] our queue disappeared!\n");
+			nlog(MSG_ERROR,"sender", "our queue disappeared!");
 			exit(1);
 		}
-		printf("Dequeued something...\n");
+		nlog(MSG_LOG,"sender","Dequeued something...");
 		va.va_type = data->addr_type;
 
 		 retval = van_node_send(this_node->van_node, data->iface, data->packet, data->packet_size, 0, &va);
@@ -332,7 +332,7 @@ void *sender (void *arg) {
 }
 
 void listener_cleanup (void *buf) {
-	printf("Cleaning up on memory...\n");
+	//printf("Cleaning up on memory...\n");
 	free(buf);
 }
 
@@ -383,7 +383,7 @@ void *listener (void *arg) {
 		retval = van_node_recv( node->van_node, interface, buf, mtu, 0, &addr );
 		
 		if (retval >= 0) {
-			if (retval > mtu) printf( "WARNING: I just got a packet on interface %d that has a size of %d, but this link has an MTU of %d !!!\n", interface, retval, mtu);
+			if (retval > mtu) nlog(MSG_WARNING,"listener","I just got a packet on interface %d that has a size of %d, but this link has an MTU of %d !!!", interface, retval, mtu);
 			//memcpy (&dest, buf+7, 1);
 			//memcpy (&src, buf+6, 1);
 			
@@ -401,7 +401,7 @@ void *listener (void *arg) {
 					char *packet = malloc(total_length);
 					memcpy(packet, buf, total_length);
 
-					printf("Just got a rip packet\n");
+					nlog(MSG_LOG,"rip","Just got a rip packet");
 					rip_packet_t *rip = malloc(sizeof(rip_packet_t));
 					
 					rip->packet = packet;
@@ -418,8 +418,8 @@ void *listener (void *arg) {
 			src = get_src(buf);
 			ttl = get_ttl(buf);
 
-			printf("This IP packet is from %d, addressed to %d, has a ttl of %d, and a total length of %d\n",src, dest, ttl, total_length);
-			if (total_length > mtu) { printf("WARNING: according to this IP packet header, the total length of the packet is %d, but this MTU for this link is only %d !!!\n   Will not forward. \n", total_length, mtu); continue; }
+			nlog(MSG_LOG,"listener","This IP packet is from %d, addressed to %d, has a ttl of %d, and a total length of %d\n",src, dest, ttl, total_length);
+			if (total_length > mtu) { nlog(MSG_WARNING,"listener","WARNING: according to this IP packet header, the total length of the packet is %d, but this MTU for this link is only %d !!!\n   Will not forward.", total_length, mtu); continue; }
 
 			if (dest != me) {
 				rtable_entry_t *r = lookup_route(node, dest);
@@ -427,7 +427,7 @@ void *listener (void *arg) {
 
 				memcpy(packet, buf, total_length);
 
-				printf("This packet is not addressed to me.  Will attempt to forward it out interface %d\n", r->iface);
+				nlog(MSG_LOG,"listener","This packet is not addressed to me.  Will attempt to forward it out interface %d", r->iface);
 
 				set_ttl(packet,ttl - 1 );
 
@@ -442,7 +442,7 @@ void *listener (void *arg) {
 				pthread_cleanup_pop(0);
 
 			} else {
-				printf("This packet is addressesd to me! ");
+				nlog(MSG_LOG,"listener","This packet is addressesd to me!");
 
 				// TODO TODO TODO TODO TODO
 				// check the checksum
@@ -450,7 +450,7 @@ void *listener (void *arg) {
 
 				if (proto == PROTO_DATA) {
 					char *data = malloc(total_length);
-					printf("Will pass up to the next layer\n");
+					nlog(MSG_LOG,"listener","Will pass up to the next layer");
 					memcpy(data, buf, total_length);
 				
 					pthread_cleanup_push((void(*)(void*))bqueue_poorly_implemented_cleanup, node->receiving_q);
@@ -458,14 +458,14 @@ void *listener (void *arg) {
 					pthread_cleanup_pop(0);
 
 				} else {
-					printf("WARNING! I got a IP packet with an unknown payload type\n");
+					nlog(MSG_WARNING,"listener","I got a IP packet with an unknown payload type");
 				}
 
 
 			}
 
 		} else {
-			printf("WARNING van_node_recv returned %d\n", retval);
+			nlog(MSG_WARNING,"listener","van_node_recv returned %d", retval);
 		}
 
 
@@ -488,75 +488,61 @@ int van_driver_loaded() {
 void van_driver_destory(ip_node_t *node) {
 	int i;
 
-	printf("Attempting to cancel the sending thread... ");
+	nlog(MSG_LOG,"shutdown","Attempting to cancel the sending thread... ");
 
 	pthread_cancel(*node->sending_thread);
 	pthread_join(*node->sending_thread, NULL);
 	free(node->sending_thread);
 
-	printf("Done.\n");
-
-	printf("Attempting to cancel the listening threads... ");
+	nlog(MSG_LOG,"shutdown","Attempting to cancel the listening threads... ");
 
 	for (i = 0; i < van_node_nifs(node->van_node); i++) {
 		pthread_cancel(*node->listening_thread[i]);
 		pthread_join(*node->listening_thread[i], NULL);
 		free(node->listening_thread[i]);
-		printf(" Done ");
+		nlog(MSG_LOG,"shutdown"," %d Done",i);
 		pthread_cond_destroy(&node->ifaces[i].cond);
 		pthread_mutex_destroy(&node->ifaces[i].lock);
 		pthread_mutex_destroy(&node->ifaces[i].age_lock);
 	}
 
-	printf("\n");
 
 	free(node->ifaces);
 
-	printf("Attempting to cancel the rip thread... ");
+	nlog(MSG_LOG,"shutdown","Attempting to cancel the rip thread... ");
 	pthread_cancel(*node->rip_thread);
 	pthread_join(*node->rip_thread, NULL);
 	free(node->rip_thread);
-	printf("Done.\n");
+	//printf("Done.\n");
 
-	printf("Attempting to cancel the rip monitor thread... ");
+	nlog(MSG_LOG,"shutdown","Attempting to cancel the rip monitor thread... ");
 	pthread_cancel(*node->rip_monitor_thread);
 	pthread_join(*node->rip_monitor_thread, NULL);
 	free(node->rip_monitor_thread);
-	printf("Done.\n");
 
-	printf("Attempting to cancel the link state thread... ");
+	nlog(MSG_LOG,"shutdown","Attempting to cancel the link state thread... ");
 	pthread_cancel(*node->link_state_thread);
 	pthread_join(*node->link_state_thread, NULL);
 	free(node->link_state_thread);
-	printf("Done.\n");
-	fflush(stdout);
 
-	printf("Attempting to destroy the sending q... ");
-	fflush(stdout);
+	nlog(MSG_LOG,"shutdown","Attempting to destroy the sending q... ");
 	bqueue_destroy(node->sending_q);
 	free(node->sending_q);
-	printf("Done.\n");
 
-	printf("Attempting to destroy the receiving q... ");
-	fflush(stdout);
+	nlog(MSG_LOG,"shutdown","Attempting to destroy the receiving q... ");
 	bqueue_destroy(node->receiving_q);
 	free(node->receiving_q);
-	printf("Done.\n");
 
-	printf("Attempting to destory the rip q... ");
-	fflush(stdout);
+	nlog(MSG_LOG,"shutdown","Attempting to destory the rip q... ");
 	bqueue_destroy(node->rip_q);
 	free(node->rip_q);
-	printf("Done.\n");
 
-	printf("Attempting to destory the route table... ");
-	fflush(stdout);
+	nlog(MSG_LOG,"shutdown","Attempting to destory the route table... ");
 	rtable_destroy(node->route_table);
 	free(node->route_table);
-	printf("Done.\n");
 
 
-	printf("\n\nBye!\n\n");
+	nlog(MSG_LOG,"shutdown"," -= Bye! =- ");
 	return;
 }
 
@@ -759,7 +745,7 @@ int van_driver_sendto (ip_node_t *node, char *buf, int size, int to) {
 
 	if (to == node->van_node->vn_num) {
 		// this packet is addressed to this local host
-		printf("I was asked to send a packet to myself! Sending directly into local queue\n");
+		nlog(MSG_LOG,"sendto","I was asked to send a packet to myself! Sending directly into local queue\n");
 		char *data = malloc(size);	
 
 		memcpy(data, buf, size);
@@ -776,7 +762,7 @@ int van_driver_sendto (ip_node_t *node, char *buf, int size, int to) {
 		// queue up this packet
 		r = rtable_get(node->route_table, to);
 		if (!r) {
-			printf("WARNING I was asked to send a packet to nodei%d, but I have no route to that node\n", to);
+			nlog(MSG_WARNING,"sendto","I was asked to send a packet to nodei%d, but I have no route to that node", to);
 			return -1;
 		}
 		
@@ -785,13 +771,13 @@ int van_driver_sendto (ip_node_t *node, char *buf, int size, int to) {
 		packet_size = buildPacket(node, buf, size, to, &packet);
 
 		if (packet_size > mtu) {
-			printf("WARNING Will not send this packet -- TOO BIG\n");
+			nlog(MSG_WARNING, "sendto", "WARNING Will not send this packet -- TOO BIG\n");
 			free(packet);
 			return -1;
 		}
 
-		printf("Packet_size: %d (%p)\n", packet_size, packet);
-		printf("Attempting to send this packet out along interface %d\n", r->iface);
+		nlog(MSG_LOG,"sendto","Packet_size: %d (%p)\n", packet_size, packet);
+		nlog(MSG_LOG,"sendto","Attempting to send this packet out along interface %d\n", r->iface);
 		
 		p->iface = r->iface;
 		p->packet = packet;
@@ -816,8 +802,8 @@ int van_driver_recvfrom (ip_node_t *node, char *buf, int size) {
 	// this will block;
 	bqueue_dequeue(node->receiving_q, (void**)&data);
 	data_size = get_total_len(data) - HEADER_SIZE ;
-	printf("data_size=%d\n", data_size);
-	printf("get_total_len=%d\n", get_total_len(data));
+	nlog(MSG_LOG,"recvfrom","data_size=%d\n", data_size);
+	nlog(MSG_LOG,"recvfrom","get_total_len=%d\n", get_total_len(data));
 
 	if (size < data_size) {
 		data_size = size;

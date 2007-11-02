@@ -4,10 +4,13 @@
 #include <curses.h>
 #include <panel.h>
 #include <menu.h>
+#include <form.h>
+#include <pthread.h>
 
 typedef struct {
 
 	int use_curses;
+	pthread_mutex_t lock;
 
 	WINDOW *rtable_win;
 	PANEL	*rtable_pan;
@@ -17,6 +20,9 @@ typedef struct {
 
 	WINDOW *menu_win;
 	PANEL *menu_pan;
+
+	WINDOW *link_win;
+	PANEL *link_pan;
 } curses_out_t;
 
 typedef enum {	
@@ -37,5 +43,8 @@ typedef enum {
 int init_display(int use_curses);
 void nlog(msg_type msg, const char *slug, char *text, ...);
 int get_key();
+int get_number(const char *);
+void update_link_line(int, int);
+void scroll_logwin(int);
 
 #endif

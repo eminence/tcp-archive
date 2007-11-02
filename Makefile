@@ -23,9 +23,9 @@ LDIRS		= $(CS168_VAN_ROOT)/lib .
 LDFLAGS		= $(LDIRS:%=-L%) $(LDIRS:%=-Wl,-R%) 
 SOFLAGS		= -shared
 
-VAN_DRIVER_LIBS	= -lvan2 -lmenu -lpanel -lncurses
+VAN_DRIVER_LIBS	= -lvan2 -lform -lmenu -lpanel -lncurses
 IP_DRIVER_LIBS	= -l$(PROJECT) -lutil
-IP_LIBRARY_LIBS	= -lvan2 -lpthread -lutil -lrt -ldl -lm -lmenu -lpanel -lncurses
+IP_LIBRARY_LIBS	= -lvan2 -lpthread -lutil -lrt -ldl -lm -lform -lmenu -lpanel -lncurses
 
 all: $(LIBRARY) $(IP_DRIVER) $(VAN_DRIVER)
 
