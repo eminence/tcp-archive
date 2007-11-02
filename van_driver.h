@@ -6,29 +6,8 @@
 #include <bqueue.h>
 #include "rtable.h"
 
-#include <curses.h>
-#include <panel.h>
-#include <menu.h>
+#include "fancy_display.h"
 
-typedef enum {	
-	MSG_LOG,
-	MSG_WARNING,
-	MSG_ERROR,
-} msg_type;
-
-typedef struct {
-
-	int use_curses;
-
-	WINDOW *rtable_win;
-	PANEL	*rtable_pan;
-	
-	WINDOW *log_win;
-	PANEL *log_pan;
-
-	WINDOW *menu_win;
-	PANEL *menu_pan;
-} curses_out_t;
 
 typedef struct {
 	unsigned char cur_state;
@@ -76,7 +55,7 @@ typedef struct {
 
 int van_driver_loaded();
 
-ip_node_t *van_driver_init(char *fname, int num, int use_curses);
+ip_node_t *van_driver_init(char *fname, int num);
 void van_driver_destory(ip_node_t *node);
 
 int get_if_state(ip_node_t *node, int iface);

@@ -27,6 +27,8 @@
 #include "van_driver.h"
 #include "packet.h"
 
+#include "fancy_display.h"
+
 /* proto types */
 int buildPacket(ip_node_t *node, char *data, int data_size, int to, char  **header);
 void send_route_table(ip_node_t *node);
@@ -42,39 +44,7 @@ static char *types[] = {
 };
 
 
-curses_out_t output;
 
-void nlog(msg_type msg, const char *slug, char *text, ...) {
-	int c = output.use_curses;
-	WINDOW *log = output.log_win;
-	va_list args;
-	va_start(args, text);
-
-
-	if (msg == MSG_LOG) {
-		if (c) {
-			wscrl(log, 1);
-			wmove(log, (LINES/2)-2, 0);
-		
-			wattron(log, A_BOLD);
-			wprintw(log,"[%s] ",slug);
-			wattroff(log, A_BOLD);
-
-			wattron(log,COLOR_PAIR(1));
-			vwprintw(log, text, args);
-			wprintw(log,"\n");
-			wattroff(log,COLOR_PAIR(1));
-			mvwhline(log,0,0,0,COLS);//box(log, 0, 0);
-			update_panels(); doupdate();
-		} else {
-			printf(text, args);
-		}
-
-	}
-
-	va_end(args);
-
-}
 
 /*
  * The bqueue doesn't push a cleanup handler, so cancellation doesn't
@@ -590,57 +560,12 @@ void van_driver_destory(ip_node_t *node) {
 	return;
 }
 
-int getMenuKey() {
-	
-	return getch();
-}
 
 /* van_driver_init
  * Initilizes the van stuff, and whatever IP data structures
  * we create
  */
-ip_node_t *van_driver_init(char *fname, int num, int use_curses) {
-
-	output.use_curses = use_curses;
-
-	if (use_curses) {
-		initscr();
-		cbreak();
-		noecho();
-		curs_set(0);
-											/*height, width, starty, startx*/
-		output.log_win = newwin(LINES/2, COLS, LINES/2, 0);
-		
-		mvwhline(output.log_win,0,0,0,COLS); //box(output.log_win, 0, 0);
-		output.log_pan = new_panel(output.log_win);
-		scrollok(output.log_win,1);
-
-		output.menu_win = newwin(1, COLS, 0,0);
-		output.menu_pan = new_panel(output.menu_win);
-		keypad(output.menu_win, 1);
-
-		refresh();
-		update_panels(); doupdate();
-
-		nlog(MSG_LOG, "info","ncurses interface started up (%s)","test");
-
-		if (has_colors() == FALSE) {
-			nlog(MSG_LOG, "WARNING","No color support on this terminal");
-		} else {
-			nlog(MSG_LOG, "info","Using colors");
-			start_color();
-			init_pair(1, COLOR_CYAN, COLOR_BLACK);
-			init_pair(2, COLOR_WHITE, COLOR_BLUE);
-			wbkgd(output.menu_win, COLOR_PAIR(2));
-			wattron(output.menu_win, COLOR_PAIR(2));
-
-		}
-
-		wprintw(output.menu_win, "1:Send data    2:Receive Data   3:Something");
-		update_panels(); doupdate();
-
-	}
-
+ip_node_t *van_driver_init(char *fname, int num) {
 	van_node_t *vn = NULL;
 	ip_node_t *node = malloc(sizeof(ip_node_t));
 	int i, nifs;
@@ -648,12 +573,12 @@ ip_node_t *van_driver_init(char *fname, int num, int use_curses) {
 	node_and_num_t *nnn;
 
 	if (van_init(fname)) {
-		fprintf(stderr, "Error: Can't init the van driver with network spec '%s'\n\n",fname);
+		nlog(MSG_ERROR,"init", "Error: Can't init the van driver with network spec '%s'\n\n",fname);
 		return NULL;
 	}
 	
 	if ( !(vn = van_node_get(num))) {
-		fprintf(stderr, "Error Can't get node %d\n\n", num);
+		nlog(MSG_ERROR,"init", "Error Can't get node %d\n\n", num);
 		return NULL;
 	}
 
@@ -665,7 +590,7 @@ ip_node_t *van_driver_init(char *fname, int num, int use_curses) {
 
 	// start sending thread
 	sleep(1);
-	nlog(MSG_LOG, "sender","starting sending thread");
+	nlog(MSG_LOG, "init","starting sending thread");
 	node->sending_thread = malloc(sizeof(pthread_t));
 	pthread_create(node->sending_thread , 0 , sender, (void*)node);
 
@@ -756,7 +681,7 @@ ip_node_t *van_driver_init(char *fname, int num, int use_curses) {
 	node->rip_thread = malloc(sizeof(pthread_t));
 	pthread_create(node->rip_thread, 0, rip, (void*)node);
 
-	nlog (MSG_LOG,"info","init for IP node %d done", vn->vn_num);	
+	nlog (MSG_LOG,"init","Node %d running", vn->vn_num);	
 	return node;
 
 }
