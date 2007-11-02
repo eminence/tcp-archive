@@ -442,12 +442,27 @@ void *listener (void *arg) {
 				pthread_cleanup_pop(0);
 
 			} else {
-				nlog(MSG_LOG,"listener","This packet is addressesd to me!");
+        /* Check packet checksum. */
+	      uint16_t packet_checksum;
 
-				// TODO TODO TODO TODO TODO
-				// check the checksum
-				// TODO TODO TODO TODO TODO
+				nlog(MSG_LOG,"listener","This packet is addressesed to me!");
+        
+        packet_checksum = get_checksum(buf);
+        
+        /* Clear checksum field. */
+        set_checksum(buf, 0);
 
+        if(ip_fast_csum((unsigned char*)buf, 8) != packet_checksum) {
+		      nlog(MSG_ERROR,"init", "Error: checksum mismatch\n\n");
+          continue;
+
+        } else {
+				  nlog(MSG_LOG,"listener","Checksum match.");
+          
+          /* Restore checksum. */
+          set_checksum(buf, packet_checksum);
+        }
+        
 				if (proto == PROTO_DATA) {
 					char *data = malloc(total_length);
 					nlog(MSG_LOG,"listener","Will pass up to the next layer");
