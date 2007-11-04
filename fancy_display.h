@@ -46,5 +46,6 @@ int get_key();
 int get_number(const char *);
 void update_link_line(int, int);
 void scroll_logwin(int);
+void nlog_set_menu(const char *msg, ...);
 
 #endif

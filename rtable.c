@@ -7,6 +7,7 @@
 #include <pthread.h>
 
 #include "rtable.h"
+#include "fancy_display.h"
 
 void rtable_cleanup(rtable_t* rt) {
   pthread_mutex_unlock(&rt->lock);
@@ -35,7 +36,7 @@ int rtable_merge(int self_addr, rtable_t *local, rtable_t *remote, rtable_entry_
     /* Lookup address in local table; if not found, simply insert. */
     if(!(l_entry = rtable_get(local, r_entry->addr))) {
       if(!(l_entry = malloc(sizeof(rtable_entry_t)))) {
-        fprintf(stderr, "Merge failure.\n");
+        nlog(MSG_WARNING,"route merge", "Merge failure.");
         continue;
       }
 
@@ -147,7 +148,7 @@ void rtable_set_cost(rtable_t *rt, int addr, int cost) {
 	// TODO this function should be OK.
 	
 	rtable_entry_t *new = malloc(sizeof(rtable_entry_t));
-	printf("Trying to set the cost for addr %d to %d\n", addr, cost);
+	nlog(MSG_LOG,"route set cost","Trying to set the cost for addr %d to %d", addr, cost);
 	rtable_entry_t* old_entry = rtable_get(rt, addr);	
 
 	old_entry->cost = cost;
@@ -237,12 +238,12 @@ void rtable_dump(rtable_t *rt) {
   pthread_cleanup_push((void (*)(void*))rtable_cleanup, rt);
   pthread_mutex_lock(&rt->lock);
   
-  printf("----------------------\n");
-  printf("Route table %p\n", rt);
-  printf("----------------------\n");
+  nlog(MSG_LOG,"route dump","----------------------");
+  nlog(MSG_LOG,"route dump","Route table %p", rt);
+  nlog(MSG_LOG,"route dump","----------------------");
 
   rtable_iterate_begin(rt, entry) {
-    printf(" * \tAddress: %d, Iface: %d, Next: %d, Type: %d, Cost: %d\n",
+    nlog(MSG_LOG,"route dump"," * \tAddress: %d, Iface: %d, Next: %d, Type: %d, Cost: %d",
       entry->addr, entry->iface, entry->next_hop, entry->type, entry->cost);                                                                          
   } rtable_iterate_end();
 

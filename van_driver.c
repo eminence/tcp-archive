@@ -207,7 +207,7 @@ void *rip_monitor (void *arg) {
 		//	printf("[Node %d]  New route added:  I can reach %d on iface %d\n", node->van_node->vn_num, from, iface);
 
 		//	printf("\nA dump of the new route table:\n");
-		//	rtable_dump(node->route_table);
+			rtable_dump(node->route_table);
 		//	send_route_table(node);
 
 		new_rtable = rtable_unserialize(rip->packet + HEADER_SIZE , total_length - HEADER_SIZE);
@@ -588,7 +588,7 @@ ip_node_t *van_driver_init(char *fname, int num) {
 
 	nifs = van_node_nifs(vn);
 	node->ifaces = malloc(sizeof(iface_t) * nifs);
-
+	nlog_set_menu("[node %d]  Initializing",num );
 	// start sending thread
 	sleep(1);
 	nlog(MSG_LOG, "init","starting sending thread");
@@ -669,7 +669,13 @@ ip_node_t *van_driver_init(char *fname, int num) {
 		rtable_put(node->route_table, r1);
 	}*/
 	
-	sleep(10);
+	nlog_set_menu("[node %d]  Initializing.",num );
+	sleep(3);
+	nlog_set_menu("[node %d]  Initializing..",num );
+	sleep(3);
+	nlog_set_menu("[node %d]  Initializing...",num );
+	sleep(3);
+	nlog_set_menu("[node %d]  Initializing....",num );
 
 	// start up RIP threads
 	
@@ -683,6 +689,8 @@ ip_node_t *van_driver_init(char *fname, int num) {
 	pthread_create(node->rip_thread, 0, rip, (void*)node);
 
 	nlog (MSG_LOG,"init","Node %d running", vn->vn_num);	
+	nlog_set_menu("[node %d]  1:Send data   2:Receive Data   3:Toggle Link State   q:Quit", vn->vn_num);
+	// start sending thread
 	return node;
 
 }

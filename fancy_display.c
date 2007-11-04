@@ -28,6 +28,17 @@ void scroll_logwin(int i) {
 
 }
 
+void nlog_set_menu(const char *msg, ...) {
+	va_list args;
+	va_start(args, msg);
+	pthread_mutex_lock(&output.lock);
+	wmove(output.menu_win,0,0);
+	vwprintw(output.menu_win, msg, args);
+	update_panels(); doupdate();
+	va_end(args);
+	pthread_mutex_unlock(&output.lock);
+}
+
 int get_number(const char *msg) {
 	
 	FIELD *field[2];
@@ -169,7 +180,6 @@ int init_display(int use_curses) {
 
 		}
 
-		wprintw(output.menu_win, "1:Send data   2:Receive Data   3:Toggle Link State   q:Quit");
 		update_panels(); doupdate();
 
 	} else {
