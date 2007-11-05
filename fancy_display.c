@@ -24,8 +24,6 @@ void scroll_logwin(int i) {
 			break;
 
 	}*/
-
-
 }
 
 void nlog_set_menu(const char *msg, ...) {
@@ -39,7 +37,39 @@ void nlog_set_menu(const char *msg, ...) {
 	pthread_mutex_unlock(&output.lock);
 }
 
-int get_number(const char *msg) {
+
+
+void display_msg(char *msg) {
+	int l = strlen(msg);
+	WINDOW *my_form_win;
+	PANEL *my_form_pan;
+
+	/* Create the window to be associated with the form */
+	my_form_win = newwin(3, 2 + l, LINES/2 - (3/2), COLS/2 - ((l+2)/2));
+	leaveok(my_form_win, FALSE);
+	my_form_pan = new_panel(my_form_win);
+	keypad(my_form_win, TRUE);
+	wbkgd(my_form_win, COLOR_PAIR(DEFAULT_COLOR));
+
+	/* Print a border around the main window and print a title */
+	box(my_form_win, 0, 0);
+	mvwprintw(my_form_win, 1,1,msg);
+	//wprintw(my_form_win, 1, 0, cols + 4, "My Form", COLOR_PAIR(1));
+	
+	move(0,COLS);
+	wmove(my_form_win,0,0);
+	update_panels(); doupdate();
+
+	/* Loop through to get user requests */
+	wgetch(my_form_win);
+
+	/* Un post form and free the memory */
+	del_panel(my_form_pan);
+	delwin(my_form_win);
+	update_panels(); doupdate();
+
+}
+int get_number(char *msg) {
 	
 	FIELD *field[2];
 	FORM  *my_form;
@@ -50,7 +80,7 @@ int get_number(const char *msg) {
 	char *buff = NULL;
 
 	/* Initialize the fields */ /* height, width, toprow, leftcol, offscreen, buffs*/
-	field[0] = new_field(1, 5, 1, l, 0, 0);
+	field[0] = new_field(1, 5, 1, 1, 0, 0);
 	field[1] = NULL;
 
 	/* Set field options */
@@ -66,7 +96,8 @@ int get_number(const char *msg) {
 	scale_form(my_form, &rows, &cols);
 
 	/* Create the window to be associated with the form */
-	my_form_win = newwin(rows + 4, cols + 2 + l, LINES/2 - (rows/2), COLS/2 - (cols/2));
+	my_form_win = newwin(rows + 4, l + 2, LINES/2 - (rows/2), COLS/2 - (cols/2));
+	wbkgd(my_form_win, COLOR_PAIR(DEFAULT_COLOR));
 	my_form_pan = new_panel(my_form_win);
 	keypad(my_form_win, TRUE);
 
@@ -76,7 +107,7 @@ int get_number(const char *msg) {
 
 	/* Print a border around the main window and print a title */
 	box(my_form_win, 0, 0);
-	mvwprintw(my_form_win, 3,1,msg);
+	mvwprintw(my_form_win, 1,1,msg);
 	//wprintw(my_form_win, 1, 0, cols + 4, "My Form", COLOR_PAIR(1));
 
 	post_form(my_form);
@@ -139,19 +170,44 @@ int init_display(int use_curses) {
 		cbreak();
 		noecho();
 		curs_set(0);
+		leaveok(stdscr, FALSE);
 		keypad(stdscr, TRUE);
-											/*height, width, starty, startx*/
+
 		output.log_win = newwin(LINES/2, COLS, LINES/2, 0);
-		
 		mvwhline(output.log_win,0,0,0,COLS); //box(output.log_win, 0, 0);
 		output.log_pan = new_panel(output.log_win);
 		scrollok(output.log_win,1);
 
+		nlog(MSG_LOG, "info","ncurses interface started up (%s)","test");
+
+		if (has_colors() == FALSE) {
+			nlog(MSG_LOG, "info","No color support on this terminal");
+		} else {
+			nlog(MSG_LOG, "info","Using colors");
+			start_color();
+			init_pair(DEFAULT_COLOR, COLOR_WHITE, COLOR_BLACK);
+			init_pair(MSG_LOG_COLOR, COLOR_CYAN, COLOR_BLACK);
+			init_pair(MENU_COLOR, COLOR_WHITE, COLOR_BLUE);
+			init_pair(MSG_ERROR_COLOR, COLOR_RED, COLOR_BLACK);
+			init_pair(MSG_WARNING_COLOR, COLOR_YELLOW, COLOR_BLACK);
+
+		}
+
+		wbkgd(stdscr,COLOR_PAIR(DEFAULT_COLOR));
+		redrawwin(stdscr);
+											/*height, width, starty, startx*/
 		output.menu_win = newwin(1, COLS, 0,0);
 		output.menu_pan = new_panel(output.menu_win);
+		wbkgd(output.menu_win, COLOR_PAIR(MENU_COLOR));
+		wattron(output.menu_win, COLOR_PAIR(MENU_COLOR));
 
 		output.link_win = newwin(LINES/2, 12, 1, COLS-12);
 		output.link_pan = new_panel(output.link_win);
+
+		wbkgd(output.link_win, COLOR_PAIR(DEFAULT_COLOR));
+		wbkgd(output.log_win, COLOR_PAIR(DEFAULT_COLOR));
+		redrawwin(output.log_win);
+		redrawwin(output.link_win);
 		//mvwvline(output.link_win,0,0,0,LINES/2); /* y, x, ch, n */
 		//mvwhline(output.link_win,LINES/2-1,0,0,10);
 		wborder(output.link_win,0,' ',' ',0,ACS_VLINE,' ',ACS_BTEE,' ');
@@ -163,22 +219,6 @@ int init_display(int use_curses) {
 		refresh();
 		update_panels(); doupdate();
 
-		nlog(MSG_LOG, "info","ncurses interface started up (%s)","test");
-
-		if (has_colors() == FALSE) {
-			nlog(MSG_LOG, "info","No color support on this terminal");
-		} else {
-			nlog(MSG_LOG, "info","Using colors");
-			start_color();
-			init_pair(MSG_LOG_COLOR, COLOR_CYAN, COLOR_BLACK);
-			init_pair(MENU_COLOR, COLOR_WHITE, COLOR_BLUE);
-			init_pair(MSG_ERROR_COLOR, COLOR_RED, COLOR_BLACK);
-			init_pair(MSG_WARNING_COLOR, COLOR_YELLOW, COLOR_BLACK);
-			wbkgd(output.menu_win, COLOR_PAIR(2));
-			//wbkgd(output.link_win, COLOR_PAIR(2));
-			wattron(output.menu_win, COLOR_PAIR(2));
-
-		}
 
 		update_panels(); doupdate();
 

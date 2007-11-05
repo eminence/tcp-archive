@@ -60,11 +60,11 @@ int main( int argc, char* argv[] ) {
 			case '1':
 				/* read */
 
-				retval = van_driver_recvfrom(node, data, 1000);
-				printf("Got data (%d): '%s'\n", retval, data);
+				//retval = van_driver_recvfrom(node, data, 1000);
+				//printf("Got data (%d): '%s'\n", retval, data);
 
-				printf( "van_driver_recvfrom returned: %d\n", retval );
-
+				//printf( "van_driver_recvfrom returned: %d\n", retval );
+				display_msg("Function Not Yet Implemented");
 				break;
 
 			case '2':

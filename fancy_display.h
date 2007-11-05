@@ -36,6 +36,7 @@ typedef enum {
 #define MSG_LOG_COLOR 10
 #define MSG_WARNING_COLOR 11
 #define MSG_ERROR_COLOR 12
+#define DEFAULT_COLOR 13
 
 #define USE_CURSES 1
 #define NO_USE_CURSES 0
@@ -43,7 +44,8 @@ typedef enum {
 int init_display(int use_curses);
 void nlog(msg_type msg, const char *slug, char *text, ...);
 int get_key();
-int get_number(const char *);
+int get_number(char *);
+void display_msg(char *msg);
 void update_link_line(int, int);
 void scroll_logwin(int);
 void nlog_set_menu(const char *msg, ...);

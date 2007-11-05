@@ -588,7 +588,7 @@ ip_node_t *van_driver_init(char *fname, int num) {
 
 	nifs = van_node_nifs(vn);
 	node->ifaces = malloc(sizeof(iface_t) * nifs);
-	nlog_set_menu("[node %d]  Initializing",num );
+	nlog_set_menu("[node %d]  Initializing [=         ]",num );
 	// start sending thread
 	sleep(1);
 	nlog(MSG_LOG, "init","starting sending thread");
@@ -669,13 +669,24 @@ ip_node_t *van_driver_init(char *fname, int num) {
 		rtable_put(node->route_table, r1);
 	}*/
 	
-	nlog_set_menu("[node %d]  Initializing.",num );
-	sleep(3);
-	nlog_set_menu("[node %d]  Initializing..",num );
-	sleep(3);
-	nlog_set_menu("[node %d]  Initializing...",num );
-	sleep(3);
-	nlog_set_menu("[node %d]  Initializing....",num );
+	nlog_set_menu("[node %d]  Initializing [==        ]",num );
+	sleep(1);
+	nlog_set_menu("[node %d]  Initializing [===       ]",num );
+	sleep(1);
+	nlog_set_menu("[node %d]  Initializing [====      ]",num );
+	sleep(1);
+	nlog_set_menu("[node %d]  Initializing [=====     ]",num );
+	sleep(1);
+	nlog_set_menu("[node %d]  Initializing [======    ]",num );
+	sleep(1);
+	nlog_set_menu("[node %d]  Initializing [=======   ]",num );
+	sleep(1);
+	nlog_set_menu("[node %d]  Initializing [========  ]",num );
+	sleep(1);
+	nlog_set_menu("[node %d]  Initializing [========= ]",num );
+	sleep(1);
+	nlog_set_menu("[node %d]  Initializing [==========]",num );
+	sleep(1);
 
 	// start up RIP threads
 	
