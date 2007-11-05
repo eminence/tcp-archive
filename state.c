@@ -1,5 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <bqueue.h>
+
+#include "state.h"
 
 machine_t* machine_init(state_t* start, void* context) {
   machine_t *machine;
@@ -104,9 +107,9 @@ void state_destroy(state_t* state) {
   /* Recursively destroy all linked-to states; utilize "mark and sweep". */
   htable_iterate_begin(&state->transitions, tr, transition_t) {
     /* If not yet queued, flag for obliteration. */
-    if(!tr->next.mark) {
-      tr->next.mark = 1;
-      bqueue_enqueue(tr->next);
+    if(!tr->next->mark) {
+      tr->next->mark = 1;
+      bqueue_enqueue(&garbage, tr->next);
     }
 
     /* Free transition. */
@@ -114,7 +117,7 @@ void state_destroy(state_t* state) {
   } htable_iterate_end();
 
   /* After marking, sweep. */
-  while(!bqueue_trydequeue(&garbage, &marked)) {
+  while(!bqueue_trydequeue(&garbage, (void**)&marked)) {
     state_destroy(marked);
   }
 
@@ -125,9 +128,8 @@ void state_destroy(state_t* state) {
   bqueue_destroy(&garbage);
 }
 
-void state_transition(state_t* state, state_t* next, input_t input, void (*action)(sid_t, sid_t, void*, void*)) {
+int state_transition(state_t* state, state_t* next, input_t input, void (*action)(sid_t, sid_t, void*, void*)) {
   transition_t* tr;
-  transition_t* otr;
 
   /* Both state and next must not be NULL. */
   if(!state || !next) {
@@ -149,8 +151,6 @@ void state_transition(state_t* state, state_t* next, input_t input, void (*actio
 
   /* Insert transition. */
   htable_put(&state->transitions, input, tr);
-}
 
-int main(int argc, char* argv[]) {
   return 0;
 }

@@ -11,17 +11,10 @@
  * Data types.
  */
 
-struct __state;
-
 typedef uint32_t sid_t;
 typedef uint32_t input_t;
 
-typedef struct __transition {
-  void (*action)(sid_t prev, sid_t next, void* context, void* argt);
-  struct state__* next;
-} transition_t;
-
-typedef struct __state {
+typedef struct {
   uint8_t mark;
   sid_t id;
   htable_t transitions;
@@ -29,7 +22,12 @@ typedef struct __state {
   void (*error)(sid_t id, void* context, void* args);
 } state_t;
 
-typedef struct __machine {
+typedef struct {
+  void (*action)(sid_t prev, sid_t next, void* context, void* argt);
+  state_t* next;
+} transition_t;
+
+typedef struct {
   void* context;
   state_t* current;
   state_t* root;
