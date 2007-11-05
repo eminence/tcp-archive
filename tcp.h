@@ -1,6 +1,10 @@
 #ifndef __TCP_H_
 #define __TCP_H_
 
+#include "state.h"
+
+#define MAXSOCKETS 256
+
 typedef struct {
 	machine_t *machine;
 	short local_port;
@@ -9,6 +13,9 @@ typedef struct {
 
 } tcp_socket_t;
 
+tcp_socket_t *socket_table[MAXSOCKETS];
+
+void v_tcp_init();
 int v_socket();
 int v_bind(int socket, int node, short port);
 int v_listen(int socket, int backlog /* optional */);

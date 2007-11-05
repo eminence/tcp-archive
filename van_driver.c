@@ -26,6 +26,7 @@
 #include "rtable.h"
 #include "van_driver.h"
 #include "packet.h"
+#include "tcp.h"
 
 #include "fancy_display.h"
 
@@ -702,6 +703,10 @@ ip_node_t *van_driver_init(char *fname, int num) {
 	nlog (MSG_LOG,"init","Node %d running", vn->vn_num);	
 	nlog_set_menu("[node %d]  1:Send data   2:Receive Data   3:Toggle Link State   q:Quit", vn->vn_num);
 	// start sending thread
+	
+	// init TCP stufffs:
+	v_tcp_init();
+
 	return node;
 
 }
