@@ -4,7 +4,7 @@
 
 #include "state.h"
 
-machine_t* machine_init(state_t* start, void* context) {
+machine_t* machine_new(state_t* start, void* context) {
   machine_t *machine;
 
   /* Out of memory. */
@@ -32,7 +32,7 @@ void machine_destroy(machine_t* machine) {
   
   /* Take ownership of context structure. */
   if(machine->context) {
-    free(machine->context);
+    //free(machine->context);//TODO UNCOMMENT THIS!!!!!!!! TODO TODO TODO TODO
   }
 
   free(machine);
@@ -72,7 +72,7 @@ state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args)
   return machine->current;
 }
 
-state_t* state_init(sid_t id, void (*action)(sid_t, void*, void*), void (*error)(sid_t, void*, void*)) {
+state_t* state_new(sid_t id, void (*action)(sid_t, void*, void*), void (*error)(sid_t, void*, void*)) {
   state_t* state;
 
   /* Out of memory. */
@@ -103,12 +103,15 @@ void state_destroy(state_t* state) {
 
   /* Set up garbage heap. */
   bqueue_init(&garbage);
+  
+  /* Mark state as processed. */
+  state->mark = 1;
 
   /* Recursively destroy all linked-to states; utilize "mark and sweep". */
   htable_iterate_begin(&state->transitions, tr, transition_t) {
     /* If not yet queued, flag for obliteration. */
     if(!tr->next->mark) {
-      tr->next->mark = 1;
+      tr->next->mark = 1; 
       bqueue_enqueue(&garbage, tr->next);
     }
 

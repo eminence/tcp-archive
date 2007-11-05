@@ -24,7 +24,7 @@ typedef struct {
 
 typedef struct {
   void (*action)(sid_t prev, sid_t next, void* context, void* argt);
-  state_t* next;
+ state_t* next;
 } transition_t;
 
 typedef struct {
@@ -37,11 +37,11 @@ typedef struct {
  * Operations.
  */
 
-machine_t* machine_init(state_t* start, void* context);
+machine_t* machine_new(state_t* start, void* context);
 void machine_destroy(machine_t* machine);
 state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args);
 
-state_t* state_init(sid_t id, void (*action)(sid_t, void*, void*), void (*error)(sid_t, void*, void*));
+state_t* state_new(sid_t id, void (*action)(sid_t, void*, void*), void (*error)(sid_t, void*, void*));
 void state_destroy(state_t* state);
 int state_transition(state_t* state, state_t* next, input_t input, void (*action)(sid_t, sid_t, void*, void*));
 
