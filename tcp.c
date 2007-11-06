@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "tcp.h"
 #include "van_driver.h"
@@ -25,7 +26,24 @@ tcp_socket_t *get_socket_from_int(int s) {
 int build_tcp_packet(char *data, int data_size, 
 		uint16_t source_port, uint16_t dest_port,
 		uint32_t seq_num, uint32_t ack_num,
-		uint8_t flags, uint16_t window) {
+		uint8_t flags, uint16_t window, char **header) {
+
+	int total_packet_length = data_size + 20; // fixed header size of 20 bytes
+	
+	*header = malloc(total_packet_length);
+	memset(*header, 0, total_packet_length); // zero out everything
+
+	set_srcport(*header, source_port);
+	set_destport(*header, dest_port);
+	set_seqnum(*header, seq_num);
+	set_acknum(*header, ack_num);
+	set_flags(*header, flags);
+	set_window(*header, window);
+
+	// memcpy the data into the packet
+	memcpy(*header+20,data,data_size);
+
+	// TODO set checksum
 
 	return 0;
 }

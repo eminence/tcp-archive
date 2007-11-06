@@ -80,7 +80,7 @@ int main( int argc, char* argv[] ) {
 				//scanf( "%d", &in );
 
 				//printf( "Message: " );
-				int len = get_text( "Message:", &buf, 256);
+				int len = get_text( "Message:", buf, 256);
 				//scanf( "%s", buf );
 				retval = van_driver_sendto(node, buf, len, in);
 				//printf("van_driver_sendto returned %d\n", retval);

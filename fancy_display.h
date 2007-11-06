@@ -64,5 +64,6 @@ void show_route_table();
 void show_tcp_table();
 void rtable_print( char *text, ...);
 void clear_rtable_display();
+int get_text(char *msg, char* buf, int len);
 
 #endif

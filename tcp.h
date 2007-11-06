@@ -5,6 +5,11 @@
 
 #define MAXSOCKETS 256
 
+#define TCP_FLAG_FIN 0x01
+#define TCP_FLAG_SYN 0x02
+#define TCP_FLAG_RST 0x04
+#define TCP_FLAG_ACK 0x10
+
 /* uint16_t */
 #define get_srcport(p) 		(*((uint16_t*)((p))))
 #define set_srcport(p,v)	do {uint16_t _tmp=(v); memcpy((p), &_tmp, 2);} while(0)
@@ -26,25 +31,27 @@
 #define set_window(p,v)			do {uint16_t _tmp=(v); memcpy((p)+14, &_tmp, 2); } while(0)
 
 /* uint16_t */
-#define get_checksum(p)			(*((uint16_t*)((p)+16)))
-#define set_checksum(p,v)		do {uint16_t _tmp=(v); memcpy((p)+16, &_tmp, 2); } while(0)
+#define get_tcpchecksum(p)			(*((uint16_t*)((p)+16)))
+#define set_tcpchecksum(p,v)		do {uint16_t _tmp=(v); memcpy((p)+16, &_tmp, 2); } while(0)
+
+#define set_flags(p,v)			((p[13] = ((uint8_t)(v))))
 
 /* tcp flags, 1 bit each */
-#define get_fin(p)				((uint8_t)((p)[13])) & (1 << 7)
-#define set_fin(p)				((uint8_t)((p)[13])) |= (1 << 7)
-#define clear_fin(p)				((uint8_t)((p)[13])) &= ~(1 << 7)
+#define get_fin(p)				((uint8_t)((p)[13])) & (1 << 0)
+#define set_fin(p)				((uint8_t)((p)[13])) |= (1 << 0)
+#define clear_fin(p)				((uint8_t)((p)[13])) &= ~(1 << 0)
 
-#define get_syn(p)				((uint8_t)((p)[13])) & (1 << 6)
-#define set_syn(p)				((uint8_t)((p)[13])) |= (1 << 6)
-#define clear_syn(p)				((uint8_t)((p)[13])) &= ~(1 << 6)
+#define get_syn(p)				((uint8_t)((p)[13])) & (1 << 1)
+#define set_syn(p)				((uint8_t)((p)[13])) |= (1 << 1)
+#define clear_syn(p)				((uint8_t)((p)[13])) &= ~(1 << 1)
 
-#define get_rst(p)				((uint8_t)((p)[13])) & (1 << 5)
-#define set_rst(p)				((uint8_t)((p)[13])) |= (1 << 5)
-#define clear_rst(p)				((uint8_t)((p)[13])) &= ~(1 << 5)
+#define get_rst(p)				((uint8_t)((p)[13])) & (1 << 2)
+#define set_rst(p)				((uint8_t)((p)[13])) |= (1 << 2)
+#define clear_rst(p)				((uint8_t)((p)[13])) &= ~(1 << 2)
 
-#define get_ack(p)				((uint8_t)((p)[13])) & (1 << 3)
-#define set_ack(p)				((uint8_t)((p)[13])) |= (1 << 3)
-#define clear_ack(p)				((uint8_t)((p)[13])) &= ~(1 << 3)
+#define get_ack(p)				((uint8_t)((p)[13])) & (1 << 4)
+#define set_ack(p)				((uint8_t)((p)[13])) |= (1 << 4)
+#define clear_ack(p)				((uint8_t)((p)[13])) &= ~(1 << 4)
 
 typedef struct {
 	machine_t *machine;

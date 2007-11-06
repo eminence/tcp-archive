@@ -732,13 +732,11 @@ int buildPacket(ip_node_t *node, char *data, int data_size, int to, char  **head
 
 	//printf("Building packet of size %d address to %d\n\n", data_size,to);
 
-
 	// zero everything.
 	memset(*header,0,packet_size);
 
 	// n=0 LSB
 	start |= (1 << 7); // set ver = 0x1
-
 
 	//memcpy(*header,&start,1);
 	set_version(*header,1);
