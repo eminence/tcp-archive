@@ -44,7 +44,8 @@ $(LIBRARY): $(LIBOBJECTS)
 
 .PHONY : tags
 tags:
-	ctags --defines --typedefs-and-c++ --members --globals --no-warn *.[chCH]\
+	cscope -b -R
+#	ctags --defines --typedefs-and-c++ --members --globals --no-warn *.[chCH]\
 	*.cpp
 
 .PHONY : clean

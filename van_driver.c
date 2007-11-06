@@ -44,9 +44,6 @@ static char *types[] = {
     "LOOP"
 };
 
-
-
-
 /*
  * The bqueue doesn't push a cleanup handler, so cancellation doesn't
  * release the mutex as expected.
@@ -141,7 +138,7 @@ void *link_state_thread (void *arg) {
 				node->ifaces[i].timed_out = 1;
 				pthread_mutex_unlock(&node->ifaces[i].age_lock);
 
-				nlog(MSG_LOG,"linkstate","Havn't heard anything on interface %d in over %d seconds.  Will now poison all routes that use this interface!", i, LINK_TIMEOUT);
+				nlog(MSG_WARNING,"linkstate","Havn't heard anything on interface %d in over %d seconds.  Will now poison all routes that use this interface!", i, LINK_TIMEOUT);
 				send_route_table(node);
 				rtable_dump(node->route_table);
 			}
@@ -198,7 +195,7 @@ void *rip_monitor (void *arg) {
 		total_length = get_total_len(rip->packet);
 		iface = rip->iface;
 
-		nlog(MSG_LOG,"rip","[Node %d] Processing an incoming RIP packet from interface %d",node->van_node->vn_num, iface);
+		//nlog(MSG_LOG,"rip","[Node %d] Processing an incoming RIP packet from interface %d",node->van_node->vn_num, iface);
 
 		// do we have a route TO the node which just sent us a packet?
 		if (update_route(node, from, iface, 1, from)) {
@@ -257,7 +254,7 @@ void send_route_table(ip_node_t *node) {
 		// if we know the peer on the other side, exclude the routes they gave us
 		// in the serialized rtable we send
 
-		nlog(MSG_LOG,"send_route_table","Sending out a RIP packet on interface %d", i);
+		//nlog(MSG_LOG,"send_route_table","Sending out a RIP packet on interface %d", i);
 
 		rtable = rtable_serialize(node->route_table, &rtable_size, (node->ifaces[i].peer >= 0? node->ifaces[i].peer: -1) );
 
@@ -268,7 +265,7 @@ void send_route_table(ip_node_t *node) {
 
 		free(packet);
 
-		nlog(MSG_LOG,"send_route_table","van_node_send returned %d", retval);
+		//nlog(MSG_LOG,"send_route_table","van_node_send returned %d", retval);
 		//printf("[Node %d] Sent out dummy RIP packet out iface %d\n", node->van_node->vn_num, i);
 		free (rtable); // don't call destory here because rtable is simply a char*
 		//sleep(1);
@@ -402,7 +399,7 @@ void *listener (void *arg) {
 					char *packet = malloc(total_length);
 					memcpy(packet, buf, total_length);
 
-					nlog(MSG_LOG,"rip","Just got a rip packet");
+					//nlog(MSG_LOG,"rip","Just got a rip packet");
 					rip_packet_t *rip = malloc(sizeof(rip_packet_t));
 					
 					rip->packet = packet;
@@ -671,21 +668,21 @@ ip_node_t *van_driver_init(char *fname, int num) {
 	}*/
 	
 	nlog_set_menu("[node %d]  Initializing [==        ]",num );
-	sleep(1);
+	//sleep(1);
 	nlog_set_menu("[node %d]  Initializing [===       ]",num );
-	sleep(1);
+	//sleep(1);
 	nlog_set_menu("[node %d]  Initializing [====      ]",num );
-	sleep(1);
+	//sleep(1);
 	nlog_set_menu("[node %d]  Initializing [=====     ]",num );
-	sleep(1);
+	//sleep(1);
 	nlog_set_menu("[node %d]  Initializing [======    ]",num );
-	sleep(1);
+	//sleep(1);
 	nlog_set_menu("[node %d]  Initializing [=======   ]",num );
-	sleep(1);
+	//sleep(1);
 	nlog_set_menu("[node %d]  Initializing [========  ]",num );
-	sleep(1);
+	//sleep(1);
 	nlog_set_menu("[node %d]  Initializing [========= ]",num );
-	sleep(1);
+	//sleep(1);
 	nlog_set_menu("[node %d]  Initializing [==========]",num );
 	sleep(1);
 
@@ -801,7 +798,8 @@ int van_driver_sendto (ip_node_t *node, char *buf, int size, int to) {
 		// queue up this packet
 		r = rtable_get(node->route_table, to);
 		if (!r) {
-			nlog(MSG_WARNING,"sendto","I was asked to send a packet to nodei%d, but I have no route to that node", to);
+			nlog(MSG_WARNING,"sendto","I was asked to send a packet to node %d, but I have no route to that node", to);
+			free(p);
 			return -1;
 		}
 		

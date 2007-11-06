@@ -9,6 +9,7 @@
 
 #define PROTO_DATA 0
 #define PROTO_RIP 1
+#define PROTO_TCP 2
 
 #define get_version(p)        ((unsigned char)(((p)[0] & 0xF0)>>4))
 #define set_version(p, v)     ((p)[0] &= 0x0F, (p)[0] |= ((v)<<4))

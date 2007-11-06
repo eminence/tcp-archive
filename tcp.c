@@ -15,6 +15,22 @@ tcp_socket_t *get_socket_from_int(int s) {
 	return sock;
 }
 
+
+/*
+ * mallocs some memory, and builds a complete tcp packet
+ * (suitable to sticking directly into an IP packet)
+ *
+ * returns the size of the new packet
+ */
+int build_tcp_packet(char *data, int data_size, 
+		uint16_t source_port, uint16_t dest_port,
+		uint32_t seq_num, uint32_t ack_num,
+		uint8_t flags, uint16_t window) {
+
+	return 0;
+}
+
+
 /* initialize various tcp structures
  */
 void v_tcp_init() {

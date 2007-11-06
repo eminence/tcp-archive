@@ -57,6 +57,13 @@ int main( int argc, char* argv[] ) {
 		i = get_key();
 		//printf("Got key: %d\n", i);
 		switch( i ) {
+			case 'r':
+				show_route_table();
+				break;
+			case 't':
+				show_tcp_table();	
+				break;
+
 			case '1':
 				/* read */
 
@@ -69,15 +76,15 @@ int main( int argc, char* argv[] ) {
 
 			case '2':
 				/* write */
+				in = get_number("Dest node:" );
+				//scanf( "%d", &in );
 
-				printf( "Dest node: " );
-				scanf( "%d", &in );
-
-				printf( "Message: " );
-				scanf( "%s", buf );
-				retval = van_driver_sendto(node, buf, strlen(buf), in);
-				printf("van_driver_sendto returned %d\n", retval);
-
+				//printf( "Message: " );
+				int len = get_text( "Message:", &buf, 256);
+				//scanf( "%s", buf );
+				retval = van_driver_sendto(node, buf, len, in);
+				//printf("van_driver_sendto returned %d\n", retval);
+				//display_msg("Function Not Yet Implemented");
 				break;
 
 			case '3':

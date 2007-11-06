@@ -237,13 +237,16 @@ void rtable_dump(rtable_t *rt) {
 
   pthread_cleanup_push((void (*)(void*))rtable_cleanup, rt);
   pthread_mutex_lock(&rt->lock);
-  
-  nlog(MSG_LOG,"route dump","----------------------");
-  nlog(MSG_LOG,"route dump","Route table %p", rt);
-  nlog(MSG_LOG,"route dump","----------------------");
+ 
+
+  clear_rtable_display();
+
+  //nlog(MSG_LOG,"route dump","----------------------");
+  rtable_print("Route table %p", rt);
+  //nlog(MSG_LOG,"route dump","----------------------");
 
   rtable_iterate_begin(rt, entry) {
-    nlog(MSG_LOG,"route dump"," * \tAddress: %d, Iface: %d, Next: %d, Type: %d, Cost: %d",
+    rtable_print(" * \tAddress: %d, Iface: %d, Next: %d, Type: %d, Cost: %d",
       entry->addr, entry->iface, entry->next_hop, entry->type, entry->cost);                                                                          
   } rtable_iterate_end();
 
