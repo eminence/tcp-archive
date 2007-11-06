@@ -28,8 +28,12 @@ typedef struct {
 	pthread_t *rip_monitor_thread;
 	pthread_t *link_state_thread;
 	bqueue_t *sending_q;
-	bqueue_t *receiving_q;
+	bqueue_t *receiving_q; /* this may not beed needed any more! */
 	bqueue_t *rip_q;
+	bqueue_t *tcp_q;
+	pthread_t *tcp_thread;
+
+
 	rtable_t *route_table;
 	iface_t *ifaces;
 

@@ -120,6 +120,14 @@ int v_connect(int socket, int node, short port) {
 
 	// TODO make sure we can call connect
 	// TODO transition into connection state
+	
+	if (tcpm_event(sock->machine, ON_ACTIVE_OPEN)) {
+		nlog(MSG_ERROR,"connect","Uhh. error.  noob");
+		return -1;
+	}
+
+	// TODO wait until we get into the ESTAB state 
+	// OR return -1 if we never get there
 
 	return 0;
 }

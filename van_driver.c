@@ -108,6 +108,24 @@ int set_if_state(ip_node_t *node, int iface, int link_state) {
 }
 
 
+/* tcp thread */
+void *tcp_thread(void* arg) {
+
+	ip_node_t *node = (ip_node_t*)arg;
+
+	ip_packet_t *packet;
+
+	while (1) {
+		pthread_cleanup_push((void(*)(void*))bqueue_poorly_implemented_cleanup, node->tcp_q);
+		bqueue_dequeue(node->tcp_q, (void*)&packet); /* this will block */
+		pthread_cleanup_pop(0);
+
+		nlog(MSG_LOG,"tcp", "tcp thread dequeued a tdp packet");
+
+
+	}
+}
+
 /* query each interface and report when it goes down
  */
 void *link_state_thread (void *arg) {
@@ -385,7 +403,6 @@ void *listener (void *arg) {
 			//memcpy (&dest, buf+7, 1);
 			//memcpy (&src, buf+6, 1);
 			
-			
 			pthread_mutex_lock(&node->ifaces[interface].age_lock);
 			node->ifaces[interface].age = time(NULL);
 			node->ifaces[interface].timed_out = 0;
@@ -440,35 +457,47 @@ void *listener (void *arg) {
 				pthread_cleanup_pop(0);
 
 			} else {
-        /* Check packet checksum. */
-	      uint16_t packet_checksum;
+				/* Check packet checksum. */
+				uint16_t packet_checksum;
 
 				nlog(MSG_LOG,"listener","This packet is addressesed to me!");
-        
-        packet_checksum = get_checksum(buf);
-        
-        /* Clear checksum field. */
-        set_checksum(buf, 0);
 
-        if(ip_fast_csum((unsigned char*)buf, 8) != packet_checksum) {
-		      nlog(MSG_ERROR,"init", "Error: checksum mismatch\n\n");
-          continue;
 
-        } else {
-				  nlog(MSG_LOG,"listener","Checksum match.");
-          
-          /* Restore checksum. */
-          set_checksum(buf, packet_checksum);
-        }
+
+				packet_checksum = get_checksum(buf);
         
+				/* Clear checksum field. */
+				set_checksum(buf, 0);
+
+				if(ip_fast_csum((unsigned char*)buf, 8) != packet_checksum) {
+					nlog(MSG_ERROR,"init", "Error: checksum mismatch\n\n");
+					continue;
+
+				} else {
+					nlog(MSG_LOG,"listener","Checksum match.");
+
+					/* Restore checksum. */
+					set_checksum(buf, packet_checksum);
+				}
+
 				if (proto == PROTO_DATA) {
 					char *data = malloc(total_length);
 					nlog(MSG_LOG,"listener","Will pass up to the next layer");
 					memcpy(data, buf, total_length);
-				
+
+					/* XXX is this really needed? enqueue will never really block*/
 					pthread_cleanup_push((void(*)(void*))bqueue_poorly_implemented_cleanup, node->receiving_q);
 					bqueue_enqueue(node->receiving_q, data);
 					pthread_cleanup_pop(0);
+
+				} else if (proto == PROTO_TCP) {
+					/* give this to the TCP thread, so it can figure out what to do with it */
+
+					char *packet = malloc(total_length); // will be free() when dequeed and sent
+
+					memcpy(packet, buf, total_length);
+					
+					bqueue_enqueue(node->sending_q, (void*)packet);
 
 				} else {
 					nlog(MSG_WARNING,"listener","I got a IP packet with an unknown payload type");
@@ -625,6 +654,9 @@ ip_node_t *van_driver_init(char *fname, int num) {
 	node->rip_q = malloc(sizeof(bqueue_t));
 	bqueue_init(node->rip_q);
 
+	node->tcp_q = malloc(sizeof(bqueue_t));
+	bqueue_init(node->tcp_q);
+
 	// set up some static routes:
 	node->route_table = rtable_new();
 
@@ -668,13 +700,13 @@ ip_node_t *van_driver_init(char *fname, int num) {
 	}*/
 	
 	nlog_set_menu("[node %d]  Initializing [==        ]",num );
-	//sleep(1);
+	sleep(1);
 	nlog_set_menu("[node %d]  Initializing [===       ]",num );
 	//sleep(1);
 	nlog_set_menu("[node %d]  Initializing [====      ]",num );
 	//sleep(1);
 	nlog_set_menu("[node %d]  Initializing [=====     ]",num );
-	//sleep(1);
+	sleep(1);
 	nlog_set_menu("[node %d]  Initializing [======    ]",num );
 	//sleep(1);
 	nlog_set_menu("[node %d]  Initializing [=======   ]",num );
@@ -696,6 +728,9 @@ ip_node_t *van_driver_init(char *fname, int num) {
 
 	node->rip_thread = malloc(sizeof(pthread_t));
 	pthread_create(node->rip_thread, 0, rip, (void*)node);
+
+	node->tcp_thread = malloc(sizeof(pthread_t));
+	pthread_create(node->tcp_thread, 0, tcp_thread, (void*)node);
 
 	nlog (MSG_LOG,"init","Node %d running", vn->vn_num);	
 	nlog_set_menu("[node %d]  1:Send data   2:Receive Data   3:Toggle Link State   q:Quit", vn->vn_num);
@@ -844,7 +879,7 @@ int van_driver_recvfrom (ip_node_t *node, char *buf, int size) {
 		data_size = size;
 	}
 
-	dump_bits(data, (data_size + 8)*8);	
+	//dump_bits(data, (data_size + 8)*8);	
 
 	memcpy(buf, data+HEADER_SIZE, data_size);
 	free(data);
