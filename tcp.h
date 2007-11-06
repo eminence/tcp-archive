@@ -5,6 +5,47 @@
 
 #define MAXSOCKETS 256
 
+/* uint16_t */
+#define get_srcport(p) 		(*((uint16_t*)((p))))
+#define set_srcport(p,v)	do {uint16_t _tmp=(v); memcpy((p), &_tmp, 2);} while(0)
+
+/* uint16_t */
+#define get_destport(p) 		(*((uint16_t*)((p)+2)))
+#define set_destport(p,v)		do {uint16_t _tmp=(v); memcpy((p)+2, &_tmp, 2);} while(0)
+
+/* uint32_t */
+#define get_seqnum(p)			(*((uint32_t*)((p)+4)))
+#define set_seqnum(p,v)			do {uint32_t _tmp=(v); memcpy((p)+4, &_tmp, 4);} while(0)
+
+/* uint32_t */
+#define get_acknum(p)			(*((uint32_t*)((p)+8)))
+#define set_acknum(p,v)			do {uint32_t _tmp=(v); memcpy((p)+8, &_tmp, 4);} while(0)
+
+/* uint16_t */
+#define get_window(p)			(*((uint16_t*)((p)+14)))
+#define set_window(p,v)			do {uint16_t _tmp=(v); memcpy((p)+14, &_tmp, 2); } while(0)
+
+/* uint16_t */
+#define get_checksum(p)			(*((uint16_t*)((p)+16)))
+#define set_checksum(p,v)		do {uint16_t _tmp=(v); memcpy((p)+16, &_tmp, 2); } while(0)
+
+/* tcp flags, 1 bit each */
+#define get_fin(p)				((uint8_t)((p)[13])) & (1 << 7)
+#define set_fin(p)				((uint8_t)((p)[13])) |= (1 << 7)
+#define clear_fin(p)				((uint8_t)((p)[13])) &= ~(1 << 7)
+
+#define get_syn(p)				((uint8_t)((p)[13])) & (1 << 6)
+#define set_syn(p)				((uint8_t)((p)[13])) |= (1 << 6)
+#define clear_syn(p)				((uint8_t)((p)[13])) &= ~(1 << 6)
+
+#define get_rst(p)				((uint8_t)((p)[13])) & (1 << 5)
+#define set_rst(p)				((uint8_t)((p)[13])) |= (1 << 5)
+#define clear_rst(p)				((uint8_t)((p)[13])) &= ~(1 << 5)
+
+#define get_ack(p)				((uint8_t)((p)[13])) & (1 << 3)
+#define set_ack(p)				((uint8_t)((p)[13])) |= (1 << 3)
+#define clear_ack(p)				((uint8_t)((p)[13])) &= ~(1 << 3)
+
 typedef struct {
 	machine_t *machine;
 	short local_port;
