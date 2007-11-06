@@ -32,7 +32,7 @@ void machine_destroy(machine_t* machine) {
   
   /* Take ownership of context structure. */
   if(machine->context) {
-    //free(machine->context);//TODO UNCOMMENT THIS!!!!!!!! TODO TODO TODO TODO
+    free(machine->context);
   }
 
   free(machine);
@@ -58,7 +58,15 @@ state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args)
 
   /* Invoke transition action, if provided. */
   if(tr->action) {
-    tr->action(machine->current->id, tr->next->id, machine->context, argt);
+    /* Transition function must return 0; else, failure. */
+    if(tr->action(machine->current->id, tr->next->id, machine->context, argt)) {
+      /* Invoke error function, if provided. */
+      if(machine->current->error) {
+        machine->current->error(machine->current->id, machine->context, args);
+      }
+
+      return NULL;
+    }
   }
 
   /* Update machine state. */
@@ -131,7 +139,7 @@ void state_destroy(state_t* state) {
   bqueue_destroy(&garbage);
 }
 
-int state_transition(state_t* state, state_t* next, input_t input, void (*action)(sid_t, sid_t, void*, void*)) {
+int state_transition(state_t* state, state_t* next, input_t input, int (*action)(sid_t, sid_t, void*, void*)) {
   transition_t* tr;
 
   /* Both state and next must not be NULL. */
