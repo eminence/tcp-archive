@@ -66,10 +66,13 @@ struct tcp_machine__;
 typedef struct tcp_socket__ {
 	struct tcp_machine__ *machine;
 	unsigned int fd;
-	short local_port;
-	short remote_port;
-	int remote_node;
 	uint32_t seq_num;
+
+  /* Socket identifiers. */
+  int local_node;
+	short local_port;
+	int remote_node;
+	short remote_port;
 } tcp_socket_t;
 
 tcp_socket_t *socket_table[MAXSOCKETS];
