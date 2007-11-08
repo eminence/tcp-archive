@@ -59,7 +59,7 @@ state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args)
   /* Invoke transition action, if provided. */
   if(tr->action) {
     /* Transition function must return 0; else, failure. */
-    if(tr->action(machine->current->id, tr->next->id, machine->context, argt)) {
+    if(tr->action(machine->current->id, tr->next->id, machine->context, tr->argd, argt)) {
       /* Invoke error function, if provided. */
       if(machine->current->error) {
         machine->current->error(machine->current->id, machine->context, args);
@@ -74,13 +74,13 @@ state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args)
 
   /* Invoke state action, if provided. */
   if(machine->current->action) {
-    machine->current->action(machine->current->id, machine->context, args);
+    machine->current->action(machine->current->id, machine->context, args, machine->current->argd);
   }
 
   return machine->current;
 }
 
-state_t* state_new(sid_t id, void (*action)(sid_t, void*, void*), void (*error)(sid_t, void*, void*)) {
+state_t* state_new(sid_t id, void (*action)(sid_t, void*, void*), void (*error)(sid_t, void*, void*), void* argd) {
   state_t* state;
 
   /* Out of memory. */
@@ -94,6 +94,7 @@ state_t* state_new(sid_t id, void (*action)(sid_t, void*, void*), void (*error)(
   state->id = id;
   state->action = action;
   state->error = error;
+  state->argd = argd;
   state->mark = 0;
 
   return state;
@@ -124,6 +125,7 @@ void state_destroy(state_t* state) {
     }
 
     /* Free transition. */
+    free(tr->argd);
     free(tr);
   } htable_iterate_end();
 
@@ -133,13 +135,14 @@ void state_destroy(state_t* state) {
   }
 
   htable_destroy(&state->transitions);
+  free(state->argd);
   free(state);
 
   /* Destroy garbage heap. */
   bqueue_destroy(&garbage);
 }
 
-int state_transition(state_t* state, state_t* next, input_t input, int (*action)(sid_t, sid_t, void*, void*)) {
+int state_transition(state_t* state, state_t* next, input_t input, int (*action)(sid_t, sid_t, void*, void*), void* argd) {
   transition_t* tr;
 
   /* Both state and next must not be NULL. */
@@ -159,6 +162,7 @@ int state_transition(state_t* state, state_t* next, input_t input, int (*action)
 
   tr->next = next;
   tr->action = action;
+  tr->argd = argd;
 
   /* Insert transition. */
   htable_put(&state->transitions, input, tr);

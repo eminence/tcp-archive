@@ -18,12 +18,14 @@ typedef struct {
   uint8_t mark;
   sid_t id;
   htable_t transitions;
+  void* argd;
   void (*action)(sid_t id, void* context, void* args);
   void (*error)(sid_t id, void* context, void* args);
 } state_t;
 
 typedef struct {
-  int (*action)(sid_t prev, sid_t next, void* context, void* argt);
+ int (*action)(sid_t prev, sid_t next, void* context, void* argd, void* argt);
+ void* argd;
  state_t* next;
 } transition_t;
 
@@ -41,9 +43,9 @@ machine_t* machine_new(state_t* start, void* context);
 void machine_destroy(machine_t* machine);
 state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args);
 
-state_t* state_new(sid_t id, void (*action)(sid_t, void*, void*), void (*error)(sid_t, void*, void*));
+state_t* state_new(sid_t id, void (*action)(sid_t, void*, void*), void (*error)(sid_t, void*, void*), void* argd);
 void state_destroy(state_t* state);
-int state_transition(state_t* state, state_t* next, input_t input, int (*action)(sid_t, sid_t, void*, void*));
+int state_transition(state_t* state, state_t* next, input_t input, int (*action)(sid_t, sid_t, void*, void*, void*), void* argd);
 
 /*
  * Macros.

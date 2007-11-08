@@ -29,7 +29,8 @@ typedef enum {
   ON_RECV_SYN,
   ON_RECV_SYN_ACK,
   ON_RECV_FIN,
-  ON_RECV_FIN_ACK
+  ON_RECV_FIN_ACK,
+  ON_INVALID,
 } tinput_t;
 
 struct {
