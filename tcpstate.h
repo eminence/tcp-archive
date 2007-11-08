@@ -35,10 +35,11 @@ typedef enum {
   ON_INVALID,
 } tinput_t;
 
-typedef struct {
+typedef struct tcp_machine__ {
   machine_t* sm;
 } tcp_machine_t;
 
+/* Forward declaration. */
 struct tcp_socket__;
 
 /* Core functionality. */

@@ -60,15 +60,17 @@
 /* tcp shortcuts */
 #define get_data_len(p)   (get_total_len(p) - (HEADER_SIZE + TCP_HEADER_SIZE))
 
-struct tcp_socket__ {
-	tcp_machine_t *machine;
+/* Forward declaration */
+struct tcp_machine__;
+
+typedef struct tcp_socket__ {
+	struct tcp_machine__ *machine;
 	unsigned int fd;
 	short local_port;
 	short remote_port;
 	int remote_node;
 	uint32_t seq_num;
-};
-typedef struct tcp_socket__ tcp_socket_t;
+} tcp_socket_t;
 
 tcp_socket_t *socket_table[MAXSOCKETS];
 
