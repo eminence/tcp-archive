@@ -3,6 +3,7 @@
 
 #include "tcpstate.h"
 #include "state.h"
+#include "van_driver.h"
 
 #define TCP_HEADER_SIZE   20
 #define MAXSOCKETS        256
@@ -69,7 +70,7 @@ typedef struct tcp_socket__ {
 	uint32_t seq_num;
 
   /* Socket identifiers. */
-  int local_node;
+  	ip_node_t *local_node;
 	short local_port;
 	int remote_node;
 	short remote_port;

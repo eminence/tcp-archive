@@ -7,6 +7,8 @@
 #include <form.h>
 #include <pthread.h>
 
+#define nlog(m,s,t,...) nlog_s(__FILE__,__LINE__,m,s,t,## __VA_ARGS__)
+
 typedef struct {
 
 	int use_curses;
@@ -53,7 +55,8 @@ typedef enum {
 #define NO_USE_CURSES 0
 
 int init_display(int use_curses);
-void nlog(msg_type msg, const char *slug, char *text, ...);
+//void nlog(msg_type msg, const char *slug, char *text, ...);
+void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *text, ...);
 int get_key();
 int get_number(char *);
 void display_msg(char *msg, ...);

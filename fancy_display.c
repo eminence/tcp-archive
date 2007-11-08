@@ -446,7 +446,8 @@ int get_key() {
 	return wgetch(stdscr);
 }
 
-void nlog(msg_type msg, const char *slug, char *text, ...) {
+
+void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *text, ...) {
 	int c = output.use_curses;
 	WINDOW *log = output.log_win;
 	va_list args;
@@ -455,6 +456,8 @@ void nlog(msg_type msg, const char *slug, char *text, ...) {
 
 	if (msg == MSG_LOG) {
 		if (c) {
+			char lineno[5];
+			int linenol,y,x;
 			assert(log);
 			//wscrl(log, 1);
 			wmove(log, (LINES/2)-1, 0);
@@ -465,7 +468,15 @@ void nlog(msg_type msg, const char *slug, char *text, ...) {
 
 			wattron(log,COLOR_PAIR(MSG_LOG_COLOR));
 			vwprintw(log, text, args);
+
+			getyx(log,y,x);
+			sprintf(lineno,"%d",wline);
+			linenol = strlen(wfile) + strlen(lineno)+3; 
+			mvwprintw(log,y,COLS-linenol,"%s:%d",wfile, wline);
+			wmove(log,y,COLS-2);
+
 			wprintw(log,"\n");
+
 			wattroff(log,COLOR_PAIR(MSG_LOG_COLOR));
 			mvwhline(log,0,0,0,COLS);//box(log, 0, 0);
 			mvwaddch(output.log_win,0,0,ACS_LLCORNER);
@@ -479,6 +490,8 @@ void nlog(msg_type msg, const char *slug, char *text, ...) {
 
 	} else if (msg == MSG_ERROR) {
 		if (c) {
+			char lineno[5];
+			int linenol,y,x;
 			assert(log);
 
 			wscrl(log, 1);
@@ -490,6 +503,13 @@ void nlog(msg_type msg, const char *slug, char *text, ...) {
 
 			wattron(log,COLOR_PAIR(MSG_ERROR_COLOR));
 			vwprintw(log, text, args);
+
+			getyx(log,y,x);
+			sprintf(lineno,"%d",wline);
+			linenol = strlen(wfile) + strlen(lineno)+3; 
+			mvwprintw(log,y,COLS-linenol,"%s:%d",wfile, wline);
+			wmove(log,y,COLS-2);
+			
 			wprintw(log,"\n");
 			wattroff(log,COLOR_PAIR(MSG_ERROR_COLOR));
 			mvwhline(log,0,0,0,COLS);//box(log, 0, 0);
@@ -503,6 +523,8 @@ void nlog(msg_type msg, const char *slug, char *text, ...) {
 		}
 	} else if (msg == MSG_WARNING) {
 		if (c) {
+			char lineno[5];
+			int linenol,y,x;
 			assert(log);
 
 			wscrl(log, 1);
@@ -514,6 +536,13 @@ void nlog(msg_type msg, const char *slug, char *text, ...) {
 
 			wattron(log,COLOR_PAIR(MSG_WARNING_COLOR));
 			vwprintw(log, text, args);
+
+			getyx(log,y,x);
+			sprintf(lineno,"%d",wline);
+			linenol = strlen(wfile) + strlen(lineno)+3; 
+			mvwprintw(log,y,COLS-linenol,"%s:%d",wfile, wline);
+			wmove(log,y,COLS-2);
+
 			wprintw(log,"\n");
 			wattroff(log,COLOR_PAIR(MSG_WARNING_COLOR));
 			mvwhline(log,0,0,0,COLS);//box(log, 0, 0);

@@ -9,6 +9,8 @@
 #include "state.h"
 #include "tcpstate.h"
 
+static ip_node_t *this_node;
+
 tcp_socket_t *get_socket_from_int(int s) {
 	assert(s >= 0);
 	assert(s < MAXSOCKETS);
@@ -36,9 +38,9 @@ int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) 
 		return -1;
 	}
 
-	if (flags & TCP_FLAG_SYN == TCP_FLAG_SYN) {
+	if ((flags & TCP_FLAG_SYN) == TCP_FLAG_SYN) {
 		sock->seq_num++; /* increase seq num by one */
-	} else if ( flags & TCP_FLAG_FIN == TCP_FLAG_FIN) {
+	} else if ((flags & TCP_FLAG_FIN) == TCP_FLAG_FIN) {
 		sock->seq_num++;
 	} else {
 		assert (bufsize > 0); /* TODO double check that this assertion is valid */
@@ -80,12 +82,14 @@ int build_tcp_packet(char *data, int data_size,
 
 /* initialize various tcp structures
  */
-void v_tcp_init() {
+void v_tcp_init(ip_node_t *node) {
 
 	int x;
 	for (x = 0; x < MAXSOCKETS; x++) {
 		socket_table[x] = NULL;
 	}
+
+	this_node = node;
 
 }
 
@@ -115,6 +119,7 @@ int v_socket() {
 
 	sock->fd = s;
 	sock->local_port = 0;
+	sock->local_node = this_node;
 	
 
 	return s;

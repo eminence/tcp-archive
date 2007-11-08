@@ -120,7 +120,8 @@ void *tcp_thread(void* arg) {
 		bqueue_dequeue(node->tcp_q, (void*)&packet); /* this will block */
 		pthread_cleanup_pop(0);
 
-		nlog(MSG_LOG,"tcp", "tcp thread dequeued a tdp packet");
+	nlog(MSG_LOG,"tcp", "tcp thread dequeued a tdp packet");
+	//nlog_s(__FILE__, __LINE__, MSG_LOG, "tcp", "tcp blah");
 
 
 	}
@@ -433,8 +434,8 @@ void *listener (void *arg) {
 			src = get_src(buf);
 			ttl = get_ttl(buf);
 
-			nlog(MSG_LOG,"listener","This IP packet is from %d, addressed to %d, has a ttl of %d, and a total length of %d\n",src, dest, ttl, total_length);
-			if (total_length > mtu) { nlog(MSG_WARNING,"listener","WARNING: according to this IP packet header, the total length of the packet is %d, but this MTU for this link is only %d !!!\n   Will not forward.", total_length, mtu); continue; }
+			nlog(MSG_LOG,"listener","This IP packet is from %d, addressed to %d, has a ttl of %d, and a total length of %d",src, dest, ttl, total_length);
+			if (total_length > mtu) { nlog(MSG_WARNING,"listener","WARNING: according to this IP packet header, the total length of the packet is %d, but this MTU for this link is only %d !!!   Will not forward.", total_length, mtu); continue; }
 
 			if (dest != me) {
 				rtable_entry_t *r = lookup_route(node, dest);
@@ -470,7 +471,7 @@ void *listener (void *arg) {
 				set_checksum(buf, 0);
 
 				if(ip_fast_csum((unsigned char*)buf, 8) != packet_checksum) {
-					nlog(MSG_ERROR,"init", "Error: checksum mismatch\n\n");
+					nlog(MSG_ERROR,"listener", "Error: checksum mismatch");
 					continue;
 
 				} else {
@@ -601,12 +602,12 @@ ip_node_t *van_driver_init(char *fname, int num) {
 	node_and_num_t *nnn;
 
 	if (van_init(fname)) {
-		nlog(MSG_ERROR,"init", "Error: Can't init the van driver with network spec '%s'\n\n",fname);
+		nlog(MSG_ERROR,"init", "Error: Can't init the van driver with network spec '%s'",fname);
 		return NULL;
 	}
 	
 	if ( !(vn = van_node_get(num))) {
-		nlog(MSG_ERROR,"init", "Error Can't get node %d\n\n", num);
+		nlog(MSG_ERROR,"init", "Error Can't get node %d", num);
 		return NULL;
 	}
 
@@ -737,7 +738,7 @@ ip_node_t *van_driver_init(char *fname, int num) {
 	// start sending thread
 	
 	// init TCP stufffs:
-	v_tcp_init();
+	v_tcp_init(node);
 
 	return node;
 
@@ -814,7 +815,7 @@ int van_driver_sendto (ip_node_t *node, char *buf, int size, int to) {
 
 	if (to == node->van_node->vn_num) {
 		// this packet is addressed to this local host
-		nlog(MSG_LOG,"sendto","I was asked to send a packet to myself! Sending directly into local queue\n");
+		nlog(MSG_LOG,"sendto","I was asked to send a packet to myself! Sending directly into local queue");
 		char *data = malloc(size);	
 
 		memcpy(data, buf, size);
@@ -841,13 +842,13 @@ int van_driver_sendto (ip_node_t *node, char *buf, int size, int to) {
 		packet_size = buildPacket(node, buf, size, to, &packet);
 
 		if (packet_size > mtu) {
-			nlog(MSG_WARNING, "sendto", "WARNING Will not send this packet -- TOO BIG\n");
+			nlog(MSG_WARNING, "sendto", "WARNING Will not send this packet -- TOO BIG");
 			free(packet);
 			return -1;
 		}
 
-		nlog(MSG_LOG,"sendto","Packet_size: %d (%p)\n", packet_size, packet);
-		nlog(MSG_LOG,"sendto","Attempting to send this packet out along interface %d\n", r->iface);
+		nlog(MSG_LOG,"sendto","Packet_size: %d (%p)", packet_size, packet);
+		nlog(MSG_LOG,"sendto","Attempting to send this packet out along interface %d", r->iface);
 		
 		p->iface = r->iface;
 		p->packet = packet;
@@ -872,8 +873,8 @@ int van_driver_recvfrom (ip_node_t *node, char *buf, int size) {
 	// this will block;
 	bqueue_dequeue(node->receiving_q, (void**)&data);
 	data_size = get_total_len(data) - HEADER_SIZE ;
-	nlog(MSG_LOG,"recvfrom","data_size=%d\n", data_size);
-	nlog(MSG_LOG,"recvfrom","get_total_len=%d\n", get_total_len(data));
+	nlog(MSG_LOG,"recvfrom","data_size=%d", data_size);
+	nlog(MSG_LOG,"recvfrom","get_total_len=%d", get_total_len(data));
 
 	if (size < data_size) {
 		data_size = size;
