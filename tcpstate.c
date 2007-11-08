@@ -1,10 +1,23 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #include "tcpstate.h"
 #include "state.h"
 #include "statefunc.h"
+
+void* alloc_flags(uint8_t flags) {
+  void* byte = malloc(1);
+
+  /* Ensure success. */
+  assert(byte);
+
+  /* Set flags. */
+  *((uint8_t*)byte) = flags;
+
+  return byte;
+}
 
 /* Core functionality. */
 tcp_machine_t* tcpm_new(tcp_socket_t* context) {
@@ -40,23 +53,23 @@ tcp_machine_t* tcpm_new(tcp_socket_t* context) {
   assert(machine->sm);
   
   /* Add transitions. */
-  assert(state_transition(st_closed,      st_syn_sent,    ON_ACTIVE_OPEN,     send_packet_with_flags, NULL));
-  assert(state_transition(st_closed,      st_listen,      ON_PASSIVE_OPEN,    send_packet_with_flags, NULL));
-  assert(state_transition(st_syn_sent,    st_closed,      ON_CLOSE,           send_packet_with_flags, NULL));
-  assert(state_transition(st_syn_sent,    st_syn_rcvd,    ON_RECV_SYN,        send_packet_with_flags, NULL));
-  assert(state_transition(st_syn_sent,    st_estab,       ON_RECV_SYN_ACK,    send_packet_with_flags, NULL));
-  assert(state_transition(st_listen,      st_closed,      ON_CLOSE,           send_packet_with_flags, NULL));
-  assert(state_transition(st_listen,      st_syn_rcvd,    ON_RECV_SYN,        send_packet_with_flags, NULL));
-  assert(state_transition(st_syn_rcvd,    st_estab,       ON_RECV_ACK,        send_packet_with_flags, NULL));
-  assert(state_transition(st_estab,       st_fin_wait_1,  ON_CLOSE,           send_packet_with_flags, NULL));
-  assert(state_transition(st_estab,       st_close_wait,  ON_RECV_FIN,        send_packet_with_flags, NULL));
-  assert(state_transition(st_fin_wait_1,  st_closing,     ON_RECV_FIN,        send_packet_with_flags, NULL));
-  assert(state_transition(st_fin_wait_1,  st_time_wait,   ON_RECV_FIN_ACK,    send_packet_with_flags, NULL));
-  assert(state_transition(st_fin_wait_1,  st_fin_wait_2,  ON_RECV_ACK,        send_packet_with_flags, NULL));
-  assert(state_transition(st_close_wait,  st_last_ack,    ON_CLOSE,           send_packet_with_flags, NULL));
-  assert(state_transition(st_fin_wait_2,  st_time_wait,   ON_RECV_FIN,        send_packet_with_flags, NULL));
-  assert(state_transition(st_closing,     st_time_wait,   ON_RECV_ACK,        send_packet_with_flags, NULL));
-  assert(state_transition(st_time_wait,   st_closed,      ON_TIMEOUT,         send_packet_with_flags, NULL));
+  assert(0 == state_transition(st_closed,      st_syn_sent,    ON_ACTIVE_OPEN,     send_packet_with_flags, alloc_flags(TCP_FLAG_SYN)));
+  assert(0 == state_transition(st_closed,      st_listen,      ON_PASSIVE_OPEN,    NULL,                   NULL)); /* TODO init state. */
+  assert(0 == state_transition(st_syn_sent,    st_closed,      ON_CLOSE,           NULL,                   NULL)); /* TODO free state. */
+  assert(0 == state_transition(st_syn_sent,    st_syn_rcvd,    ON_RECV_SYN,        send_packet_with_flags, alloc_flags(TCP_FLAG_ACK)));
+  assert(0 == state_transition(st_syn_sent,    st_estab,       ON_RECV_SYN_ACK,    send_packet_with_flags, alloc_flags(TCP_FLAG_SYN | TCP_FLAG_ACK)));
+  assert(0 == state_transition(st_listen,      st_closed,      ON_CLOSE,           NULL,                   NULL)); /* TODO free state. */
+  assert(0 == state_transition(st_listen,      st_syn_rcvd,    ON_RECV_SYN,        send_packet_with_flags, alloc_flags(TCP_FLAG_SYN | TCP_FLAG_ACK)));
+  assert(0 == state_transition(st_syn_rcvd,    st_estab,       ON_RECV_ACK,        NULL,                   NULL));
+  assert(0 == state_transition(st_estab,       st_fin_wait_1,  ON_CLOSE,           send_packet_with_flags, alloc_flags(TCP_FLAG_FIN)));
+  assert(0 == state_transition(st_estab,       st_close_wait,  ON_RECV_FIN,        send_packet_with_flags, alloc_flags(TCP_FLAG_ACK)));
+  assert(0 == state_transition(st_fin_wait_1,  st_closing,     ON_RECV_FIN,        send_packet_with_flags, alloc_flags(TCP_FLAG_ACK)));
+  assert(0 == state_transition(st_fin_wait_1,  st_time_wait,   ON_RECV_FIN_ACK,    send_packet_with_flags, alloc_flags(TCP_FLAG_ACK)));
+  assert(0 == state_transition(st_fin_wait_1,  st_fin_wait_2,  ON_RECV_ACK,        NULL,                   NULL));
+  assert(0 == state_transition(st_close_wait,  st_last_ack,    ON_CLOSE,           send_packet_with_flags, alloc_flags(TCP_FLAG_FIN)));
+  assert(0 == state_transition(st_fin_wait_2,  st_time_wait,   ON_RECV_FIN,        send_packet_with_flags, alloc_flags(TCP_FLAG_ACK)));
+  assert(0 == state_transition(st_closing,     st_time_wait,   ON_RECV_ACK,        NULL,                   NULL));
+  assert(0 == state_transition(st_time_wait,   st_closed,      ON_TIMEOUT,         NULL,                   NULL));
 
   return machine;
 }
