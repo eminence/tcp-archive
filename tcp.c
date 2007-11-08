@@ -120,7 +120,6 @@ int v_socket() {
 	sock->fd = s;
 	sock->local_port = 0;
 	sock->local_node = this_node;
-	
 
 	return s;
 }
@@ -162,6 +161,7 @@ int v_connect(int socket, int node, short port) {
 	sock->remote_port = port;
 
 	sock->seq_num = 100; /* an arbitrary inital seq number. TODO make this random */ 
+	sock->ack_num = 0;
 
 	assert(sock->machine);
 	if (tcpm_event(sock->machine, ON_ACTIVE_OPEN, NULL, NULL)) {

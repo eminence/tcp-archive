@@ -68,6 +68,7 @@ typedef struct tcp_socket__ {
 	struct tcp_machine__ *machine;
 	unsigned int fd;
 	uint32_t seq_num;
+	uint32_t ack_num;
 
   /* Socket identifiers. */
   	ip_node_t *local_node;
