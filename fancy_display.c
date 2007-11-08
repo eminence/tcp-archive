@@ -50,10 +50,13 @@ void nlog_set_menu(const char *msg, ...) {
 
 
 
-void display_msg(char *msg) {
+void display_msg(char *msg, ...) {
+	va_list args;
 	int l = strlen(msg);
 	WINDOW *my_form_win;
 	PANEL *my_form_pan;
+
+	va_start(args,msg);
 
 	/* Create the window to be associated with the form */
 	my_form_win = newwin(3, 2 + l, LINES/2 - (3/2), COLS/2 - ((l+2)/2));
@@ -64,7 +67,8 @@ void display_msg(char *msg) {
 
 	/* Print a border around the main window and print a title */
 	box(my_form_win, 0, 0);
-	mvwprintw(my_form_win, 1,1,msg);
+	wmove(my_form_win, 1, 1);
+	vwprintw(my_form_win,msg,args);
 	//wprintw(my_form_win, 1, 0, cols + 4, "My Form", COLOR_PAIR(1));
 	
 	move(0,COLS);
@@ -78,7 +82,7 @@ void display_msg(char *msg) {
 	del_panel(my_form_pan);
 	delwin(my_form_win);
 	update_panels(); doupdate();
-
+	va_end(args);
 }
 
 

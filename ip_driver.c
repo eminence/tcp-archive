@@ -14,6 +14,7 @@
 
 #include "van_driver.h"
 #include "fancy_display.h"
+#include "tcp.h"
 
 int main( int argc, char* argv[] ) {
 	char netconf[256];
@@ -40,7 +41,7 @@ int main( int argc, char* argv[] ) {
 
 
 	while( i != 'q' ) {
-		int err;
+		int err, retval;
 		//printf( "\n0 : Read some data\n");
 		//printf( "1 : Send some data\n");
 		//printf( "2 : Get the status of a link\n");
@@ -64,6 +65,24 @@ int main( int argc, char* argv[] ) {
 				show_tcp_table();	
 				break;
 
+			case 's': /* new socket */
+				retval = v_socket();
+				display_msg("v_socket() returned %d", retval);
+				break;
+
+			case 'c': /* connect! */
+				{
+					int socket, node;
+					short port;
+					socket = get_number("Socket to use");
+					node = get_number("node to connect to");
+					port = get_number("port to connect to");
+					nlog(MSG_LOG,"socket","connecting to %d on port %d with socket %d...", node, port, socket);
+					retval = v_connect(socket, node, port);
+					display_msg("v_connect() returned %d", retval);
+
+				}
+				break;
 			case '1':
 				/* read */
 

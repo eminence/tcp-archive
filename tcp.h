@@ -1,10 +1,12 @@
 #ifndef __TCP_H_
 #define __TCP_H_
 
+#include "tcpstate.h"
 #include "state.h"
 
 #define TCP_HEADER_SIZE   20
 #define MAXSOCKETS        256
+#define SEND_WINDOW_SIZE 4096
 
 #define TCP_FLAG_FIN      0x01
 #define TCP_FLAG_SYN      0x02
@@ -58,15 +60,15 @@
 /* tcp shortcuts */
 #define get_data_len(p)   (get_total_len(p) - (HEADER_SIZE + TCP_HEADER_SIZE))
 
-typedef struct {
-	machine_t *machine;
+struct tcp_socket__ {
+	tcp_machine_t *machine;
 	unsigned int fd;
 	short local_port;
 	short remote_port;
 	int remote_node;
 	uint32_t seq_num;
-
-} tcp_socket_t;
+};
+typedef struct tcp_socket__ tcp_socket_t;
 
 tcp_socket_t *socket_table[MAXSOCKETS];
 
@@ -80,4 +82,8 @@ int v_read(int socket, unsigned char *buf, int nbyte);
 int v_write(int socket, const unsigned char *buf, int nbyte);
 int v_close(int socket);
 
+int build_tcp_packet(char *data, int data_size, 
+		uint16_t source_port, uint16_t dest_port,
+		uint32_t seq_num, uint32_t ack_num,
+		uint8_t flags, uint16_t window, char **header);
 #endif

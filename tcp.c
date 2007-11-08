@@ -43,7 +43,7 @@ int build_tcp_packet(char *data, int data_size,
 	set_window(*header, window);
 
 	// memcpy the data into the packet
-	memcpy(*header+20,data,data_size);
+	if (data) memcpy(*header+20,data,data_size);
 
 	// TODO set checksum
 
@@ -83,10 +83,12 @@ int v_socket() {
 	assert(sock);
 	socket_table[s] = sock;
 
-	sock->machine = NULL; /* XXX TODO i want to create an initilize 
+	sock->machine = tcpm_new(sock); /* XXX TODO i want to create an initilize 
 									a new state machine, in the CLOSED state */
 
 	sock->fd = s;
+	sock->local_port = 0;
+	
 
 	return s;
 }
@@ -129,8 +131,9 @@ int v_connect(int socket, int node, short port) {
 
 	sock->seq_num = 100; /* an arbitrary inital seq number. TODO make this random */ 
 
+	assert(sock->machine);
 	if (tcpm_event(sock->machine, ON_ACTIVE_OPEN, NULL, NULL)) {
-		nlog(MSG_ERROR,"connect","Uhh. error.  noob");
+		nlog(MSG_ERROR,"socket:connect","Uhh. error.  noob");
 		return -1;
 	}
 

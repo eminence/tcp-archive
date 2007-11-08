@@ -56,7 +56,7 @@ int init_display(int use_curses);
 void nlog(msg_type msg, const char *slug, char *text, ...);
 int get_key();
 int get_number(char *);
-void display_msg(char *msg);
+void display_msg(char *msg, ...);
 void update_link_line(int, int);
 void scroll_logwin(int);
 void nlog_set_menu(const char *msg, ...);
