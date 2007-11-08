@@ -18,6 +18,33 @@ tcp_socket_t *get_socket_from_int(int s) {
 	return sock;
 }
 
+/* master tcp sender function
+ */
+int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) {
+	assert(sock);
+
+	char *packet;
+
+	int packet_size = build_tcp_packet(data_buf, bufsize, sock->local_port, sock->remote_port ,
+			sock->seq_num, /*ack*/ 0, flags,SEND_WINDOW_SIZE, &packet);
+
+	nlog(MSG_LOG,"tcp_sendto", "now have a packet of size %d ready to be sent", packet_size);
+
+	int retval = van_driver_sendto(sock->local_node, packet, packet_size, sock->remote_node);
+	if (retval == -1) {
+		nlog(MSG_ERROR,"tcp_sendto", "van_driver_sendto returned -1! A tcp packet just got lost!");
+		return -1;
+	}
+
+	if (flags & TCP_FLAG_SYN == TCP_FLAG_SYN) {
+		sock->seq_num++; /* increase seq num by one */
+	} else if ( flags & TCP_FLAG_FIN == TCP_FLAG_FIN) {
+		sock->seq_num++;
+	} else {
+		assert (bufsize > 0); /* TODO double check that this assertion is valid */
+		sock->seq_num += bufsize;
+	}
+}
 
 /*
  * mallocs some memory, and builds a complete tcp packet
