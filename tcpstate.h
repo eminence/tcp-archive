@@ -3,6 +3,7 @@
 
 #include "tcp.h"
 #include "state.h"
+#include "statefunc.h"
 
 /* TCP state constants. */
 typedef enum {
@@ -40,7 +41,7 @@ typedef struct {
 /* Core functionality. */
 tcp_machine_t* tcpm_new(tcp_socket_t* context);
 void tcpm_destroy(tcp_machine_t* machine);
-int tcpm_event(tcp_machine_t* machine, tinput_t event);
+int tcpm_event(tcp_machine_t* machine, tinput_t event, void* argt, void* args);
 
 #define tcpm_state(m) ((m)->sm->current->id)
 #define flags_to_input(f) NULL
