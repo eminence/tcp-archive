@@ -8,8 +8,8 @@ IP_DRIVER		= ip_driver
 LIBRARY			= lib$(PROJECT).so
 
 # Driver objects
-VAN_OBJECTS		= van_driver.o rtable.o fancy_display.o state.o tcp.o tcpstate.o statefunc.o
-IP_OBJECTS		= ip_driver.o rtable.o fancy_display.o state.o tcp.o tcpstate.o statefunc.o
+VAN_OBJECTS		= van_driver.o rtable.o fancy_display.o state.o tcp.o tcpstate.o statefunc.o socktable.o
+IP_OBJECTS		= ip_driver.o rtable.o fancy_display.o state.o tcp.o tcpstate.o statefunc.o socktable.o
 
 # All other dependent objects
 LIBOBJECTS		= van_driver.o # XXX Put all objects om which your IP driver depends here
