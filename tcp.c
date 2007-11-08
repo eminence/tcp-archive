@@ -82,9 +82,10 @@ int v_socket() {
 	assert(sock);
 	socket_table[s] = sock;
 
-	sock->machine = NULL /* XXX TODO i want to create an initilize 
-									a new state machine, in the CLOSED state */;
+	sock->machine = NULL; /* XXX TODO i want to create an initilize 
+									a new state machine, in the CLOSED state */
 
+	sock->fd = s;
 
 	return s;
 }
@@ -121,8 +122,13 @@ int v_connect(int socket, int node, short port) {
 
 	// TODO make sure we can call connect
 	// TODO transition into connection state
-	
-	if (tcpm_event(sock->machine, ON_ACTIVE_OPEN)) {
+
+	sock->remote_node = node;
+	sock->remote_port = port;
+
+	sock->seq_num = 100; /* an arbitrary inital seq number. TODO make this random */ 
+
+	if (tcpm_event(sock->machine, ON_ACTIVE_OPEN, NULL, NULL)) {
 		nlog(MSG_ERROR,"connect","Uhh. error.  noob");
 		return -1;
 	}

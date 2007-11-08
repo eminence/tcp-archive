@@ -55,9 +55,11 @@
 
 typedef struct {
 	machine_t *machine;
+	unsigned int fd;
 	short local_port;
 	short remote_port;
 	int remote_node;
+	uint32_t seq_num;
 
 } tcp_socket_t;
 
