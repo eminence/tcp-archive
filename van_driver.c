@@ -25,7 +25,7 @@
 
 #include "rtable.h"
 #include "van_driver.h"
-#include "packet.h"
+#include "ippacket.h"
 #include "tcp.h"
 
 #include "fancy_display.h"

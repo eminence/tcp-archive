@@ -6,6 +6,7 @@
 #include "tcpstate.h"
 #include "state.h"
 #include "statefunc.h"
+#include "ippacket.h"
 
 void* alloc_flags(uint8_t flags) {
   void* byte = malloc(1);
@@ -82,3 +83,27 @@ int tcpm_event(tcp_machine_t* machine, tinput_t event, void* argt, void* args) {
   return NULL == machine_step(machine->sm, event, argt, args);
 }
 
+int tcpm_packet_to_input(const char* packet) {
+  /* State machine does not handle non-empty packets. */
+  if(get_data_len(packet) != 0) {
+    return ON_INVALID;
+  }
+
+  /* Directly convert each symbol. */
+  switch(get_flags(packet)) {
+    case TCP_FLAG_ACK:
+      return ON_RECV_ACK;
+    case TCP_FLAG_SYN:
+      return ON_RECV_SYN;
+    case TCP_FLAG_FIN:
+      return ON_RECV_FIN;
+    case TCP_FLAG_RST:
+      return ON_RECV_RST;
+    case TCP_FLAG_SYN | TCP_FLAG_ACK:
+      return ON_RECV_SYN_ACK;
+    case TCP_FLAG_FIN | TCP_FLAG_ACK:
+      return ON_RECV_FIN_ACK;
+    default:
+      return ON_INVALID;
+  }
+}

@@ -28,8 +28,9 @@ typedef enum {
   ON_TIMEOUT,
   ON_RECV_ACK,
   ON_RECV_SYN,
-  ON_RECV_SYN_ACK,
   ON_RECV_FIN,
+  ON_RECV_RST,
+  ON_RECV_SYN_ACK,
   ON_RECV_FIN_ACK,
   ON_INVALID,
 } tinput_t;
@@ -42,8 +43,8 @@ typedef struct {
 tcp_machine_t* tcpm_new(tcp_socket_t* context);
 void tcpm_destroy(tcp_machine_t* machine);
 int tcpm_event(tcp_machine_t* machine, tinput_t event, void* argt, void* args);
+int tcpm_packet_to_input(const char* packet);
 
 #define tcpm_state(m) ((m)->sm->current->id)
-#define flags_to_input(f) NULL
 
 #endif

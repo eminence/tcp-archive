@@ -3,12 +3,13 @@
 
 #include "state.h"
 
-#define MAXSOCKETS 256
+#define TCP_HEADER_SIZE   20
+#define MAXSOCKETS        256
 
-#define TCP_FLAG_FIN 0x01
-#define TCP_FLAG_SYN 0x02
-#define TCP_FLAG_RST 0x04
-#define TCP_FLAG_ACK 0x10
+#define TCP_FLAG_FIN      0x01
+#define TCP_FLAG_SYN      0x02
+#define TCP_FLAG_RST      0x04
+#define TCP_FLAG_ACK      0x10
 
 /* uint16_t */
 #define get_srcport(p) 		(*((uint16_t*)((p))))
@@ -34,7 +35,8 @@
 #define get_tcpchecksum(p)			(*((uint16_t*)((p)+16)))
 #define set_tcpchecksum(p,v)		do {uint16_t _tmp=(v); memcpy((p)+16, &_tmp, 2); } while(0)
 
-#define set_flags(p,v)			((p[13] = ((uint8_t)(v))))
+#define set_flags(p,v)			(((p)[13] = ((uint8_t)(v))))
+#define get_flags(p)        ((p)[13])
 
 /* tcp flags, 1 bit each */
 #define get_fin(p)				((uint8_t)((p)[13])) & (1 << 0)
@@ -52,6 +54,9 @@
 #define get_ack(p)				((uint8_t)((p)[13])) & (1 << 4)
 #define set_ack(p)				((uint8_t)((p)[13])) |= (1 << 4)
 #define clear_ack(p)				((uint8_t)((p)[13])) &= ~(1 << 4)
+
+/* tcp shortcuts */
+#define get_data_len(p)   (get_total_len(p) - (HEADER_SIZE + TCP_HEADER_SIZE))
 
 typedef struct {
 	machine_t *machine;
