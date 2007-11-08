@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <checksum.h>
 
 #include "tcp.h"
 #include "van_driver.h"
