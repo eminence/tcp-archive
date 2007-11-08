@@ -74,13 +74,13 @@ state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args)
 
   /* Invoke state action, if provided. */
   if(machine->current->action) {
-    machine->current->action(machine->current->id, machine->context, args, machine->current->argd);
+    machine->current->action(machine->current->id, machine->context, machine->current->argd, args);
   }
 
   return machine->current;
 }
 
-state_t* state_new(sid_t id, void (*action)(sid_t, void*, void*), void (*error)(sid_t, void*, void*), void* argd) {
+state_t* state_new(sid_t id, void (*action)(sid_t, void*, void*, void*), void (*error)(sid_t, void*, void*), void* argd) {
   state_t* state;
 
   /* Out of memory. */
@@ -142,7 +142,7 @@ void state_destroy(state_t* state) {
   bqueue_destroy(&garbage);
 }
 
-int state_transition(state_t* state, state_t* next, input_t input, int (*action)(sid_t, sid_t, void*, void*), void* argd) {
+int state_transition(state_t* state, state_t* next, input_t input, int (*action)(sid_t, sid_t, void*, void*, void*), void* argd) {
   transition_t* tr;
 
   /* Both state and next must not be NULL. */
