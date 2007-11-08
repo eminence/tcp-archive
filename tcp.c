@@ -7,6 +7,7 @@
 #include "van_driver.h"
 #include "fancy_display.h"
 #include "state.h"
+#include "tcpstate.h"
 
 tcp_socket_t *get_socket_from_int(int s) {
 	assert(s >= 0);

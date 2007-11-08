@@ -33,7 +33,7 @@ typedef enum {
   ON_INVALID,
 } tinput_t;
 
-struct {
+typedef struct {
   machine_t* sm;
 } tcp_machine_t;
 
