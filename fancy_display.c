@@ -461,113 +461,60 @@ void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *t
 	va_start(args, text);
 	pthread_mutex_lock(&output.lock);
 
-	if (msg == MSG_LOG) {
-		if (c) {
-			char lineno[5];
-			int linenol,y,x;
-			assert(log);
-			//wscrl(log, 1);
-			wmove(log, (LINES/2)-1, 0);
-		
-			wattron(log, A_BOLD);
-			wprintw(log,"[%s] ",slug);
-			wattroff(log, A_BOLD);
+	if (c) {
+		int color;
+		if (msg == MSG_LOG) color = COLOR_PAIR(MSG_LOG_COLOR);
+		if (msg == MSG_WARNING) color = COLOR_PAIR(MSG_WARNING_COLOR);
+		if (msg == MSG_ERROR) color = COLOR_PAIR(MSG_ERROR_COLOR);
 
-			wattron(log,COLOR_PAIR(MSG_LOG_COLOR));
-			vwprintw(log, text, args);
+		char lineno[5];
+		int linenol,y,x;
+		assert(log);
+		//wscrl(log, 1);
+		wmove(log, (LINES/2)-1, 0);
 
-			getyx(log,y,x);
-			sprintf(lineno,"%d",wline);
-			linenol = strlen(wfile) + strlen(lineno)+2; 
-			wattron(log,A_DIM);
-			mvwprintw(log,y,COLS-linenol,"%s:%d",wfile, wline);
-			wattroff(log,A_DIM);
-			wmove(log,y,COLS-1);
+		wattron(log, A_BOLD);
+		wprintw(log,"[%s] ",slug);
+		wattroff(log, A_BOLD);
 
-			wprintw(log,"\n");
+		wattron(log,color);
+		vwprintw(log, text, args);
 
-			wattroff(log,COLOR_PAIR(MSG_LOG_COLOR));
-			mvwhline(log,0,0,0,COLS);//box(log, 0, 0);
-			mvwaddch(output.log_win,0,0,ACS_LLCORNER);
-			update_panels(); doupdate();
-		} else {
+		getyx(log,y,x);
+		sprintf(lineno,"%d",wline);
+		linenol = strlen(wfile) + strlen(lineno)+2; 
+		wattr_on(log,WA_DIM,NULL);
+		mvwprintw(log,y,COLS-linenol,"%s:%d",wfile, wline);
+		wattr_off(log,WA_DIM,NULL);
+		wmove(log,y,COLS-1);
+
+		wprintw(log,"\n");
+
+		wattroff(log,color);
+		mvwhline(log,0,0,0,COLS);//box(log, 0, 0);
+		mvwaddch(output.log_win,0,0,ACS_LLCORNER);
+		update_panels(); doupdate();
+
+	} else {
+		if (msg == MSG_LOG) {
 			printf("[%s] ", slug);
 			vprintf(text, args);
 			printf("\n");
 			fflush(stdout);
-		}
 
-	} else if (msg == MSG_ERROR) {
-		if (c) {
-			char lineno[5];
-			int linenol,y,x;
-			assert(log);
-
-			wscrl(log, 1);
-			wmove(log, (LINES/2)-2, 0);
-		
-			wattron(log, A_BOLD);
-			wprintw(log,"[%s] ",slug);
-			wattroff(log, A_BOLD);
-
-			wattron(log,COLOR_PAIR(MSG_ERROR_COLOR));
-			vwprintw(log, text, args);
-
-			getyx(log,y,x);
-			sprintf(lineno,"%d",wline);
-			linenol = strlen(wfile) + strlen(lineno)+2; 
-			wattron(log,A_DIM);
-			mvwprintw(log,y,COLS-linenol,"%s:%d",wfile, wline);
-			wattroff(log,A_DIM);
-			wmove(log,y,COLS-1);
-			
-			wprintw(log,"\n");
-			wattroff(log,COLOR_PAIR(MSG_ERROR_COLOR));
-			mvwhline(log,0,0,0,COLS);//box(log, 0, 0);
-			mvwaddch(output.log_win,0,0,ACS_LLCORNER);
-			update_panels(); doupdate();
-		} else {
+		} else if (msg == MSG_ERROR) {
 			printf("ERROR! [%s] ", slug);
 			vprintf(text, args);
 			printf("\n");
 			fflush(stdout);
-		}
-	} else if (msg == MSG_WARNING) {
-		if (c) {
-			char lineno[5];
-			int linenol,y,x;
-			assert(log);
-
-			wscrl(log, 1);
-			wmove(log, (LINES/2)-2, 0);
-
-			wattron(log, A_BOLD);
-			wprintw(log,"[%s] ",slug);
-			wattroff(log, A_BOLD);
-
-			wattron(log,COLOR_PAIR(MSG_WARNING_COLOR));
-			vwprintw(log, text, args);
-
-			getyx(log,y,x);
-			sprintf(lineno,"%d",wline);
-			linenol = strlen(wfile) + strlen(lineno)+2; 
-			wattron(log,A_DIM);
-			mvwprintw(log,y,COLS-linenol,"%s:%d",wfile, wline);
-			wattroff(log,A_DIM);
-			wmove(log,y,COLS-1);
-
-			wprintw(log,"\n");
-			wattroff(log,COLOR_PAIR(MSG_WARNING_COLOR));
-			mvwhline(log,0,0,0,COLS);//box(log, 0, 0);
-			update_panels(); doupdate();
-		} else {
+		} else if (msg == MSG_WARNING) {
 			printf("WARNING [%s] ", slug);
 			vprintf(text, args);
 			printf("\n");
 			fflush(stdout);
 		}
-	}
 
+	}
 
 	va_end(args);
 	pthread_mutex_unlock(&output.lock);
