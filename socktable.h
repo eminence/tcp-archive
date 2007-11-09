@@ -5,6 +5,7 @@
 #include "tcp.h"
 
 typedef htable_t socktable_t;
+struct tcp_socket__;
 
 void socktable_init(socktable_t *st);
 void socktable_destroy(socktable_t *st);

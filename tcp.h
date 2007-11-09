@@ -11,8 +11,9 @@
 #define TCP_FLAG_ACK      0x10
 
 #include "tcpstate.h"
+#include "socktable.h"
 #include "state.h"
-#include "van_driver.h"
+//#include "van_driver.h"
 
 /* uint16_t */
 #define get_srcport(p) 		(*((uint16_t*)((p))))

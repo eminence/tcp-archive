@@ -4,10 +4,10 @@
 #include <van.h>
 #include <pthread.h>
 #include <bqueue.h>
+#include "socktable.h"
 #include "rtable.h"
 #include "tcp.h"
 #include "fancy_display.h"
-#include "socktable.h"
 #include "ippacket.h"
 
 struct tcp_socket__;
