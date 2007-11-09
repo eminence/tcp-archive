@@ -58,6 +58,11 @@ int main( int argc, char* argv[] ) {
 		i = get_key();
 		//printf("Got key: %d\n", i);
 		switch( i ) {
+
+			case 'h':
+				display_msg("alpha\nbeta");
+				break;
+
 			case 'r':
 				show_route_table();
 				break;
@@ -69,6 +74,16 @@ int main( int argc, char* argv[] ) {
 				retval = v_socket();
 				display_msg("v_socket() returned %d", retval);
 				break;
+
+			case 'b':
+				{
+					int socket, node;
+					short port;
+					socket = get_number("Socket to use");
+					node = get_number("enter this node number")
+					port = get_number("Local port to bind to");
+
+				}
 
 			case 'c': /* connect! */
 				{

@@ -56,10 +56,17 @@ void display_msg(char *msg, ...) {
 	WINDOW *my_form_win;
 	PANEL *my_form_pan;
 
+	int c=0;
+	int n = 0;
+	while (msg[c] != 0) {
+		if (msg[++c] == '\n') n++;
+	}
+
+
 	va_start(args,msg);
 
 	/* Create the window to be associated with the form */
-	my_form_win = newwin(3, 2 + l, LINES/2 - (3/2), COLS/2 - ((l+2)/2));
+	my_form_win = newwin(3+n, 2 + l, LINES/2 - (3/2), COLS/2 - ((l+2)/2));
 	leaveok(my_form_win, FALSE);
 	my_form_pan = new_panel(my_form_win);
 	keypad(my_form_win, TRUE);
@@ -472,7 +479,9 @@ void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *t
 			getyx(log,y,x);
 			sprintf(lineno,"%d",wline);
 			linenol = strlen(wfile) + strlen(lineno)+2; 
+			wattron(log,A_DIM);
 			mvwprintw(log,y,COLS-linenol,"%s:%d",wfile, wline);
+			wattroff(log,A_DIM);
 			wmove(log,y,COLS-1);
 
 			wprintw(log,"\n");
@@ -507,7 +516,9 @@ void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *t
 			getyx(log,y,x);
 			sprintf(lineno,"%d",wline);
 			linenol = strlen(wfile) + strlen(lineno)+2; 
+			wattron(log,A_DIM);
 			mvwprintw(log,y,COLS-linenol,"%s:%d",wfile, wline);
+			wattroff(log,A_DIM);
 			wmove(log,y,COLS-1);
 			
 			wprintw(log,"\n");
@@ -540,7 +551,9 @@ void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *t
 			getyx(log,y,x);
 			sprintf(lineno,"%d",wline);
 			linenol = strlen(wfile) + strlen(lineno)+2; 
+			wattron(log,A_DIM);
 			mvwprintw(log,y,COLS-linenol,"%s:%d",wfile, wline);
+			wattroff(log,A_DIM);
 			wmove(log,y,COLS-1);
 
 			wprintw(log,"\n");

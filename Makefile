@@ -15,7 +15,7 @@ IP_OBJECTS		= ip_driver.o rtable.o fancy_display.o state.o tcp.o tcpstate.o stat
 LIBOBJECTS		= van_driver.o # XXX Put all objects om which your IP driver depends here
 
 # Compiler / Linker flags
-DEBUG_FLAGS	= -g -Wall -Wvariadic-macros
+DEBUG_FLAGS	= -g -W -Wall -Wvariadic-macros
 IFLAGS		= -I$(CS168_VAN_ROOT) -I/course/cs168/van2/util -I$(CS168_VAN_ROOT)/pub -I$(CS168_VAN_ROOT)/lib -I$(CS168_VAN_ROOT)/van2 
 CFLAGS		= $(DEBUG_FLAGS) $(IFLAGS) -D_REENTRANT -D_XOPEN_SOURCE=500
 

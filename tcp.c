@@ -100,13 +100,14 @@ void v_tcp_destroy(ip_node_t *node) {
 void v_tcp_init(ip_node_t *node) {
 
 	int x;
+	this_node = node;
 	for (x = 0; x < MAXSOCKETS; x++) {
 		this_node->socket_table[x] = NULL;
 	}
 
-	this_node = node;
-  
-  socktable_init(node->tuple_table);
+
+	node->tuple_table = malloc(sizeof(socktable_t));
+	socktable_init(node->tuple_table);
 }
 
 /* returns a new unbound socket.

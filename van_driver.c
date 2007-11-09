@@ -119,7 +119,24 @@ void *tcp_thread(void* arg) {
 		bqueue_dequeue(node->tcp_q, (void*)&packet); /* this will block */
 		pthread_cleanup_pop(0);
 
-	  nlog(MSG_LOG,"tcp", "tcp thread dequeued a tcp packet");
+		nlog(MSG_LOG,"tcp", "tcp thread dequeued a tcp packet");
+
+		uint16_t src_port = get_srcport(packet + 20);
+		uint16_t dest_port = get_destport(packet + 20);
+		uint8_t src =0;// = get_src(packet);
+		uint8_t dest =0;//= get_dst(packet);
+
+		tcp_socket_t *sock = socktable_get(node->tuple_table, dest, dest_port, src, src_port);
+		if (sock == NULL) {
+			nlog(MSG_WARNING, "tcp_thread", "We got a tcp packet, but can't figure out what socket this is for.  Discarding");
+			assert(packet);
+			free(packet);
+		} else {
+
+
+		}
+
+
 	}
 }
 
