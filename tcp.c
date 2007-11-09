@@ -135,8 +135,11 @@ int v_socket() {
 									a new state machine, in the CLOSED state */
 
 	sock->fd = s;
-	sock->local_port = 0;
+	sock->local_port = rand()%65535;
 	sock->local_node = this_node;
+
+  /* Insert into tuple table. */
+  socktable_put(this_node->tuple_table, sock);
 
 	return s;
 }
@@ -145,11 +148,17 @@ int v_socket() {
  * returns 0 on success or negative number on failure */
 int v_bind(int socket, int node, short port) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
-
+  short old_port;
+  
 	assert(sock->machine);
 	if (tcpm_state(sock->machine) == ST_CLOSED) {
-
+    old_port = sock->local_port;
 		sock->local_port = port;
+
+    /* Update tuple table. */
+    socktable_remove(this_node->tuple_table, sock->local_node->van_node->vn_num, old_port, sock->remote_node, sock->remote_port);
+    socktable_put(this_node->tuple_table, sock);
+
 	} else {
 		nlog(MSG_ERROR,"v_bind","Someone called v_bind, but I'm not in the CLOSED state!");
 		return -1;
