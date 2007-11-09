@@ -82,7 +82,7 @@ int main( int argc, char* argv[] ) {
 					socket = get_number("Socket to use");
 					node = get_number("enter this node number");
 					port = get_number("Local port to bind to");
-					nlog(msg_LOG, "socket", "binding socket %d to local port %d", socket, port);
+					nlog(MSG_LOG, "socket", "binding socket %d to local port %d", socket, port);
 					retval = v_bind(socket, node, port);
 					display_msg("v_bind() returned %d", retval);
 				}

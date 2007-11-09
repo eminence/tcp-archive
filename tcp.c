@@ -146,9 +146,14 @@ int v_socket() {
 int v_bind(int socket, int node, short port) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
 
-	// TODO make sure that the machine is in a state that will allow use to bind
+	assert(sock->machine);
+	if (tcpm_state(sock->machine) == ST_CLOSED) {
 
-	sock->local_port = port;
+		sock->local_port = port;
+	} else {
+		nlog(MSG_ERROR,"v_bind","Someone called v_bind, but I'm not in the CLOSED state!");
+		return -1;
+	}
 
 	return 0;
 }
@@ -158,9 +163,12 @@ int v_bind(int socket, int node, short port) {
 int v_listen(int socket, int backlog /* optional */) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
 
-	// TODO make sure we can listen
-	
-	// TODO transition into the listening state
+	assert(sock->machine);
+	if (tcpm_event(sock->machine, ON_PASSIVE_OPEN, NULL, NULL)) {
+		nlog(MSG_ERROR,"socket:listen", "Uhh. error.  Couldn't transition states.  noob");
+		return -1;
+
+	}
 
 	return 0;
 }
@@ -182,7 +190,7 @@ int v_connect(int socket, int node, short port) {
 
 	assert(sock->machine);
 	if (tcpm_event(sock->machine, ON_ACTIVE_OPEN, NULL, NULL)) {
-		nlog(MSG_ERROR,"socket:connect","Uhh. error.  noob");
+		nlog(MSG_ERROR,"socket:connect","Uhh. error. Couldn't transition states.  noob");
 		return -1;
 	}
 
