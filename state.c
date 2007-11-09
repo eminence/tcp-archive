@@ -42,8 +42,6 @@ void machine_destroy(machine_t* machine) {
 state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args) {
   transition_t* tr;
 
-  nlog(MSG_LOG, "machine_step", "Input %d: step from %d to %d");
-
   /* Invalid machine. */
   if(!machine->current) {
     return NULL;
@@ -71,6 +69,8 @@ state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args)
       return NULL;
     }
   }
+
+  nlog(MSG_LOG, "machine_step", "Input %d: step from %d to %d", input, machine->current->id, tr->next->id);
 
   /* Update machine state. */
   machine->current = tr->next;
