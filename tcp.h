@@ -1,18 +1,18 @@
 #ifndef __TCP_H_
 #define __TCP_H_
 
-#include "tcpstate.h"
-#include "state.h"
-#include "van_driver.h"
-
 #define TCP_HEADER_SIZE   20
 #define MAXSOCKETS        256
-#define SEND_WINDOW_SIZE 4096
+#define SEND_WINDOW_SIZE  4096
 
 #define TCP_FLAG_FIN      0x01
 #define TCP_FLAG_SYN      0x02
 #define TCP_FLAG_RST      0x04
 #define TCP_FLAG_ACK      0x10
+
+#include "tcpstate.h"
+#include "state.h"
+#include "van_driver.h"
 
 /* uint16_t */
 #define get_srcport(p) 		(*((uint16_t*)((p))))
@@ -63,6 +63,7 @@
 
 /* Forward declaration */
 struct tcp_machine__;
+struct ip_node__;
 
 typedef struct tcp_socket__ {
 	struct tcp_machine__ *machine;
@@ -71,15 +72,14 @@ typedef struct tcp_socket__ {
 	uint32_t ack_num;
 
   /* Socket identifiers. */
-  	ip_node_t *local_node;
+  struct ip_node__ *local_node;
 	short local_port;
 	int remote_node;
 	short remote_port;
 } tcp_socket_t;
 
-tcp_socket_t *socket_table[MAXSOCKETS];
-
 void v_tcp_init();
+void v_tcp_destroy();
 int v_socket();
 int v_bind(int socket, int node, short port);
 int v_listen(int socket, int backlog /* optional */);

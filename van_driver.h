@@ -5,10 +5,12 @@
 #include <pthread.h>
 #include <bqueue.h>
 #include "rtable.h"
-
+#include "tcp.h"
 #include "fancy_display.h"
+#include "socktable.h"
 #include "ippacket.h"
 
+struct tcp_socket__;
 
 typedef struct {
 	unsigned char cur_state;
@@ -21,7 +23,7 @@ typedef struct {
 	pthread_mutex_t age_lock;
 } iface_t;
 
-typedef struct {
+typedef struct ip_node__ {
 	van_node_t *van_node;
 	pthread_t *sending_thread;
 	pthread_t *listening_thread[VAN_MAXINTERFACES];
@@ -33,7 +35,10 @@ typedef struct {
 	bqueue_t *rip_q;
 	bqueue_t *tcp_q;
 	pthread_t *tcp_thread;
-
+  
+  /* Let the fun begin. */
+  struct tcp_socket__ *socket_table[MAXSOCKETS];
+  socktable_t *tuple_table;
 
 	rtable_t *route_table;
 	iface_t *ifaces;

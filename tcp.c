@@ -8,6 +8,7 @@
 #include "fancy_display.h"
 #include "state.h"
 #include "tcpstate.h"
+#include "socktable.h"
 #include "ippacket.h"
 
 static ip_node_t *this_node;
@@ -15,7 +16,7 @@ static ip_node_t *this_node;
 tcp_socket_t *get_socket_from_int(int s) {
 	assert(s >= 0);
 	assert(s < MAXSOCKETS);
-	tcp_socket_t *sock = socket_table[s];
+	tcp_socket_t *sock = this_node->socket_table[s];
 	assert(sock);
 
 	return sock;
@@ -88,6 +89,11 @@ int build_tcp_packet(char *data, int data_size,
 	return 0;
 }
 
+/* destroy global tcp structures.
+ */
+void v_tcp_destroy(ip_node_t *node) {
+  socktable_destroy(node->tuple_table);
+}
 
 /* initialize various tcp structures
  */
@@ -95,11 +101,12 @@ void v_tcp_init(ip_node_t *node) {
 
 	int x;
 	for (x = 0; x < MAXSOCKETS; x++) {
-		socket_table[x] = NULL;
+		this_node->socket_table[x] = NULL;
 	}
 
 	this_node = node;
-
+  
+  socktable_init(node->tuple_table);
 }
 
 /* returns a new unbound socket.
@@ -111,7 +118,7 @@ int v_socket() {
 	// find the first unused socket
 	int x;
 	for (x = 0; x < MAXSOCKETS; x++){
-		if (socket_table[x] == NULL) { s = x; break; }
+		if (this_node->socket_table[x] == NULL) { s = x; break; }
 	}
 
 	if (s == -1) {
@@ -121,7 +128,7 @@ int v_socket() {
 
 	sock = malloc(sizeof(tcp_socket_t) );
 	assert(sock);
-	socket_table[s] = sock;
+	this_node->socket_table[s] = sock;
 
 	sock->machine = tcpm_new(sock); /* XXX TODO i want to create an initilize 
 									a new state machine, in the CLOSED state */

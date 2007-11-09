@@ -27,6 +27,7 @@
 #include "van_driver.h"
 #include "ippacket.h"
 #include "tcp.h"
+#include "socktable.h"
 
 #include "fancy_display.h"
 
@@ -110,9 +111,7 @@ int set_if_state(ip_node_t *node, int iface, int link_state) {
 
 /* tcp thread */
 void *tcp_thread(void* arg) {
-
 	ip_node_t *node = (ip_node_t*)arg;
-
 	ip_packet_t *packet;
 
 	while (1) {
@@ -120,10 +119,7 @@ void *tcp_thread(void* arg) {
 		bqueue_dequeue(node->tcp_q, (void*)&packet); /* this will block */
 		pthread_cleanup_pop(0);
 
-	nlog(MSG_LOG,"tcp", "tcp thread dequeued a tcp packet");
-	//nlog_s(__FILE__, __LINE__, MSG_LOG, "tcp", "tcp blah");
-
-
+	  nlog(MSG_LOG,"tcp", "tcp thread dequeued a tcp packet");
 	}
 }
 
@@ -504,7 +500,6 @@ void *listener (void *arg) {
 					char *packet = malloc(total_length); // will be free() when dequeed and sent
 
 					memcpy(packet, buf, total_length);
-					
 					bqueue_enqueue(node->tcp_q, (void*)packet);
 
 				} else {
@@ -668,45 +663,6 @@ ip_node_t *van_driver_init(char *fname, int num) {
 	// set up some static routes:
 	node->route_table = rtable_new();
 
-	// if node0, send all packets out iface 1 to node1;
-	
-	/*if (num == 0) {
-		rtable_entry_t *r1 = malloc(sizeof(rtable_entry_t));
-		r1->type=AT_P2P;
-		r1->iface=1;
-		r1->addr=DEFAULT_ROUTE;
-		rtable_put(node->route_table, r1);
-
-		// if node1, send packets to node0 out iface 1;
-		//   and packets to node2 out iface 2;
-	} else 
-	
-	if (num == 1) {
-		rtable_entry_t *r1 = malloc(sizeof(rtable_entry_t));
-		r1->type=AT_P2P;
-		r1->addr=0;
-		r1->iface=1;
-		r1->cost = 1;
-		r1->next_hop=0;
-		rtable_put(node->route_table, r1);
-
-		rtable_entry_t *r2 = malloc(sizeof(rtable_entry_t));
-		r2->type=AT_P2P;
-		r2->addr=2;
-		r2->iface=2;
-		r2->cost=1;
-		r2->next_hop=2;
-		rtable_put(node->route_table, r2);
-
-		// if node2, send all packets out iface 1 to node 1
-	} else if (num == 2) {
-		rtable_entry_t *r1 = malloc(sizeof(rtable_entry_t));
-		r1->type=AT_P2P;
-		r1->iface=1;
-		r1->addr=DEFAULT_ROUTE;
-		rtable_put(node->route_table, r1);
-	}*/
-	
 	nlog_set_menu("[node %d]  Initializing [==        ]",num );
 	sleep(1);
 	nlog_set_menu("[node %d]  Initializing [===       ]",num );
