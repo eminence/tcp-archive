@@ -425,7 +425,7 @@ void *listener (void *arg) {
 				zero_checksum = get_checksum(buf);
 				nlog(MSG_LOG, "listener", "this should be zero: %d",zero_checksum);
 
-				if((calced_checksum = ip_fast_csum((unsigned char*)buf, 8)) != packet_checksum) {
+				if((calced_checksum = ip_fast_csum((unsigned char*)buf, 2)) != packet_checksum) {
 					nlog(MSG_ERROR,"listener", "Error: checksum mismatch.  ip_fast_csum returned %d, we think it should be %d", calced_checksum, packet_checksum);
 					continue;
 
@@ -797,7 +797,7 @@ int buildPacket(ip_node_t *node, char *data, int data_size, int to, char  **head
 	set_dst(*header, dest);
 
 	// calculate the checksum:
-	checksum = ip_fast_csum((unsigned char *)*header,8);
+	checksum = ip_fast_csum((unsigned char *)*header, 2);
 	nlog(MSG_LOG,"buildPacket", "checksum is %d", checksum);
 
 	//memcpy(*header+4,&checksum,2);
