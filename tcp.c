@@ -8,6 +8,7 @@
 #include "fancy_display.h"
 #include "state.h"
 #include "tcpstate.h"
+#include "ippacket.h"
 
 static ip_node_t *this_node;
 
@@ -32,7 +33,13 @@ int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) 
 
 	nlog(MSG_LOG,"tcp_sendto", "now have a packet of size %d ready to be sent", packet_size);
 
-	int retval = van_driver_sendto(sock->local_node, packet, packet_size, sock->remote_node);
+	// put our tcp packet in an IP packet. woot!
+	//int ip_packet_size = buildPacket(sock->local_node, packet, packet_size, sock->remote_node, &ippacket, PROTO_TCP);
+
+	int retval = van_driver_sendto(sock->local_node, packet, packet_size, sock->remote_node, PROTO_TCP);
+
+	free(packet);
+
 	if (retval == -1) {
 		nlog(MSG_ERROR,"tcp_sendto", "van_driver_sendto returned -1! A tcp packet just got lost!");
 		return -1;
@@ -46,6 +53,8 @@ int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) 
 		assert (bufsize > 0); /* TODO double check that this assertion is valid */
 		sock->seq_num += bufsize;
 	}
+
+	return retval;
 }
 
 /*
@@ -71,7 +80,7 @@ int build_tcp_packet(char *data, int data_size,
 	set_flags(*header, flags);
 	set_window(*header, window);
 
-	// memcpy the data into the packet
+	// memcpy the data into the packet, if there is any
 	if (data) memcpy(*header+20,data,data_size);
 
 	// TODO set checksum

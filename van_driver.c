@@ -31,7 +31,7 @@
 #include "fancy_display.h"
 
 /* proto types */
-int buildPacket(ip_node_t *node, char *data, int data_size, int to, char  **header);
+int buildPacket(ip_node_t *node, char *data, int data_size, int to, char  **header, uint8_t proto);
 void send_route_table(ip_node_t *node);
 void bqueue_poorly_implemented_cleanup(bqueue_t* queue);
 
@@ -120,7 +120,7 @@ void *tcp_thread(void* arg) {
 		bqueue_dequeue(node->tcp_q, (void*)&packet); /* this will block */
 		pthread_cleanup_pop(0);
 
-	nlog(MSG_LOG,"tcp", "tcp thread dequeued a tdp packet");
+	nlog(MSG_LOG,"tcp", "tcp thread dequeued a tcp packet");
 	//nlog_s(__FILE__, __LINE__, MSG_LOG, "tcp", "tcp blah");
 
 
@@ -139,7 +139,7 @@ void *link_state_thread (void *arg) {
 
 	while (1) {
 		pthread_testcancel();
-		sleep(2);
+		sleep(1);
 
 		for (i = 0; i < nifs; i++) {
 			van_node_getifopt(node->van_node, i, VAN_IO_UPSTATE, (char*)&link_state, sizeof(int));
@@ -277,8 +277,8 @@ void send_route_table(ip_node_t *node) {
 
 		rtable = rtable_serialize(node->route_table, &rtable_size, (node->ifaces[i].peer >= 0? node->ifaces[i].peer: -1) );
 
-		packet_size = buildPacket(node, rtable, rtable_size, 0/*to*/, &packet);
-		set_protocol(packet, PROTO_RIP);
+		packet_size = buildPacket(node, rtable, rtable_size, 0/*to*/, &packet, PROTO_RIP);
+		//set_protocol(packet, PROTO_RIP);
 
 		retval = van_node_send(node->van_node, i,packet, packet_size, 0, &va);
 
@@ -341,6 +341,8 @@ void *sender (void *arg) {
 		va.va_type = data->addr_type;
 
 		 retval = van_node_send(this_node->van_node, data->iface, data->packet, data->packet_size, 0, &va);
+		 assert(data);
+		 assert(data->packet);
 		 free(data->packet);
 		 free(data);
 	}
@@ -426,8 +428,8 @@ void *listener (void *arg) {
 				nlog(MSG_LOG, "listener", "this should be zero: %d",zero_checksum);
 
 				if((calced_checksum = ip_fast_csum((unsigned char*)buf, 2)) != packet_checksum) {
-					nlog(MSG_ERROR,"listener", "Error: checksum mismatch.  ip_fast_csum returned %d, we think it should be %d", calced_checksum, packet_checksum);
-					continue;
+					nlog(MSG_ERROR,"listener", "Error: checksum mismatch.  ip_fast_csum returned %d, we think it should be %d  will continue as if checksum is valid", calced_checksum, packet_checksum);
+					//continue;
 
 				} else {
 					nlog(MSG_LOG,"listener","Checksum match.");
@@ -498,12 +500,12 @@ void *listener (void *arg) {
 
 				} else if (proto == PROTO_TCP) {
 					/* give this to the TCP thread, so it can figure out what to do with it */
-
+					nlog(MSG_LOG, "listener", "got a TCP packet!");
 					char *packet = malloc(total_length); // will be free() when dequeed and sent
 
 					memcpy(packet, buf, total_length);
 					
-					bqueue_enqueue(node->sending_q, (void*)packet);
+					bqueue_enqueue(node->tcp_q, (void*)packet);
 
 				} else {
 					nlog(MSG_WARNING,"listener","I got a IP packet with an unknown payload type");
@@ -755,7 +757,7 @@ ip_node_t *van_driver_init(char *fname, int num) {
  *
  * returns size of new packet
  */
-int buildPacket(ip_node_t *node, char *data, int data_size, int to, char  **header) {
+int buildPacket(ip_node_t *node, char *data, int data_size, int to, char  **header, uint8_t proto) {
 
  	uint16_t total_length =8 + data_size;
 	uint16_t ttl = 32;
@@ -780,7 +782,7 @@ int buildPacket(ip_node_t *node, char *data, int data_size, int to, char  **head
 
 	//memcpy(*header,&start,1);
 	set_version(*header,1);
-	set_protocol(*header,0);
+	set_protocol(*header,proto);
 
 	//memcpy(*header + 1 ,&total_length, 2);
 	set_total_len(*header, total_length);
@@ -815,7 +817,8 @@ int buildPacket(ip_node_t *node, char *data, int data_size, int to, char  **head
 
 }
 
-int van_driver_sendto (ip_node_t *node, char *buf, int size, int to) {
+int van_driver_sendto (ip_node_t *node, char *buf, int size, int to, uint8_t proto) {
+	
 
 	char *packet;
 	int packet_size;
@@ -848,7 +851,7 @@ int van_driver_sendto (ip_node_t *node, char *buf, int size, int to) {
 		
 		van_node_getifopt(node->van_node, r->iface, VAN_IO_MTU, (char*)&mtu, sizeof(int));
 
-		packet_size = buildPacket(node, buf, size, to, &packet);
+		packet_size = buildPacket(node, buf, size, to, &packet, proto);
 
 		if (packet_size > mtu) {
 			nlog(MSG_WARNING, "sendto", "WARNING Will not send this packet -- TOO BIG");

@@ -101,7 +101,7 @@ int main( int argc, char* argv[] ) {
 				//printf( "Message: " );
 				int len = get_text( "Message:", buf, 256);
 				//scanf( "%s", buf );
-				retval = van_driver_sendto(node, buf, len, in);
+				retval = van_driver_sendto(node, buf, len, in, PROTO_DATA);
 				//printf("van_driver_sendto returned %d\n", retval);
 				//display_msg("Function Not Yet Implemented");
 				break;

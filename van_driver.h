@@ -7,6 +7,7 @@
 #include "rtable.h"
 
 #include "fancy_display.h"
+#include "ippacket.h"
 
 
 typedef struct {
@@ -64,7 +65,7 @@ void van_driver_destory(ip_node_t *node);
 
 int get_if_state(ip_node_t *node, int iface);
 int set_if_state(ip_node_t *node, int iface, int state);
-int van_driver_sendto (ip_node_t *node, char *buf, int size, int to);
+int van_driver_sendto (ip_node_t *node, char *buf, int size, int to, uint8_t proto);
 int van_driver_recvfrom (ip_node_t *node, char *buf, int size) ;
 
 /* High level functionality. */
