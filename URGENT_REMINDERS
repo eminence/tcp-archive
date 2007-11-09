@@ -1,0 +1,3 @@
+v_accept
+
+  Clone FD and retain listening socket, or listening socket BECOMES active socket and no more listener.

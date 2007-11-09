@@ -132,6 +132,7 @@ void *tcp_thread(void* arg) {
 
 		tcp_socket_t *sock = socktable_get(node->tuple_table, dest, dest_port, src, src_port);
 
+    /* If no match, may still be valid; ensure socket not listening on requested port. */
 		if (sock == NULL) {
 			nlog(MSG_WARNING, "tcp_thread", "We got a tcp packet, but can't figure out what socket this is for.  Discarding");
 			assert(packet);
