@@ -412,6 +412,30 @@ void *listener (void *arg) {
 			total_length = get_total_len(buf);
 			proto = get_protocol(buf);
 
+			{
+				/* Check packet checksum. */
+				uint16_t packet_checksum, zero_checksum, calced_checksum;
+
+				packet_checksum = get_checksum(buf);
+				nlog(MSG_LOG,"listener","Incoming packet.  Checksum field is: %d", packet_checksum);
+
+				/* Clear checksum field. */
+				set_checksum(buf, 0);
+				zero_checksum = get_checksum(buf);
+				nlog(MSG_LOG, "listener", "this should be zero: %d",zero_checksum);
+
+				if((calced_checksum = ip_fast_csum((unsigned char*)buf, 8)) != packet_checksum) {
+					nlog(MSG_ERROR,"listener", "Error: checksum mismatch.  ip_fast_csum returned %d, we think it should be %d", calced_checksum, packet_checksum);
+					continue;
+
+				} else {
+					nlog(MSG_LOG,"listener","Checksum match.");
+
+					/* Restore checksum. */
+					set_checksum(buf, packet_checksum);
+				}
+			}
+
 			if (proto == PROTO_RIP) {
 					
 					char *packet = malloc(total_length);
@@ -458,25 +482,8 @@ void *listener (void *arg) {
 				pthread_cleanup_pop(0);
 
 			} else {
-				/* Check packet checksum. */
-				uint16_t packet_checksum;
 
 				nlog(MSG_LOG,"listener","This packet is addressesed to me!");
-        packet_checksum = get_checksum(buf);
-        
-				/* Clear checksum field. */
-				set_checksum(buf, 0);
-
-				if(ip_fast_csum((unsigned char*)buf, 8) != packet_checksum) {
-					nlog(MSG_ERROR,"listener", "Error: checksum mismatch");
-					continue;
-
-				} else {
-					nlog(MSG_LOG,"listener","Checksum match.");
-
-					/* Restore checksum. */
-					set_checksum(buf, packet_checksum);
-				}
 
 				if (proto == PROTO_DATA) {
 					char *data = malloc(total_length);
@@ -790,6 +797,7 @@ int buildPacket(ip_node_t *node, char *data, int data_size, int to, char  **head
 
 	// calculate the checksum:
 	checksum = ip_fast_csum((unsigned char *)*header,8);
+	nlog(MSG_LOG,"buildPacket", "checksum is %d", checksum);
 
 	//memcpy(*header+4,&checksum,2);
 	set_checksum(*header, checksum);
