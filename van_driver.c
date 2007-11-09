@@ -131,15 +131,18 @@ void *tcp_thread(void* arg) {
 		dest = get_dst(packet->packet);
 
 		tcp_socket_t *sock = socktable_get(node->tuple_table, dest, dest_port, src, src_port);
+
 		if (sock == NULL) {
 			nlog(MSG_WARNING, "tcp_thread", "We got a tcp packet, but can't figure out what socket this is for.  Discarding");
 			assert(packet);
 			free(packet);
-		} else {
 
+      continue;
+		} 
 
-		}
+    if(sock->machine) {
 
+    }
 
 	}
 }

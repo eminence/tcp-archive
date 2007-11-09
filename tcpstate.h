@@ -49,5 +49,7 @@ int tcpm_event(tcp_machine_t* machine, tinput_t event, void* argt, void* args);
 int tcpm_packet_to_input(const char* packet);
 
 #define tcpm_state(m) ((m)->sm->current->id)
+#define tcpm_canbind(m) (tcpm_state(m) == ST_CLOSED)
+#define tcpm_estab(m) (tcpm_state(m) == ST_ESTAB)
 
 #endif
