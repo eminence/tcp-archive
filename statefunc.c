@@ -16,8 +16,6 @@ int send_packet_with_flags(sid_t prev, sid_t next, void* context, void *arg, voi
 	nlog(MSG_LOG,"state:SPWF", "flags are: %p", flags);
 
 	tcp_sendto(sock, NULL, 0, flags);
-	
 
 	return 0; // FIXME XXX TODO
-
 }

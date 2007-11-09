@@ -5,6 +5,7 @@
 
 #include "socktable.h"
 #include "tcp.h"
+#include "tcppacket.h"
 
 htable_t* alloc_htable() {
   htable_t* result = malloc(sizeof(htable_t));
@@ -17,14 +18,14 @@ htable_t* alloc_htable() {
 }
 
 void socktable_init(socktable_t *st) {
-  htable_init(st, MAXSOCKETS);
+  htable_init(&st->root, MAXSOCKETS);
 }
 
 void socktable_destroy(socktable_t *st) {
   htable_t *lport_h, *rnode_h, *rport_h;
 
   /* Iterate through all hash tables; delete appropriately. */
-  htable_iterate_begin(st, lport_h, htable_t) { 
+  htable_iterate_begin(&st->root, lport_h, htable_t) { 
     htable_iterate_begin(lport_h, rnode_h, htable_t) {
       htable_iterate_begin(rnode_h, rport_h, htable_t) {
         
@@ -41,7 +42,7 @@ void socktable_destroy(socktable_t *st) {
   } htable_iterate_end();
 
   /* Destroy local host htable. */
-  htable_destroy(st);
+  htable_destroy(&st->root);
 }
 
 tcp_socket_t *socktable_get(socktable_t *st, int lnode, short lport, int rnode, short rport) {
@@ -49,7 +50,7 @@ tcp_socket_t *socktable_get(socktable_t *st, int lnode, short lport, int rnode, 
   tcp_socket_t *result = NULL;
 
   /* Perform four constant time lookups. */
-  if((lport_h = htable_get(st, lnode))) {
+  if((lport_h = htable_get(&st->root, lnode))) {
     if((rnode_h = htable_get(lport_h, lport))) {
       if((rport_h = htable_get(rnode_h, rnode))) {
         result = htable_get(rport_h, rport);
@@ -65,8 +66,8 @@ tcp_socket_t *socktable_put(socktable_t *st, tcp_socket_t *data) {
   int fresh = 0;
 
   /* (Possibly) create all hash tables along path to socket. */
-  if((lport_h = htable_get(st, data->local_node)) == NULL) {
-    htable_put(st, data->local_node, lport_h = alloc_htable());
+  if((lport_h = htable_get(&st->root, data->local_node->van_node->vn_num)) == NULL) {
+    htable_put(&st->root, data->local_node->van_node->vn_num, lport_h = alloc_htable());
     fresh = 1;
   }
 
@@ -87,7 +88,7 @@ tcp_socket_t *socktable_remove(socktable_t *st, int lnode, short lport, int rnod
   tcp_socket_t *result = NULL;
 
   /* Perform four constant time lookups. */
-  if((lport_h = htable_get(st, lnode))) {
+  if((lport_h = htable_get(&st->root, lnode))) {
     if((rnode_h = htable_get(lport_h, lport))) {
       if((rport_h = htable_get(rnode_h, rnode))) {
         result = htable_remove(rport_h, rport);
@@ -103,6 +104,6 @@ void socktable_dump(socktable_t *st) {
 
   socktable_iterate_begin(st, sock) {
     printf("Socket [lnode = %d, lport = %d, rnode = %d, rport = %d]\n",
-      sock->local_node, sock->local_port, sock->remote_node, sock->remote_port);
+      sock->local_node->van_node->vn_num, sock->local_port, sock->remote_node, sock->remote_port);
   } socktable_iterate_end();
 }

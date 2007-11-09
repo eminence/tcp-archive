@@ -7,6 +7,7 @@
 #include "state.h"
 #include "statefunc.h"
 #include "ippacket.h"
+#include "tcppacket.h"
 
 void* alloc_flags(uint8_t flags) {
   void* byte = malloc(1);

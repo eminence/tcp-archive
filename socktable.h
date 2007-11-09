@@ -4,8 +4,11 @@
 #include <htable.h>
 #include "tcp.h"
 
-typedef htable_t socktable_t;
 struct tcp_socket__;
+
+typedef struct socktable__ {
+  htable_t root;
+} socktable_t;
 
 void socktable_init(socktable_t *st);
 void socktable_destroy(socktable_t *st);
@@ -17,7 +20,7 @@ void socktable_dump(socktable_t *st);
 #define socktable_iterate_begin(st, var) \
 do { \
   htable_t *__st_lph, *__st_rnh, *__st_rph; \
-  htable_iterate_begin(st, __st_lph, htable_t) { \
+  htable_iterate_begin(&st->root, __st_lph, htable_t) { \
     htable_iterate_begin(__st_lph, __st_rnh, htable_t) { \
       htable_iterate_begin(__st_rnh, __st_rph, htable_t) { \
         htable_iterate_begin(__st_rph, var, struct tcp_socket__) {

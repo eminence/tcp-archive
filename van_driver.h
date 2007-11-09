@@ -4,13 +4,15 @@
 #include <van.h>
 #include <pthread.h>
 #include <bqueue.h>
-#include "socktable.h"
 #include "rtable.h"
 #include "tcp.h"
+#include "socktable.h"
 #include "fancy_display.h"
 #include "ippacket.h"
+#include "tcppacket.h"
 
 struct tcp_socket__;
+struct socktable__;
 
 typedef struct {
 	unsigned char cur_state;
@@ -38,7 +40,7 @@ typedef struct ip_node__ {
   
   /* Let the fun begin. */
   struct tcp_socket__ *socket_table[MAXSOCKETS];
-  socktable_t *tuple_table;
+  struct socktable__ *tuple_table;
 
 	rtable_t *route_table;
 	iface_t *ifaces;
