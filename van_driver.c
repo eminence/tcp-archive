@@ -420,7 +420,8 @@ void *listener (void *arg) {
 				nlog(MSG_LOG,"listener","Incoming packet.  Checksum field is: %d", packet_checksum);
 
 				/* Clear checksum field. */
-				set_checksum(buf, 0);
+				//set_checksum(buf, 0);
+				memset(buf+4,0,2);
 				zero_checksum = get_checksum(buf);
 				nlog(MSG_LOG, "listener", "this should be zero: %d",zero_checksum);
 
@@ -801,6 +802,9 @@ int buildPacket(ip_node_t *node, char *data, int data_size, int to, char  **head
 
 	//memcpy(*header+4,&checksum,2);
 	set_checksum(*header, checksum);
+	checksum = 0;
+	checksum = get_checksum(*header);
+	nlog(MSG_LOG, "buildPacket", "readback checksum is %d", checksum);
 
 	//print_packet(*header,8);
 	
