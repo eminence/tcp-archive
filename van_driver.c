@@ -160,7 +160,7 @@ void *tcp_thread(void* arg) {
 			nlog(MSG_LOG, "tcp_thread", "Socket not in established state; stepping state machine.");
 
       /* Step state machine (and perform needed action.) */
-      if(tcpm_step(sock->machine, tcpm_packet_to_input(packet))) {
+      if(tcpm_event(sock->machine, tcpm_packet_to_input(packet),NULL,NULL)) {
 			  nlog(MSG_WARNING, "tcp_thread", "Invalid transition requested; fail!");
         /* Rely on error function; teardown socket? */
       }
@@ -461,20 +461,20 @@ void *listener (void *arg) {
 				uint16_t packet_checksum, zero_checksum, calced_checksum;
 
 				packet_checksum = get_checksum(buf);
-				nlog(MSG_LOG,"listener","Incoming packet.  Checksum field is: %d", packet_checksum);
+				//nlog(MSG_LOG,"listener","Incoming packet.  Checksum field is: %d", packet_checksum);
 
 				/* Clear checksum field. */
 				//set_checksum(buf, 0);
 				memset(buf+4,0,2);
 				zero_checksum = get_checksum(buf);
-				nlog(MSG_LOG, "listener", "this should be zero: %d",zero_checksum);
+				//nlog(MSG_LOG, "listener", "this should be zero: %d",zero_checksum);
 
 				if((calced_checksum = ip_fast_csum((unsigned char*)buf, 2)) != packet_checksum) {
-					nlog(MSG_ERROR,"listener", "Error: checksum mismatch.  ip_fast_csum returned %d, we think it should be %d  will continue as if checksum is valid", calced_checksum, packet_checksum);
-					//continue;
+					nlog(MSG_ERROR,"listener", "Error: checksum mismatch.  ip_fast_csum returned %d, we think it should be %d", calced_checksum, packet_checksum);
+					continue;
 
 				} else {
-					nlog(MSG_LOG,"listener","Checksum match.");
+					//nlog(MSG_LOG,"listener","Checksum match.");
 
 					/* Restore checksum. */
 					set_checksum(buf, packet_checksum);
@@ -802,13 +802,13 @@ int buildPacket(ip_node_t *node, char *data, int data_size, int to, char  **head
 
 	// calculate the checksum:
 	checksum = ip_fast_csum((unsigned char *)*header, 2);
-	nlog(MSG_LOG,"buildPacket", "checksum is %d", checksum);
+	//nlog(MSG_LOG,"buildPacket", "checksum is %d", checksum);
 
 	//memcpy(*header+4,&checksum,2);
 	set_checksum(*header, checksum);
 	checksum = 0;
 	checksum = get_checksum(*header);
-	nlog(MSG_LOG, "buildPacket", "readback checksum is %d", checksum);
+	//nlog(MSG_LOG, "buildPacket", "readback checksum is %d", checksum);
 
 	//print_packet(*header,8);
 	
