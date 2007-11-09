@@ -1,6 +1,8 @@
 #ifndef TCPCONSTANTS_T
 #define TCPCONSTANTS_T
 
+#include "ippacket.h"
+
 #define TCP_HEADER_SIZE   20
 #define MAXSOCKETS        256
 #define SEND_WINDOW_SIZE  4096
@@ -56,5 +58,6 @@
 
 /* tcp shortcuts */
 #define get_data_len(p)   (get_total_len(p) - (HEADER_SIZE + TCP_HEADER_SIZE))
+#define ip_to_tcp(p)      ((p) + HEADER_SIZE)
 
 #endif

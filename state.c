@@ -3,6 +3,7 @@
 #include <bqueue.h>
 
 #include "state.h"
+#include "fancy_display.h"
 
 machine_t* machine_new(state_t* start, void* context) {
   machine_t *machine;
@@ -41,6 +42,8 @@ void machine_destroy(machine_t* machine) {
 state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args) {
   transition_t* tr;
 
+  nlog(MSG_LOG, "machine_step", "Input %d: step from %d to %d");
+
   /* Invalid machine. */
   if(!machine->current) {
     return NULL;
@@ -76,7 +79,7 @@ state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args)
   if(machine->current->action) {
     machine->current->action(machine->current->id, machine->context, machine->current->argd, args);
   }
-
+  
   return machine->current;
 }
 

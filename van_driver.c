@@ -112,7 +112,7 @@ int set_if_state(ip_node_t *node, int iface, int link_state) {
 /* tcp thread */
 void *tcp_thread(void* arg) {
 	ip_node_t *node = (ip_node_t*)arg;
-	ip_packet_t *packet;
+	char *packet;
   uint16_t src_port;
 	uint16_t dest_port;
 	uint8_t src;
@@ -125,10 +125,10 @@ void *tcp_thread(void* arg) {
 
 		nlog(MSG_LOG,"tcp", "tcp thread dequeued a tcp packet");
 
-		src_port = get_srcport(packet + 20);
-		dest_port = get_destport(packet + 20);
-		src = get_src(packet->packet);
-		dest = get_dst(packet->packet);
+		src_port = get_srcport(ip_to_tcp(packet));
+		dest_port = get_destport(ip_to_tcp(packet));
+		src = get_src(packet);
+		dest = get_dst(packet);
 
 		tcp_socket_t *sock = socktable_get(node->tuple_table, dest, dest_port, src, src_port);
 
@@ -140,8 +140,30 @@ void *tcp_thread(void* arg) {
       continue;
 		} 
 
-    if(sock->machine) {
+    /* If we're in the established state, perform primary communication; else, handshake*/
+    if(tcpm_estab(sock->machine)) {
+			nlog(MSG_LOG, "tcp_thread", "Socket in established state; using sliding window protocol.");
+      /* TODO */
+    } else {
+      /* Validate sequence numbers. */
 
+      if(tcpm_firstseq(sock->machine)) {
+        /* Set initial sequence number. */
+        sock->seq_num = 1000;
+        sock->ack_num = get_seqnum(ip_to_tcp(packet)) + 1;
+
+      } else if(get_seqnum(ip_to_tcp(packet)) != sock->ack_num) {
+			  nlog(MSG_WARNING, "tcp_thread", "Invalid sequence number!");
+        /* TODO reset connection */
+      }
+
+			nlog(MSG_LOG, "tcp_thread", "Socket not in established state; stepping state machine.");
+
+      /* Step state machine (and perform needed action.) */
+      if(tcpm_step(sock->machine, tcpm_packet_to_input(packet))) {
+			  nlog(MSG_WARNING, "tcp_thread", "Invalid transition requested; fail!");
+        /* Rely on error function; teardown socket? */
+      }
     }
 
 	}
