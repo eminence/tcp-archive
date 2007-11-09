@@ -80,7 +80,7 @@ int main( int argc, char* argv[] ) {
 					int socket, node;
 					short port;
 					socket = get_number("Socket to use");
-					node = get_number("enter this node number")
+					node = get_number("enter this node number");
 					port = get_number("Local port to bind to");
 
 				}

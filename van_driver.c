@@ -113,6 +113,10 @@ int set_if_state(ip_node_t *node, int iface, int link_state) {
 void *tcp_thread(void* arg) {
 	ip_node_t *node = (ip_node_t*)arg;
 	ip_packet_t *packet;
+  uint16_t src_port;
+	uint16_t dest_port;
+	uint8_t src;
+	uint8_t dest;
 
 	while (1) {
 		pthread_cleanup_push((void(*)(void*))bqueue_poorly_implemented_cleanup, node->tcp_q);
@@ -121,10 +125,10 @@ void *tcp_thread(void* arg) {
 
 		nlog(MSG_LOG,"tcp", "tcp thread dequeued a tcp packet");
 
-		uint16_t src_port = get_srcport(packet + 20);
-		uint16_t dest_port = get_destport(packet + 20);
-		uint8_t src =0;// = get_src(packet);
-		uint8_t dest =0;//= get_dst(packet);
+		src_port = get_srcport(packet + 20);
+		dest_port = get_destport(packet + 20);
+		src = get_src(packet->packet);
+		dest = get_dst(packet->packet);
 
 		tcp_socket_t *sock = socktable_get(node->tuple_table, dest, dest_port, src, src_port);
 		if (sock == NULL) {

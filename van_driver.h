@@ -55,7 +55,7 @@ typedef struct {
 
 typedef struct {
 	int iface;
-	void *packet;
+	char *packet;
 	int packet_size;
 	unsigned int addr_type;
 } ip_packet_t;
