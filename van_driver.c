@@ -462,10 +462,7 @@ void *listener (void *arg) {
 				uint16_t packet_checksum;
 
 				nlog(MSG_LOG,"listener","This packet is addressesed to me!");
-
-
-
-				packet_checksum = get_checksum(buf);
+        packet_checksum = get_checksum(buf);
         
 				/* Clear checksum field. */
 				set_checksum(buf, 0);
@@ -764,9 +761,8 @@ int buildPacket(ip_node_t *node, char *data, int data_size, int to, char  **head
 
 	// malloc ourselfs 8 bytes plus the size of the data
 	packet_size = 8 + data_size;
-	*header = malloc(packet_size);
 
-	//printf("Building packet of size %d address to %d\n\n", data_size,to);
+	*header = malloc(packet_size);
 
 	// zero everything.
 	memset(*header,0,packet_size);
@@ -794,6 +790,7 @@ int buildPacket(ip_node_t *node, char *data, int data_size, int to, char  **head
 
 	// calculate the checksum:
 	checksum = ip_fast_csum((unsigned char *)*header,8);
+
 	//memcpy(*header+4,&checksum,2);
 	set_checksum(*header, checksum);
 
