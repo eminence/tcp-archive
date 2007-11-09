@@ -471,9 +471,9 @@ void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *t
 
 			getyx(log,y,x);
 			sprintf(lineno,"%d",wline);
-			linenol = strlen(wfile) + strlen(lineno)+3; 
+			linenol = strlen(wfile) + strlen(lineno)+2; 
 			mvwprintw(log,y,COLS-linenol,"%s:%d",wfile, wline);
-			wmove(log,y,COLS-2);
+			wmove(log,y,COLS-1);
 
 			wprintw(log,"\n");
 
@@ -506,9 +506,9 @@ void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *t
 
 			getyx(log,y,x);
 			sprintf(lineno,"%d",wline);
-			linenol = strlen(wfile) + strlen(lineno)+3; 
+			linenol = strlen(wfile) + strlen(lineno)+2; 
 			mvwprintw(log,y,COLS-linenol,"%s:%d",wfile, wline);
-			wmove(log,y,COLS-2);
+			wmove(log,y,COLS-1);
 			
 			wprintw(log,"\n");
 			wattroff(log,COLOR_PAIR(MSG_ERROR_COLOR));
@@ -539,9 +539,9 @@ void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *t
 
 			getyx(log,y,x);
 			sprintf(lineno,"%d",wline);
-			linenol = strlen(wfile) + strlen(lineno)+3; 
+			linenol = strlen(wfile) + strlen(lineno)+2; 
 			mvwprintw(log,y,COLS-linenol,"%s:%d",wfile, wline);
-			wmove(log,y,COLS-2);
+			wmove(log,y,COLS-1);
 
 			wprintw(log,"\n");
 			wattroff(log,COLOR_PAIR(MSG_WARNING_COLOR));
