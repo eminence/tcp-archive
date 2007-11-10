@@ -65,29 +65,24 @@ void bqueue_poorly_implemented_cleanup(bqueue_t* queue) {
  * hex dump of a packet
  */
 void print_packet (char *buf, int len) {
-	int i, j, cnt = 0;
-  char buffer[4096];
+	int i, j;
 
-	cnt += sprintf(buffer + cnt, "\n--\nPacket Dump:\n--\n");
+	printf("\n--\nPacket Dump:\n--\n");
 
 	for (i = 0; i < 32; i++) {
-	  cnt += sprintf(buffer + cnt, "%02d ",i);
+	printf("%02d ",i);
 	}
 	printf("\n\n");
 
 	for (i = 0; i < len; i++) {
 		for (j = 7; j >= 0; j--) {	
 			unsigned char e = buf[i] & (1 << j); //d has the byte value.
-			cnt += sprintf(buffer + cnt, "%X  ", e>0?1:0);
+			printf("%X  ", e>0?1:0);
 		}
-		if ((i+1)%4 == 0) cnt += sprintf(buffer + cnt, "\n");
+		if ((i+1)%4 == 0) printf("\n");
 	}
 
-	cnt += sprintf(buffer + cnt, "\n--");
- 
-  *(buffer + cnt) = '\0';
-
-  nlog(MSG_LOG, "print_packet", buffer);
+	printf("\n--\n");
 }
 
 /*
@@ -122,6 +117,7 @@ void *tcp_thread(void* arg) {
 	uint16_t dest_port;
 	uint8_t src;
 	uint8_t dest;
+	uint8_t flags;
 
 	while (1) {
 		pthread_cleanup_push((void(*)(void*))bqueue_poorly_implemented_cleanup, node->tcp_q);
@@ -134,14 +130,19 @@ void *tcp_thread(void* arg) {
 		dest_port = get_destport(ip_to_tcp(packet));
 		src = get_src(packet);
 		dest = get_dst(packet);
+		flags = get_flags(ip_to_tcp(packet));
 
 		tcp_socket_t *sock = socktable_get(node->tuple_table, dest, dest_port, src, src_port, FULL_SOCKET);
+		nlog(MSG_LOG,"tcp_thread", "dest=%d, dest_port=%d, src=%d, src_port=%d flags=%d", dest, dest_port, src, src_port, flags);
+		nlog(MSG_LOG,"tcp_thread", "about to dump socktable in tcp_thread");
+		socktable_dump(node->tuple_table, FULL_SOCKET);      
+		socktable_dump(node->tuple_table, HALF_SOCKET);
 
 		/* If no match, may still be valid; ensure socket not listening on requested port. */
 		if (sock == NULL) {
 			nlog(MSG_WARNING, "tcp_thread", "We got a tcp packet, but it doesn't seem to have a full socket associated with it.  Halfchecking...");
 
-			tcp_socket_t *sock = socktable_get(node->tuple_table, dest, dest_port, src, src_port, HALF_SOCKET);
+			sock = socktable_get(node->tuple_table, dest, dest_port, 0, 0, HALF_SOCKET);
 			if (sock == NULL) {
 				nlog(MSG_ERROR,"tcp_thread", "Ok, not a half socket either.  Discarding.");
 				assert(packet);
@@ -171,7 +172,7 @@ void *tcp_thread(void* arg) {
 			nlog(MSG_LOG, "tcp_thread", "Socket not in established state; stepping state machine.");
 
       /* Step state machine (and perform needed action.) */
-      if(tcpm_event(sock->machine, tcpm_packet_to_input(packet),NULL,NULL)) {
+      if(tcpm_event(sock->machine, tcpm_packet_to_input(ip_to_tcp(packet)),NULL,NULL)) {
 			  nlog(MSG_WARNING, "tcp_thread", "Invalid transition requested; fail!");
         /* Rely on error function; teardown socket? */
       }
@@ -864,7 +865,13 @@ int van_driver_sendto (ip_node_t *node, char *buf, int size, int to, uint8_t pro
 		
 		van_node_getifopt(node->van_node, r->iface, VAN_IO_MTU, (char*)&mtu, sizeof(int));
 
+		uint16_t dport = get_destport(buf);
+		nlog(MSG_LOG,"van_driver_sendto","pre buildPacket dport=%d",dport);
+		nlog(MSG_LOG,"van_driver_sendto","about to call buildPacket.  size=%d", size);
 		packet_size = buildPacket(node, buf, size, to, &packet, proto);
+
+		dport = get_destport(packet+8);
+		nlog(MSG_LOG,"van_driver_sendto","get_destport=%d", dport);
 
 		if (packet_size > mtu) {
 			nlog(MSG_WARNING, "sendto", "WARNING Will not send this packet -- TOO BIG");

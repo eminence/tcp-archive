@@ -30,6 +30,9 @@ int do_listen(sid_t prev, sid_t next, void* context, void *arg, void *tran_arg) 
 	assert(node);
 
 	socktable_put(node->tuple_table, sock, HALF_SOCKET);
+	nlog(MSG_LOG,"do_listen", "just called socktable_put.  i hope it worked");
+	socktable_dump(node->tuple_table, FULL_SOCKET);
+	socktable_dump(node->tuple_table, HALF_SOCKET);
 
 	return 0;
 }

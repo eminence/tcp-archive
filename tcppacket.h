@@ -37,7 +37,7 @@
 #define set_tcpchecksum(p,v)		do {uint16_t _tmp=(v); memcpy((p)+16, &_tmp, 2); } while(0)
 
 #define set_flags(p,v)			(((p)[13] = ((uint8_t)(v))))
-#define get_flags(p)        ((p)[13])
+#define get_flags(p)        ((uint8_t)(p)[13])
 
 /* tcp flags, 1 bit each */
 #define get_fin(p)				((uint8_t)((p)[13])) & (1 << 0)
@@ -59,5 +59,6 @@
 /* tcp shortcuts */
 #define get_data_len(p)   (get_total_len(p) - (HEADER_SIZE + TCP_HEADER_SIZE))
 #define ip_to_tcp(p)      ((p) + HEADER_SIZE)
+#define tcp_to_ip(p)      ((p) - HEADER_SIZE)
 
 #endif

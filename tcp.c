@@ -33,7 +33,12 @@ int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) 
 	int packet_size = build_tcp_packet(data_buf, bufsize, sock->local_port, sock->remote_port ,
 			sock->seq_num, /*ack*/ sock->ack_num, flags, SEND_WINDOW_SIZE, &packet);
 
-	nlog(MSG_LOG,"tcp_sendto", "now have a packet of size %d ready to be sent", packet_size);
+	nlog(MSG_LOG,"tcp_sendto", "now have a packet of size %d ready to be sent to dest_port %d", 
+			packet_size, sock->remote_port);
+
+
+	uint16_t dport = get_destport(packet);
+	nlog(MSG_LOG,"tcp_sendto", "from build_tcp_packet, dport=%d (should be %d)", dport, sock->remote_port);
 
 	// put our tcp packet in an IP packet. woot!
 	//int ip_packet_size = buildPacket(sock->local_node, packet, packet_size, sock->remote_node, &ippacket, PROTO_TCP);
@@ -70,7 +75,7 @@ int build_tcp_packet(char *data, int data_size,
 		uint32_t seq_num, uint32_t ack_num,
 		uint8_t flags, uint16_t window, char **header) {
 
-	int total_packet_length = data_size + 20; // fixed header size of 20 bytes
+	int total_packet_length = data_size + TCP_HEADER_SIZE; // fixed header size of 20 bytes
 	
 	*header = malloc(total_packet_length);
 	memset(*header, 0, total_packet_length); // zero out everything
@@ -85,12 +90,15 @@ int build_tcp_packet(char *data, int data_size,
 	set_flags(*header, flags);
 	set_window(*header, window);
 
+	uint16_t dest_port2 = get_destport(*header);
+	nlog(MSG_LOG, "build_tcp_packet", "dest_port readback: %d (should be %d)", dest_port2, dest_port);
+
 	// memcpy the data into the packet, if there is any
-	if (data) memcpy(*header+20,data,data_size);
+	if (data) memcpy(*header+TCP_HEADER_SIZE,data,data_size);
 
 	// TODO set checksum
 
-	return 0;
+	return data_size + TCP_HEADER_SIZE;
 }
 
 /* destroy global tcp structures.
