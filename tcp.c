@@ -75,6 +75,9 @@ int build_tcp_packet(char *data, int data_size,
 	*header = malloc(total_packet_length);
 	memset(*header, 0, total_packet_length); // zero out everything
 
+  nlog(MSG_LOG, "build_tcp_packet", "src_port = %d, dest_port = %d, seq_num = %d, ack_num = %d, flags = %d, window = %d, len = %d",
+    source_port, dest_port, seq_num, ack_num, flags, window, data_size);
+
 	set_srcport(*header, source_port);
 	set_destport(*header, dest_port);
 	set_seqnum(*header, seq_num);

@@ -71,7 +71,7 @@ tcp_socket_t *socktable_get(socktable_t *st, int lnode, short lport, int rnode, 
   socksplit_t *rsplit;
   tcp_socket_t *result = NULL;
 
-  /* Perform four constant time lookups. */
+  /* Perform lookups. */
   if((lport_h = htable_get(&st->root, lnode))) {
     if((rsplit = htable_get(lport_h, lport))) {
       if(!full) {
@@ -153,13 +153,13 @@ void socktable_dump(socktable_t *st, uint8_t full) {
 
   if(full) {
     socktable_full_iterate_begin(st, sock) {
-      nlog(MSG_LOG, "socket_dump", "Full Socket [lnode = %d, lport = %d, rnode = %d, rport = %d]\n",
+      nlog(MSG_LOG, "socket_dump", "Full Socket [lnode = %d, lport = %d, rnode = %d, rport = %d]",
         sock->local_node->van_node->vn_num, sock->local_port, sock->remote_node, sock->remote_port);
     } socktable_full_iterate_end();
   } else {
     socktable_half_iterate_begin(st, sock) {
-      nlog(MSG_LOG, "socket_dump", "Half Socket [lnode = %d, lport = %d, rnode = %d, rport = %d]\n",
-        sock->local_node->van_node->vn_num, sock->local_port, sock->remote_node, sock->remote_port);
+      nlog(MSG_LOG, "socket_dump", "Half Socket [lnode = %d, lport = %d]",
+        sock->local_node->van_node->vn_num, sock->local_port);
     } socktable_half_iterate_end();
   }
 }
