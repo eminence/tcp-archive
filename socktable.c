@@ -6,6 +6,7 @@
 #include "socktable.h"
 #include "tcp.h"
 #include "tcppacket.h"
+#include "fancy_display.h"
 
 htable_t* alloc_htable() {
   htable_t* result = malloc(sizeof(htable_t));
@@ -53,10 +54,6 @@ void socktable_destroy(socktable_t *st) {
         free(rsplit->full);
       }
       
-      if(rsplit->half) {
-        free(rsplit->half);
-      }
-
       free(rsplit);
     } htable_iterate_end();
     /* Destroy local port htable. */
@@ -94,12 +91,12 @@ tcp_socket_t *socktable_put(socktable_t *st, tcp_socket_t *data, uint8_t full) {
   int fresh = 0;
 
   /* (Possibly) create all hash tables along path to socket. */
-  if((lport_h = htable_get(&st->root, data->local_node->van_node->vn_num)) == NULL) {
+  if(!(lport_h = htable_get(&st->root, data->local_node->van_node->vn_num))) {
     htable_put(&st->root, data->local_node->van_node->vn_num, lport_h = alloc_htable());
     fresh = 1;
   }
 
-  if(fresh || (rsplit = htable_get(lport_h, data->local_port))) {
+  if(fresh || !(rsplit = htable_get(lport_h, data->local_port))) {
     void* rval = htable_put(lport_h, data->local_port, rsplit = alloc_ssplit(full ? NULL : data));
     fresh = 1;
 
@@ -108,7 +105,12 @@ tcp_socket_t *socktable_put(socktable_t *st, tcp_socket_t *data, uint8_t full) {
     }
   }
 
-  if(fresh || (rport_h = htable_get(rsplit->full, data->remote_node))) {
+  if(!rsplit->full) {
+    rsplit->full = alloc_htable();
+    fresh = 1;
+  }
+
+  if(fresh || !(rport_h = htable_get(rsplit->full, data->remote_node))) {
     htable_put(rsplit->full, data->remote_node, rport_h = alloc_htable());
   }
 
@@ -140,7 +142,7 @@ tcp_socket_t *socktable_promote(socktable_t *st, tcp_socket_t *data) {
   tcp_socket_t *result = NULL;
 
   if(socktable_remove(st, data->local_node->van_node->vn_num, data->local_port, data->remote_node, data->remote_port, 0)) {
-    result = socktable_put(st, data, 1);
+    result = socktable_put(st, data, FULL_SOCKET);
   }
 
   return result;
@@ -149,8 +151,15 @@ tcp_socket_t *socktable_promote(socktable_t *st, tcp_socket_t *data) {
 void socktable_dump(socktable_t *st, uint8_t full) {
   tcp_socket_t* sock;
 
-  socktable_iterate_begin(st, sock, full) {
-    printf("%s Socket [lnode = %d, lport = %d, rnode = %d, rport = %d]\n",
-      full ? "Full" : "Half", sock->local_node->van_node->vn_num, sock->local_port, sock->remote_node, sock->remote_port);
-  } socktable_iterate_end();
+  if(full) {
+    socktable_full_iterate_begin(st, sock) {
+      nlog(MSG_LOG, "socket_dump", "Full Socket [lnode = %d, lport = %d, rnode = %d, rport = %d]\n",
+        sock->local_node->van_node->vn_num, sock->local_port, sock->remote_node, sock->remote_port);
+    } socktable_full_iterate_end();
+  } else {
+    socktable_half_iterate_begin(st, sock) {
+      nlog(MSG_LOG, "socket_dump", "Half Socket [lnode = %d, lport = %d, rnode = %d, rport = %d]\n",
+        sock->local_node->van_node->vn_num, sock->local_port, sock->remote_node, sock->remote_port);
+    } socktable_half_iterate_end();
+  }
 }

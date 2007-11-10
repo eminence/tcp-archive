@@ -956,94 +956,126 @@ int add_route(ip_node_t *node, int addr, int iface, int cost, int next_hop) {
   return 0;
 }
 
+void init_st(tcp_socket_t* thing, int ln, short lp, int rn, short rp) {
+  thing->local_node = malloc(sizeof(ip_node_t));
+  thing->local_node->van_node = malloc(sizeof(van_node_t));
+  thing->local_node->van_node->vn_num = ln;
 
-
-int main( int argc, char* argv[] ) {
-    van_node_t *vn;
-    int i = 0, in, len;
-    char buf[ 256 ];
-    vanaddr_t va;
-
-    if( argc != 3 ) {
-        printf("usage: %s node_num netconfig\n",argv[0]);
-        return -1;
-    }
-
-    if( van_init( argv[ 2 ] ) ) {
-        fprintf( stderr, "doh: van_init\n" );
-        exit( 1 );
-    }
-    
-    if( !( vn = van_node_get( atoi( argv[ 1 ] ) ) ) ) {
-        fprintf( stderr, "doh: van_node_get\n" );
-        exit( 1 );
-    }
-
-    printf( "Node %i all set [ CTL-D to exit ]\n", atoi( argv[ 1 ] ) );
-
-    while( i != 9 ) {
-		int err;
-	    printf( "Command: " );
-
-		fflush(stdout);
-		memset(buf,0,80);
-		err = read(STDIN_FILENO, buf, 80);
-		if( err <= 0 ) { printf("\n"); break; }
-		buf[79] = 0;
-
-		sscanf(buf, "%d", &i);
-
-	    switch( i ) {
-	    case 0:
-            /* read */
-
-            printf( "Interface: " );
-			fflush(stdout);
-			memset(buf,0,80);
-			read(STDIN_FILENO, buf, 80);
-			buf[79] = 0;
-
-			sscanf(buf, "%d", &in);
-
-            if( ( len = van_node_recv( vn, in, buf, 255, 0, &va ) ) > 0 ) {
-                buf[ len ] = 0;
-                printf( "-- Received --\n"
-                        "  Interface: %d\n"
-                        "  Type: %s\n"
-                        "  Size: %d\n"
-                        "  Data: %s\n",
-                        in, types[ va.va_type ], len, buf );
-            }
-            else
-        		printf( "van_recv_error (%d): %s\n", len, strerror( -len ) );
-
-            break;
-
-        case 1:
-            /* write */
-
-            printf( "Interface: " );
-            scanf( "%d", &in );
-
-            /* make sure we're sending to an address of the
-             * proper type */
-            van_node_getifopt( vn, in, VAN_IO_IFTYPE, (char*) &va.va_type,
-                sizeof( int ) );
-
-            printf( "Message: " );
-            scanf( "%s", buf );
-			len = van_node_send( vn, in, buf, strlen( buf ), 0, &va );
-			if( len > 0 )
-                printf( "send success\n" );
-            else
-        		printf( "van_send_error (%d): %s\n", len, strerror( -len ) );
-
-            break;
-        }
-    }
-
-    /* van_destroy is implicitly called here via an at_exit() handler ...
-     * this also takes care of van_node_put()'ing all relevant van_node_t's */
-
-    return 0;
+  thing->local_port = lp;
+  thing->remote_node = rn;
+  thing->remote_port = rp;
 }
+
+int main(int argc, char** argv) {
+  socktable_t table;
+  tcp_socket_t a, b, c;
+
+  init_st(&a, 1, 2, 3, 4);
+  init_st(&b, 10, 20, 30, 40);
+  init_st(&c, 100, 200, 300, 400);
+
+  socktable_init(&table);
+  socktable_put(&table, &a, HALF_SOCKET);
+  socktable_put(&table, &b, HALF_SOCKET);
+  socktable_put(&table, &c, HALF_SOCKET);
+  socktable_put(&table, &a, FULL_SOCKET);
+  socktable_put(&table, &b, FULL_SOCKET);
+  socktable_promote(&table, &a);
+  socktable_promote(&table, &c);
+  //assert(socktable_remove(&table, a.local_node->van_node->vn_num, a.local_port, a.remote_node, a.remote_port, HALF_SOCKET));
+  //assert(socktable_remove(&table, a.local_node->van_node->vn_num, a.local_port, a.remote_node, a.remote_port, FULL_SOCKET));
+  socktable_dump(&table, FULL_SOCKET);
+  socktable_dump(&table, HALF_SOCKET);
+  socktable_destroy(&table);
+}
+
+//
+//int main( int argc, char* argv[] ) {
+//    van_node_t *vn;
+//    int i = 0, in, len;
+//    char buf[ 256 ];
+//    vanaddr_t va;
+//
+//    if( argc != 3 ) {
+//        printf("usage: %s node_num netconfig\n",argv[0]);
+//        return -1;
+//    }
+//
+//    if( van_init( argv[ 2 ] ) ) {
+//        fprintf( stderr, "doh: van_init\n" );
+//        exit( 1 );
+//    }
+//    
+//    if( !( vn = van_node_get( atoi( argv[ 1 ] ) ) ) ) {
+//        fprintf( stderr, "doh: van_node_get\n" );
+//        exit( 1 );
+//    }
+//
+//    printf( "Node %i all set [ CTL-D to exit ]\n", atoi( argv[ 1 ] ) );
+//
+//    while( i != 9 ) {
+//		int err;
+//	    printf( "Command: " );
+//
+//		fflush(stdout);
+//		memset(buf,0,80);
+//		err = read(STDIN_FILENO, buf, 80);
+//		if( err <= 0 ) { printf("\n"); break; }
+//		buf[79] = 0;
+//
+//		sscanf(buf, "%d", &i);
+//
+//	    switch( i ) {
+//	    case 0:
+//            /* read */
+//
+//            printf( "Interface: " );
+//			fflush(stdout);
+//			memset(buf,0,80);
+//			read(STDIN_FILENO, buf, 80);
+//			buf[79] = 0;
+//
+//			sscanf(buf, "%d", &in);
+//
+//            if( ( len = van_node_recv( vn, in, buf, 255, 0, &va ) ) > 0 ) {
+//                buf[ len ] = 0;
+//                printf( "-- Received --\n"
+//                        "  Interface: %d\n"
+//                        "  Type: %s\n"
+//                        "  Size: %d\n"
+//                        "  Data: %s\n",
+//                        in, types[ va.va_type ], len, buf );
+//            }
+//            else
+//        		printf( "van_recv_error (%d): %s\n", len, strerror( -len ) );
+//
+//            break;
+//
+//        case 1:
+//            /* write */
+//
+//            printf( "Interface: " );
+//            scanf( "%d", &in );
+//
+//            /* make sure we're sending to an address of the
+//             * proper type */
+//            van_node_getifopt( vn, in, VAN_IO_IFTYPE, (char*) &va.va_type,
+//                sizeof( int ) );
+//
+//            printf( "Message: " );
+//            scanf( "%s", buf );
+//			len = van_node_send( vn, in, buf, strlen( buf ), 0, &va );
+//			if( len > 0 )
+//                printf( "send success\n" );
+//            else
+//        		printf( "van_send_error (%d): %s\n", len, strerror( -len ) );
+//
+//            break;
+//        }
+//    }
+//
+//    /* van_destroy is implicitly called here via an at_exit() handler ...
+//     * this also takes care of van_node_put()'ing all relevant van_node_t's */
+//
+//    return 0;
+//}

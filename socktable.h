@@ -28,23 +28,36 @@ struct tcp_socket__ *socktable_put(socktable_t *st, struct tcp_socket__ *data, u
 struct tcp_socket__ *socktable_remove(socktable_t *st, int lnode, short lport, int rnode, short rport, uint8_t full);
 struct tcp_socket__ *socktable_promote(socktable_t *st, struct tcp_socket__ *data);
 
-#define socktable_iterate_begin(st, var, full) \
+#define socktable_full_iterate_begin(st, var) \
 do { \
   htable_t *__st_lph, *__st_rph; \
   socksplit_t *__st_rns; \
   htable_iterate_begin(&st->root, __st_lph, htable_t) { \
     htable_iterate_begin(__st_lph, __st_rns, socksplit_t) { \
-      if(!full) { \
-        var = (struct tcp_socket__*)__st_rns->half; \
+      if(!__st_rns->full) { \
         continue; \
-      } else if(__st_rns->full) { \
-        htable_iterate_begin(__st_rns->full, __st_rph, htable_t) { \
-          htable_iterate_begin(__st_rph, var, struct tcp_socket__) {
+      } \
+      htable_iterate_begin(__st_rns->full, __st_rph, htable_t) { \
+        htable_iterate_begin(__st_rph, var, struct tcp_socket__) {
 
-#define socktable_iterate_end() \
-          } htable_iterate_end(); \
+#define socktable_full_iterate_end() \
         } htable_iterate_end(); \
-      } /* handle half socket */ \
+      } htable_iterate_end(); \
+    } htable_iterate_end(); \
+  } htable_iterate_end(); \
+} while(0)
+
+#define socktable_half_iterate_begin(st, var) \
+do { \
+  htable_t *__st_lph, *__st_rph; \
+  socksplit_t *__st_rns; \
+  htable_iterate_begin(&st->root, __st_lph, htable_t) { \
+    htable_iterate_begin(__st_lph, __st_rns, socksplit_t) { \
+      if(!(var = (struct tcp_socket__*)__st_rns->half)) { \
+        continue; \
+      } \
+  
+#define socktable_half_iterate_end() \
     } htable_iterate_end(); \
   } htable_iterate_end(); \
 } while(0)
