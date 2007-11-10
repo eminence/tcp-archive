@@ -87,9 +87,10 @@ int tcpm_event(tcp_machine_t* machine, tinput_t event, void* argt, void* args) {
 int tcpm_packet_to_input(const char* packet) {
   /* State machine does not handle non-empty packets. */
   if(get_data_len(packet) != 0) {
+    nlog(MSG_ERROR, "tcpm_packet_to_input", "packet length must be zero (got %d)", get_data_len(packet));
     return ON_INVALID;
   }
-
+  
   /* Directly convert each symbol. */
   switch(get_flags(packet)) {
     case TCP_FLAG_ACK:
@@ -105,6 +106,7 @@ int tcpm_packet_to_input(const char* packet) {
     case TCP_FLAG_FIN | TCP_FLAG_ACK:
       return ON_RECV_FIN_ACK;
     default:
+      nlog(MSG_ERROR, "tcpm_packet_to_input", "Invalid flags: %d", get_flags(packet));
       return ON_INVALID;
   }
 }
