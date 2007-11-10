@@ -44,6 +44,7 @@ state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args)
 
   /* Invalid machine. */
   if(!machine->current) {
+    nlog(MSG_ERROR, "machine_step", "machine not defined");
     return NULL;
   }
 
@@ -53,6 +54,8 @@ state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args)
     if(machine->current->error) {
       machine->current->error(machine->current->id, machine->context, args);
     }
+
+    nlog(MSG_ERROR, "machine_step", "invalid input (%d)", input);
 
     return NULL;
   }
@@ -65,6 +68,8 @@ state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args)
       if(machine->current->error) {
         machine->current->error(machine->current->id, machine->context, args);
       }
+    
+      nlog(MSG_ERROR, "machine_step", "Transition function returned 0");
 
       return NULL;
     }
