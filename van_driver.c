@@ -87,7 +87,7 @@ void print_packet (char *buf, int len) {
  
   *(buffer + cnt) = '\0';
 
-  nlog(MSG_LOG, 'print_packet', buffer);
+  nlog(MSG_LOG, "print_packet", buffer);
 }
 
 /*
