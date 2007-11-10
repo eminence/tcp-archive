@@ -66,7 +66,7 @@ void socktable_destroy(socktable_t *st) {
   htable_destroy(&st->root);
 }
 
-tcp_socket_t *socktable_get(socktable_t *st, int lnode, unsigned short lport, int rnode, unsigned short rport, uint8_t full) {
+tcp_socket_t *socktable_get(socktable_t *st, int lnode, uint16_t lport, int rnode, uint16_t rport, uint8_t full) {
   htable_t *lport_h, *rport_h;
   socksplit_t *rsplit;
   tcp_socket_t *result = NULL;
@@ -117,7 +117,7 @@ tcp_socket_t *socktable_put(socktable_t *st, tcp_socket_t *data, uint8_t full) {
   return htable_put(rport_h, data->remote_port, data);
 }
 
-tcp_socket_t *socktable_remove(socktable_t *st, int lnode, unsigned short lport, int rnode, unsigned short rport, uint8_t full) {
+tcp_socket_t *socktable_remove(socktable_t *st, int lnode, uint16_t lport, int rnode, uint16_t rport, uint8_t full) {
   htable_t *lport_h, *rport_h;
   socksplit_t *rsplit;
 

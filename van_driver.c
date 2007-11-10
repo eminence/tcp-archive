@@ -422,7 +422,7 @@ void *listener (void *arg) {
 	unsigned int src;
 	unsigned int ttl;
 	unsigned int proto; 
-	unsigned short total_length;
+	uint16_t total_length;
 
 	assert(node);
 
@@ -956,7 +956,7 @@ int add_route(ip_node_t *node, int addr, int iface, int cost, int next_hop) {
   return 0;
 }
 
-void init_st(tcp_socket_t* thing, int ln, unsigned short lp, int rn, unsigned short rp) {
+void init_st(tcp_socket_t* thing, int ln, uint16_t lp, int rn, uint16_t rp) {
   thing->local_node = malloc(sizeof(ip_node_t));
   thing->local_node->van_node = malloc(sizeof(van_node_t));
   thing->local_node->van_node->vn_num = ln;

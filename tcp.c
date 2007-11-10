@@ -148,9 +148,9 @@ int v_socket() {
 
 /* binds a socket to a port
  * returns 0 on success or negative number on failure */
-int v_bind(int socket, int node, unsigned short port) {
+int v_bind(int socket, int node, uint16_t port) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
-  unsigned short old_port;
+  uint16_t old_port;
   
 	assert(sock->machine);
 	if (tcpm_state(sock->machine) == ST_CLOSED) {
@@ -182,7 +182,7 @@ int v_listen(int socket, int backlog /* optional */) {
 
 /* connects a socket to an address
  * returns 0 on success of a negative number on failure */
-int v_connect(int socket, int node, unsigned short port) {
+int v_connect(int socket, int node, uint16_t port) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
 
 	// TODO make sure we can call connect

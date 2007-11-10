@@ -23,9 +23,9 @@ void socktable_init(socktable_t *st);
 void socktable_destroy(socktable_t *st);
 void socktable_dump(socktable_t *st, uint8_t full);
 
-struct tcp_socket__ *socktable_get(socktable_t *st, int lnode, unsigned short lport, int rnode, unsigned short rport, uint8_t full);
+struct tcp_socket__ *socktable_get(socktable_t *st, int lnode, uint16_t lport, int rnode, uint16_t rport, uint8_t full);
 struct tcp_socket__ *socktable_put(socktable_t *st, struct tcp_socket__ *data, uint8_t full);
-struct tcp_socket__ *socktable_remove(socktable_t *st, int lnode, unsigned short lport, int rnode, unsigned short rport, uint8_t full);
+struct tcp_socket__ *socktable_remove(socktable_t *st, int lnode, uint16_t lport, int rnode, uint16_t rport, uint8_t full);
 struct tcp_socket__ *socktable_promote(socktable_t *st, struct tcp_socket__ *data);
 
 #define socktable_full_iterate_begin(st, var) \
