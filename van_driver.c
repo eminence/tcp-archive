@@ -132,11 +132,15 @@ void *tcp_thread(void* arg) {
 		dest = get_dst(packet);
 		flags = get_flags(ip_to_tcp(packet));
 
+		nlog(MSG_LOG, "tcp", "source = %d, dest = %d, src_port = %d, dest_port = %d, flags = %s%s%s%s , window = %d, len = %d",
+			src, dest, src_port, dest_port, flags & TCP_FLAG_SYN ? " SYN" : "", flags & TCP_FLAG_ACK ? " ACK" : "", flags & TCP_FLAG_RST ? " RST" : "", flags & TCP_FLAG_FIN ? " FIN" : "");
+
+
 		tcp_socket_t *sock = socktable_get(node->tuple_table, dest, dest_port, src, src_port, FULL_SOCKET);
 		nlog(MSG_LOG,"tcp_thread", "dest=%d, dest_port=%d, src=%d, src_port=%d flags=%d", dest, dest_port, src, src_port, flags);
-		nlog(MSG_LOG,"tcp_thread", "about to dump socktable in tcp_thread");
-		socktable_dump(node->tuple_table, FULL_SOCKET);      
-		socktable_dump(node->tuple_table, HALF_SOCKET);
+		//nlog(MSG_LOG,"tcp_thread", "about to dump socktable in tcp_thread");
+		//socktable_dump(node->tuple_table, FULL_SOCKET);      
+		//socktable_dump(node->tuple_table, HALF_SOCKET);
 
 		/* If no match, may still be valid; ensure socket not listening on requested port. */
 		if (sock == NULL) {
@@ -150,6 +154,14 @@ void *tcp_thread(void* arg) {
 
 				continue;
 			} 
+		
+			/* Found half-socket. */
+			/* TODO: THIS IS WRONG!! AFTER FINDING HALF SOCK, NEED TO SLEEP UNTIL ACCEPT IS CALLED (IF IT HASNT ALREADY BEEN CALLED.*/
+			sock->remote_port = src_port;
+			sock->remote_node = src;
+
+			socktable_promote(node->tuple_table, sock);
+
 		}
 
 		/* If we're in the established state, perform primary communication; else, handshake*/
@@ -169,7 +181,7 @@ void *tcp_thread(void* arg) {
         /* TODO reset connection */
       }
 
-			nlog(MSG_LOG, "tcp_thread", "Socket not in established state; stepping state machine.");
+		nlog(MSG_LOG, "tcp_thread", "Socket not in established state; stepping state machine.");
 
       /* Step state machine (and perform needed action.) */
       if(tcpm_event(sock->machine, tcpm_packet_to_input(ip_to_tcp(packet)),NULL,NULL)) {

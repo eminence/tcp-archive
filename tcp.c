@@ -52,8 +52,14 @@ int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) 
 		return -1;
 	}
 
+	/* TODO move this special case code somewhere else
+	 * or clean up
+	 * or make it not suck so much
+	 */
 	if ((flags & TCP_FLAG_SYN) == TCP_FLAG_SYN) {
 		sock->seq_num++; /* increase seq num by one */
+	} else if ((flags & TCP_FLAG_ACK) == TCP_FLAG_ACK) {
+		sock->seq_num++;
 	} else if ((flags & TCP_FLAG_FIN) == TCP_FLAG_FIN) {
 		sock->seq_num++;
 	} else {
@@ -80,8 +86,8 @@ int build_tcp_packet(char *data, int data_size,
 	*header = malloc(total_packet_length);
 	memset(*header, 0, total_packet_length); // zero out everything
 
-  nlog(MSG_LOG, "build_tcp_packet", "src_port = %d, dest_port = %d, seq_num = %d, ack_num = %d, flags = %d, window = %d, len = %d",
-    source_port, dest_port, seq_num, ack_num, flags, window, data_size);
+  nlog(MSG_LOG, "build_tcp_packet", "src_port = %d, dest_port = %d, seq_num = %d, ack_num = %d, flags = %s%s%s%s , window = %d, len = %d",
+    source_port, dest_port, seq_num, ack_num, flags & TCP_FLAG_SYN ? " SYN" : "", flags & TCP_FLAG_ACK ? " ACK" : "", flags & TCP_FLAG_RST ? " RST" : "", flags & TCP_FLAG_FIN ? " FIN" : "", window, data_size);
 
 	set_srcport(*header, source_port);
 	set_destport(*header, dest_port);
