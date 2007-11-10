@@ -103,7 +103,7 @@ tcp_socket_t *socktable_put(socktable_t *st, tcp_socket_t *data, uint8_t full) {
     void* rval = htable_put(lport_h, data->local_port, rsplit = alloc_ssplit(full ? NULL : data));
     fresh = 1;
 
-    if(full) {
+    if(!full) {
       return rval;
     }
   }
