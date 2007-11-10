@@ -188,8 +188,8 @@ int v_connect(int socket, int node, short port) {
 	sock->seq_num = 100; /* an arbitrary inital seq number. TODO make this random */ 
 	sock->ack_num = 0;
 
-  /* Update tuple table. */
-  socktable_put(this_node->tuple_table, sock);
+  /* Update tuple table with FULL socket. */
+  socktable_put(this_node->tuple_table, sock, FULL_SOCKET);
 
 	assert(sock->machine);
 	if (tcpm_event(sock->machine, ON_ACTIVE_OPEN, NULL, NULL)) {

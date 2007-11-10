@@ -130,7 +130,7 @@ void *tcp_thread(void* arg) {
 		src = get_src(packet);
 		dest = get_dst(packet);
 
-		tcp_socket_t *sock = socktable_get(node->tuple_table, dest, dest_port, src, src_port);
+		tcp_socket_t *sock = socktable_get(node->tuple_table, dest, dest_port, src, src_port, FULL_SOCKET);
 
     /* If no match, may still be valid; ensure socket not listening on requested port. */
 		if (sock == NULL) {
