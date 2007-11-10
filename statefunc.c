@@ -42,7 +42,7 @@ void fail_in_estab() {
 
 }
 
-int has_status(int bit, int bits) {
+int has_status(int bits, int bit) {
 	return (bits & bit) == bit;
 }
 
@@ -52,7 +52,9 @@ int wait_for_event(tcp_socket_t *sock, int status_bits) {
 	pthread_mutex_lock(&sock->lock);
 
 	while (!(has_status(status_bits, sock->cond_status))) {
+		nlog(MSG_LOG,"wait_for_event", "sleeping on cond var");
 		pthread_cond_wait(&sock->cond, &sock->lock);
+		nlog(MSG_LOG,"wait_for_event", "cond var woke me up");
 
 	}
 	pthread_mutex_unlock(&sock->lock);
@@ -60,9 +62,11 @@ int wait_for_event(tcp_socket_t *sock, int status_bits) {
 }
 
 void notify(tcp_socket_t *sock, int status) {
-	
+
+	nlog(MSG_LOG,"notify", "attempting to get socket lock");
 	pthread_mutex_lock(&sock->lock);
 	sock->cond_status = status;
+	nlog(MSG_LOG,"notify", "calling pthread_cond_signal");
 	pthread_cond_signal(&sock->cond);
 	pthread_mutex_unlock(&sock->lock);
 
@@ -73,7 +77,7 @@ void in_estab(sid_t s, void *context, void *argA, void *argB) {
 	assert(sock);
 
 
-	nlog(MSG_LOG,"state:in_estab", "We're not in the established state.  Attempted to notify the user");
+	nlog(MSG_LOG,"state:in_estab", "We're now in the established state.  Attempted to notify the user");
 
 	notify(sock,TCP_OK);
 

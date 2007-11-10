@@ -126,6 +126,8 @@ void v_tcp_init(ip_node_t *node) {
 
 	node->tuple_table = malloc(sizeof(socktable_t));
 	socktable_init(node->tuple_table);
+
+
 }
 
 /* returns a new unbound socket.
@@ -156,6 +158,9 @@ int v_socket() {
 	sock->local_node = this_node;
 
 	tcp_table_new(this_node, s);	
+
+	pthread_cond_init(&sock->cond, NULL);
+	pthread_mutex_init(&sock->lock, NULL);
 
 	return s;
 }
@@ -216,9 +221,6 @@ int v_connect(int socket, int node, uint16_t port) {
 		nlog(MSG_ERROR,"socket:connect","Uhh. error. Couldn't transition states.  noob");
 		return -1;
 	}
-
-	// TODO wait until we get into the ESTAB state 
-	// OR return -1 if we never get there
 
 	int status = wait_for_event(sock,TCP_OK | TCP_CONNECT_FAILED);
 
