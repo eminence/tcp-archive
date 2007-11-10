@@ -106,7 +106,7 @@ int tcpm_packet_to_input(const char* packet) {
     case TCP_FLAG_FIN | TCP_FLAG_ACK:
       return ON_RECV_FIN_ACK;
     default:
-      nlog(MSG_ERROR, "tcpm_packet_to_input", "Invalid flags: %d", get_flags(packet));
+      nlog(MSG_ERROR, "tcpm_packet_to_input", "invalid flags: %d", get_flags(packet));
       return ON_INVALID;
   }
 }
