@@ -29,7 +29,7 @@ int do_listen(sid_t prev, sid_t next, void* context, void *arg, void *tran_arg) 
 	ip_node_t *node = (ip_node_t*)tran_arg;
 	assert(node);
 
-	assert(socktable_put(node->tuple_table, sock, HALF_SOCKET) != NULL);
+	socktable_put(node->tuple_table, sock, HALF_SOCKET);
 
 	return 0;
 }
