@@ -84,7 +84,7 @@ int main( int argc, char* argv[] ) {
 			case 'b':
 				{
 					int socket, node;
-					short port;
+					unsigned short port;
 					socket = get_fd_from_menu();
 					if (socket == -1) {
 						display_msg("Please select/create a socket first!"); break;
@@ -115,7 +115,7 @@ int main( int argc, char* argv[] ) {
 			case 'c': /* connect! */
 				{
 					int socket, node;
-					short port;
+					unsigned short port;
 					socket = get_fd_from_menu();
 					if (socket == -1) {
 						display_msg("Please select/create a socket first!"); break;

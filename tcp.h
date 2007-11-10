@@ -18,9 +18,9 @@ typedef struct tcp_socket__ {
 
 	/* Socket identifiers. */
 	struct ip_node__ *local_node;
-	short local_port;
+	unsigned short local_port;
 	int remote_node;
-	short remote_port;
+	unsigned short remote_port;
 
 	pthread_cond_t cond;
 	pthread_mutex_t lock;
@@ -31,9 +31,9 @@ typedef struct tcp_socket__ {
 void v_tcp_init();
 void v_tcp_destroy();
 int v_socket();
-int v_bind(int socket, int node, short port);
+int v_bind(int socket, int node, unsigned short port);
 int v_listen(int socket, int backlog /* optional */);
-int v_connect(int socket, int node, short port);
+int v_connect(int socket, int node, unsigned short port);
 int v_accept(int socket, int *node);
 int v_read(int socket, unsigned char *buf, int nbyte);
 int v_write(int socket, const unsigned char *buf, int nbyte);
