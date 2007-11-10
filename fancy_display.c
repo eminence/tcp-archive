@@ -1,8 +1,11 @@
 #include <assert.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "fancy_display.h"
 
+#include "tcp.h"
+#include "van_driver.h"
 
 static curses_out_t output;
 
@@ -187,6 +190,56 @@ int get_text(char *msg, char* buf, int len) {
 	return 15;
 }
 
+void tcp_table_new(ip_node_t *node, int fd) {
+
+	output.tcp_menu_num_items++;
+	int i, retval;
+	ITEM **new_items;
+
+	// new memory for our new updated list of items
+	unpost_menu(output.tcp_menu);
+	new_items = (ITEM**)calloc(output.tcp_menu_num_items+1,sizeof(ITEM*));
+	for (i = 0; i < output.tcp_menu_num_items - 1; ++i) {
+		/* memcpy old items into new structure */
+		new_items[i] = output.tcp_items[i];
+		//memcpy(new_items[i], output.tcp_items[i], sizeof(ITEM*));
+		//new_items[i] = new_item(item_name(output.tcp_items[i]), item_description(output.tcp_items[i]));
+		//free_item(output.tcp_items[i]);
+	}
+	char *txt = malloc(64);
+	memset(txt,0,64);
+	sprintf(txt,"fd:%d",fd);
+	new_items[output.tcp_menu_num_items-1] = new_item(txt, "This is a new socket");
+	set_item_userptr(new_items[output.tcp_menu_num_items - 1],(void*)node->socket_table[fd]);
+
+	if ((retval = set_menu_items(output.tcp_menu, new_items)) != E_OK) {
+		if (retval == E_SYSTEM_ERROR)	nlog(MSG_WARNING,"tcpmenu","did not sucessfully set new menu items: System Error");
+		if (retval == E_BAD_ARGUMENT)	nlog(MSG_WARNING,"tcpmenu","did not sucessfully set new menu items: Bad Argument");
+		if (retval == E_POSTED)	nlog(MSG_WARNING,"tcpmenu","did not sucessfully set new menu items: Already Posted");
+		if (retval == E_NOT_CONNECTED)	nlog(MSG_WARNING,"tcpmenu","did not sucessfully set new menu items: No items are connect to the menu");
+	}
+	//free (output.tcp_items);
+	output.tcp_items = new_items;
+	post_menu(output.tcp_menu);
+	update_panels(); doupdate();
+}
+
+void update_tcp_table(ip_node_t *node) {
+	assert(node);
+	tcp_socket_t **socket_table = node->socket_table;
+	assert(socket_table);
+	
+	int i;
+	int num_open_sockets = 0;
+	for (i = 0; i < MAXSOCKETS; i++) {
+		if (socket_table[i] != NULL) {
+			num_open_sockets++;
+			//output.tcp_items[i]
+		}
+	}
+
+
+}
 
 
 int get_number(char *msg) {
@@ -281,7 +334,7 @@ int get_number(char *msg) {
 }
 
 void switch_to_tab(int t) {
-		int max_size = 0;
+		unsigned int max_size = 0;
 		int total_tabs = 0;
 		while (output.tabs[total_tabs] != NULL) {
 			if (strlen(output.tabs[total_tabs]) > max_size) {
@@ -322,6 +375,8 @@ void switch_to_tab(int t) {
 			if (i == t) wattroff(output.tab_win, A_BOLD | A_UNDERLINE);
 
 		}
+
+		output.toptab = t;
 }
 
 int init_display(int use_curses) {
@@ -403,6 +458,41 @@ int init_display(int use_curses) {
 		//mvwvline(output.tcp_win,0,0,0,LINES/2 -1-3);
 		mvwprintw(output.tcp_win,0,1,"tcp window");
 
+
+		// test menu stuff:
+
+		char *choices[] = {
+			"Choice 1",
+			"Choice 2",
+			"Choice 3",
+			"Exit",
+			(char*)NULL,
+		};
+
+		int i;
+
+		output.tcp_menu_num_items=0;
+
+		output.tcp_items = (ITEM**)calloc(output.tcp_menu_num_items+1,sizeof(ITEM*));
+		for (i = 0; i < output.tcp_menu_num_items; ++i) {
+			output.tcp_items[i] = new_item(choices[i], "TCP info here... ... ...");
+		}
+
+		output.tcp_menu = new_menu((ITEM **)output.tcp_items);
+
+		/* Create the window to be associated with the menu */
+		keypad(output.tcp_win ,TRUE);
+
+		/* Set main window and sub window */
+		set_menu_win(output.tcp_menu, output.tcp_win);
+		//set_menu_sub(tcp_menu, derwin(tcp_win, 6, 38, 3, 1));
+		set_menu_format(output.tcp_menu, 5, 1);
+
+		/* Set menu mark to the string " * " */
+		set_menu_mark(output.tcp_menu, " > ");
+
+		post_menu(output.tcp_menu);
+
 		refresh();
 		update_panels(); doupdate();
 
@@ -411,6 +501,33 @@ int init_display(int use_curses) {
 	}
 
 	return 0;
+}
+
+int get_fd_from_menu() {
+	tcp_socket_t *sock = (tcp_socket_t*) item_userptr(current_item(output.tcp_menu));
+	if (sock == NULL) return -1; else return sock->fd;
+}
+
+void handle_tcp_menu_input(int c) {
+	if (output.toptab != 1) return; /* ignore if we're not on the tcp tab */
+	switch (c) {
+		case KEY_DOWN:
+			menu_driver(output.tcp_menu, REQ_DOWN_ITEM);
+			break;
+		case KEY_UP:
+			menu_driver(output.tcp_menu, REQ_UP_ITEM);
+			break;
+		case ' ':
+			{
+				tcp_socket_t *sock = (tcp_socket_t*) item_userptr(current_item(output.tcp_menu));
+				if (sock != NULL) {
+					display_msg("You just clicked sock %d", sock->fd);
+				}
+			}
+			break;
+	}
+	update_panels(); doupdate();
+	return;
 }
 
 void show_route_table() {

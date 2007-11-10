@@ -19,6 +19,9 @@ typedef struct {
 
 	WINDOW *tcp_win;
 	PANEL *tcp_pan;
+	ITEM **tcp_items;
+	MENU *tcp_menu;
+	int tcp_menu_num_items;
 
 	WINDOW *tab_win;
 	PANEL *tab_pan;
@@ -33,6 +36,9 @@ typedef struct {
 	PANEL *link_pan;
 
 	char *tabs[3];
+
+	int toptab;
+
 } curses_out_t;
 
 typedef enum {	
@@ -68,5 +74,7 @@ void show_tcp_table();
 void rtable_print( char *text, ...);
 void clear_rtable_display();
 int get_text(char *msg, char* buf, int len);
+void handle_tcp_menu_input(int c);
+int get_fd_from_menu();
 
 #endif

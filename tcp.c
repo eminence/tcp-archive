@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <checksum.h>
+#include <pthread.h>
 
 #include "tcp.h"
 #include "van_driver.h"
@@ -137,6 +138,8 @@ int v_socket() {
 	sock->local_port = rand()%65535;
 	sock->local_node = this_node;
 
+	tcp_table_new(this_node, s);	
+
 	return s;
 }
 
@@ -164,7 +167,7 @@ int v_listen(int socket, int backlog /* optional */) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
 
 	assert(sock->machine);
-	if (tcpm_event(sock->machine, ON_PASSIVE_OPEN, NULL, NULL)) {
+	if (tcpm_event(sock->machine, ON_PASSIVE_OPEN, this_node, NULL)) {
 		nlog(MSG_ERROR,"socket:listen", "Uhh. error.  Couldn't transition states.  noob");
 		return -1;
 
@@ -200,7 +203,10 @@ int v_connect(int socket, int node, short port) {
 	// TODO wait until we get into the ESTAB state 
 	// OR return -1 if we never get there
 
-	return 0;
+	int status = wait_for_event(sock,TCP_OK | TCP_CONNECT_FAILED);
+
+	if (status == TCP_OK) return 0;
+	else { return -1; }
 }
 
 /* accept a requested connection

@@ -1,6 +1,8 @@
 #ifndef __TCP_H_
 #define __TCP_H_
 
+#include <pthread.h>
+
 #include "tcpstate.h"
 #include "van_driver.h"
 
@@ -14,11 +16,16 @@ typedef struct tcp_socket__ {
 	uint32_t seq_num;
 	uint32_t ack_num;
 
-  /* Socket identifiers. */
-  struct ip_node__ *local_node;
+	/* Socket identifiers. */
+	struct ip_node__ *local_node;
 	short local_port;
 	int remote_node;
 	short remote_port;
+
+	pthread_cond_t cond;
+	pthread_mutex_t lock;
+	int cond_status;
+
 } tcp_socket_t;
 
 void v_tcp_init();

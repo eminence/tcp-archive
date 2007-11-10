@@ -21,7 +21,6 @@ int main( int argc, char* argv[] ) {
 	int i = 0,nodenum, in;
 	ip_node_t *node;
 	char buf[ 256 ];
-	int retval;
 	char *data = malloc(1000);
 
 	if( argc != 3 ) {
@@ -41,7 +40,7 @@ int main( int argc, char* argv[] ) {
 
 
 	while( i != 'q' ) {
-		int err, retval;
+		int retval;
 		//printf( "\n0 : Read some data\n");
 		//printf( "1 : Send some data\n");
 		//printf( "2 : Get the status of a link\n");
@@ -72,26 +71,43 @@ int main( int argc, char* argv[] ) {
 
 			case 's': /* new socket */
 				retval = v_socket();
+
 				display_msg("v_socket() returned %d", retval);
+				break;
+
+			case KEY_DOWN:
+			case KEY_UP:
+			case ' ':
+				handle_tcp_menu_input(i);
 				break;
 
 			case 'b':
 				{
 					int socket, node;
 					short port;
-					socket = get_number("Socket to use");
-					node = get_number("enter this node number");
-					port = get_number("Local port to bind to");
-					nlog(MSG_LOG, "socket", "binding socket %d to local port %d", socket, port);
-					retval = v_bind(socket, node, port);
-					display_msg("v_bind() returned %d", retval);
+					socket = get_fd_from_menu();
+					if (socket == -1) {
+						display_msg("Please select/create a socket first!"); break;
+					} else {
+						
+						node = get_number("enter this node number");
+						port = get_number("Local port to bind to");
+						nlog(MSG_LOG, "socket", "binding socket %d to local port %d", socket, port);
+						retval = v_bind(socket, node, port);
+						display_msg("v_bind() returned %d", retval);
+					}
 				}
 				break;
 			case 'l':
 				{
-					int socket = get_number("Socket to listen on");
-					retval = v_listen(socket, 0);
-					display_msg("v_listen() returned %d", retval);
+					int socket = get_fd_from_menu();
+					if (socket == -1) {
+						display_msg("Please select/create a socket first!"); break;
+					} else {
+						display_msg("Using socket %d", socket);
+						retval = v_listen(socket, 0);
+						display_msg("v_listen() returned %d", retval);
+					}
 
 				}
 				break;
@@ -100,13 +116,16 @@ int main( int argc, char* argv[] ) {
 				{
 					int socket, node;
 					short port;
-					socket = get_number("Socket to use");
-					node = get_number("node to connect to");
-					port = get_number("port to connect to");
-					nlog(MSG_LOG,"socket","connecting to %d on port %d with socket %d...", node, port, socket);
-					retval = v_connect(socket, node, port);
-					display_msg("v_connect() returned %d", retval);
-
+					socket = get_fd_from_menu();
+					if (socket == -1) {
+						display_msg("Please select/create a socket first!"); break;
+					} else {
+						node = get_number("node to connect to");
+						port = get_number("port to connect to");
+						nlog(MSG_LOG,"socket","connecting to %d on port %d with socket %d...", node, port, socket);
+						retval = v_connect(socket, node, port);
+						display_msg("v_connect() returned %d", retval);
+					}
 				}
 				break;
 			case '1':
@@ -138,11 +157,6 @@ int main( int argc, char* argv[] ) {
 				in = get_number("Interface:");
 				if (get_if_state(node, in)) set_if_state(node, in, 0);
 				else set_if_state(node, in, 1);
-				break;
-
-			case KEY_UP:
-			case KEY_DOWN:
-				scroll_logwin(i);
 				break;
 		}
 	}

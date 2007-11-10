@@ -113,7 +113,7 @@ int set_if_state(ip_node_t *node, int iface, int link_state) {
 void *tcp_thread(void* arg) {
 	ip_node_t *node = (ip_node_t*)arg;
 	char *packet;
-  uint16_t src_port;
+	uint16_t src_port;
 	uint16_t dest_port;
 	uint8_t src;
 	uint8_t dest;
@@ -132,16 +132,21 @@ void *tcp_thread(void* arg) {
 
 		tcp_socket_t *sock = socktable_get(node->tuple_table, dest, dest_port, src, src_port, FULL_SOCKET);
 
-    /* If no match, may still be valid; ensure socket not listening on requested port. */
+		/* If no match, may still be valid; ensure socket not listening on requested port. */
 		if (sock == NULL) {
-			nlog(MSG_WARNING, "tcp_thread", "We got a tcp packet, but can't figure out what socket this is for.  Discarding");
-			assert(packet);
-			free(packet);
+			nlog(MSG_WARNING, "tcp_thread", "We got a tcp packet, but it doesn't seem to have a full socket associated with it.  Halfchecking...");
 
-      continue;
-		} 
+			tcp_socket_t *sock = socktable_get(node->tuple_table, dest, dest_port, src, src_port, HALF_SOCKET);
+			if (sock == NULL) {
+				nlog(MSG_ERROR,"tcp_thread", "Ok, not a half socket either.  Discarding.");
+				assert(packet);
+				free(packet);
 
-    /* If we're in the established state, perform primary communication; else, handshake*/
+				continue;
+			} 
+		}
+
+		/* If we're in the established state, perform primary communication; else, handshake*/
     if(tcpm_estab(sock->machine)) {
 			nlog(MSG_LOG, "tcp_thread", "Socket in established state; using sliding window protocol.");
       /* TODO */
