@@ -2,8 +2,12 @@
 
 import os,sys
 
+if len(sys.argv) < 3:
+	print "Usage: %s [number of nodes to launch] [network file]" % (sys.argv[0])
+	sys.exit()
+
 tolaunch = int(sys.argv[1])
-for x in range(tolaunch):
-	node = str(x)
-	os.system("xterm -tn xterm-color -T \"Node " + node + "\" -e ./ip_driver " + node + " networks/netconfig-bigp2p &")
+network = sys.argv[2]
+for node in range(tolaunch):
+	os.system('xterm -tn xterm-color -T "Node %d" -e ./ip_driver %d %s &' % (node, node, network))
 
