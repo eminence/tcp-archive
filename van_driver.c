@@ -65,24 +65,29 @@ void bqueue_poorly_implemented_cleanup(bqueue_t* queue) {
  * hex dump of a packet
  */
 void print_packet (char *buf, int len) {
-	int i, j;
+	int i, j, cnt = 0;
+  char buffer[4096];
 
-	printf("\n--\nPacket Dump:\n--\n");
+	cnt += sprintf(buffer + cnt, "\n--\nPacket Dump:\n--\n");
 
 	for (i = 0; i < 32; i++) {
-	printf("%02d ",i);
+	  cnt += sprintf(buffer + cnt, "%02d ",i);
 	}
 	printf("\n\n");
 
 	for (i = 0; i < len; i++) {
 		for (j = 7; j >= 0; j--) {	
 			unsigned char e = buf[i] & (1 << j); //d has the byte value.
-			printf("%X  ", e>0?1:0);
+			cnt += sprintf(buffer + cnt, "%X  ", e>0?1:0);
 		}
-		if ((i+1)%4 == 0) printf("\n");
+		if ((i+1)%4 == 0) cnt += sprintf(buffer + cnt, "\n");
 	}
 
-	printf("\n--\n");
+	cnt += sprintf(buffer + cnt, "\n--");
+ 
+  *(buffer + cnt) = '\0';
+
+  nlog(MSG_LOG, 'print_packet', buffer);
 }
 
 /*
