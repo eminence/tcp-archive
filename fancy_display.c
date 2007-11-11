@@ -1,6 +1,8 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <pthread.h>
+#include <errno.h>
 
 #include "fancy_display.h"
 
@@ -11,6 +13,8 @@
 static curses_out_t output;
 
 void update_link_line(int line, int state) {
+
+	pthread_mutex_lock(&output.lock);
 
 	wmove(output.link_win, 2+line,1);
 	wclrtoeol(output.link_win);
@@ -25,11 +29,13 @@ void update_link_line(int line, int state) {
 		wattron(output.link_win, COLOR_PAIR(LINK_UP_COLOR));
 	}
 	update_panels(); doupdate();
+
+	pthread_mutex_unlock(&output.lock);
 }
 
 void scroll_logwin(int i) {
 	pthread_mutex_lock(&output.lock);
-
+	i++;
 
 	//	switch (i) {
 	//		case KEY_NPAGE:
@@ -49,6 +55,7 @@ void scroll_logwin(int i) {
 }
 
 void nlog_set_menu(const char *msg, ...) {
+
 	va_list args;
 	va_start(args, msg);
 	pthread_mutex_lock(&output.lock);
@@ -91,7 +98,9 @@ void display_msg(char *msg, ...) {
 	
 	move(0,COLS);
 	wmove(my_form_win,0,0);
+	pthread_mutex_lock(&output.lock);
 	update_panels(); doupdate();
+	pthread_mutex_unlock(&output.lock);
 
 	/* Loop through to get user requests */
 	wgetch(my_form_win);
@@ -99,7 +108,9 @@ void display_msg(char *msg, ...) {
 	/* Un post form and free the memory */
 	del_panel(my_form_pan);
 	delwin(my_form_win);
+	pthread_mutex_lock(&output.lock);
 	update_panels(); doupdate();
+	pthread_mutex_unlock(&output.lock);
 	va_end(args);
 }
 
@@ -146,8 +157,10 @@ int get_text(char *msg, char* buf, int len) {
 	mvwprintw(my_form_win, 1,1,msg);
 	//wprintw(my_form_win, 1, 0, cols + 4, "My Form", COLOR_PAIR(1));
 
+	pthread_mutex_lock(&output.lock);
 	post_form(my_form);
 	update_panels(); doupdate();
+	pthread_mutex_unlock(&output.lock);
 
 	/* Loop through to get user requests */
 	while((ch = wgetch(my_form_win)) != '`')
@@ -200,36 +213,32 @@ int get_text(char *msg, char* buf, int len) {
 
 
 void test_tcp_menu_update() {
+	pthread_mutex_lock(&output.lock);
+
 	ITEM *curitem = current_item(output.tcp_menu);
+	tcp_socket_t *sock = (tcp_socket_t*) item_userptr(curitem);
 
 	unpost_menu(output.tcp_menu);
 
-	int i = 0;
-	while (output.tcp_items[i] != NULL) {
-		if (output.tcp_items[i] == curitem) {
-			nlog(MSG_LOG, "test_tcp", "found item %d", i);
-			// update!
-			ITEM *newitem = new_item(item_name(output.tcp_items[i]), "Hello!");
-			int retval = free_item(output.tcp_items[i]);
-			if (retval != E_OK) {
-				if (retval == E_CONNECTED) nlog(MSG_WARNING, "test_tcp_menu", "didn't free_item %s", "already connected");
-				if (retval == E_BAD_ARGUMENT) nlog(MSG_WARNING, "test_tcp_menu", "didn't free_item %s", "bad agument");
-			}
-			output.tcp_items[i] = newitem;
-			break;
+	char *new_text = malloc(128);
+	sprintf(new_text, "State: %s lport:%d rport:%d peer:%d seqnum:%d acknum:%d",
+			tcpm_strstate(tcpm_state(sock->machine)),
+			sock->local_port,
+			sock->remote_port,
+			sock->remote_node,
+			sock->seq_num,
+			sock->ack_num
+			);
 
-		}
-		i++;
-	}
-	//sprintf(new_text, "State: %d",sock)
-
-	//curitem->description.str="new_txt;
-	//curitem->description.length=strlen(new_text);
+	free((void*)curitem->description.str);
+	curitem->description.str=new_text;
+	curitem->description.length=strlen(new_text);
 
 	post_menu(output.tcp_menu);
 
 	redrawwin(output.menu_win);
 	update_panels(); doupdate();
+	pthread_mutex_unlock(&output.lock);
 
 }
 
@@ -238,6 +247,8 @@ void tcp_table_new(ip_node_t *node, int fd) {
 	output.tcp_menu_num_items++;
 	int i, retval;
 	ITEM **new_items;
+
+	pthread_mutex_lock(&output.lock);
 
 	// new memory for our new updated list of items
 	unpost_menu(output.tcp_menu);
@@ -249,30 +260,31 @@ void tcp_table_new(ip_node_t *node, int fd) {
 		//new_items[i] = new_item(item_name(output.tcp_items[i]), item_description(output.tcp_items[i]));
 		//free_item(output.tcp_items[i]);
 	}
-	char *txt = malloc(64);
-	memset(txt,0,64);
+	char *txt = malloc(8);
+	memset(txt,0,8);
 	sprintf(txt,"fd:%d",fd);
-	new_items[output.tcp_menu_num_items-1] = new_item(txt, "This is a new socket");
+	char *desc = malloc(256); /* this will be free()'d when we update the socket desc */
+	strcpy(desc,"This is a new socket                                                                                  ");
+	new_items[output.tcp_menu_num_items-1] = new_item(txt, desc);
 	set_item_userptr(new_items[output.tcp_menu_num_items - 1],(void*)node->socket_table[fd]);
 
 	if ((retval = set_menu_items(output.tcp_menu, new_items)) != E_OK) {
-		if (retval == E_SYSTEM_ERROR)	nlog(MSG_WARNING,"tcpmenu","did not sucessfully set new menu items: System Error");
-		if (retval == E_BAD_ARGUMENT)	nlog(MSG_WARNING,"tcpmenu","did not sucessfully set new menu items: Bad Argument");
-		if (retval == E_POSTED)	nlog(MSG_WARNING,"tcpmenu","did not sucessfully set new menu items: Already Posted");
-		if (retval == E_NOT_CONNECTED)	nlog(MSG_WARNING,"tcpmenu","did not sucessfully set new menu items: No items are connect to the menu");
+		pthread_mutex_unlock(&output.lock);
+			nlog(MSG_ERROR,"tcp_table_new", "Can't update the tcp table with this new socket");
+		pthread_mutex_lock(&output.lock);
 	}
 	//free (output.tcp_items);
 	output.tcp_items = new_items;
 	post_menu(output.tcp_menu);
 	update_panels(); doupdate();
+	pthread_mutex_unlock(&output.lock);
 }
 
 void update_tcp_table(tcp_socket_t *sock) {
 	assert(sock);
 
-	return;
+	pthread_mutex_lock(&output.lock);
 
-	nlog(MSG_LOG,"update_tcp_table", "updating tcp table");
 
 	// find the menu item associtated with this socket:
 	int i = 0;
@@ -280,10 +292,18 @@ void update_tcp_table(tcp_socket_t *sock) {
 		if (item_userptr(output.tcp_items[i]) == (void*)sock) {
 			// update!
 
+			char *new_text = malloc(128);
 
-			char * new_text = malloc(40);
-			sprintf(new_text,"State: %s", tcpm_strstate(tcpm_state(sock->machine)));
+			sprintf(new_text, "State: %s lport:%d rport:%d peer:%d seqnum:%d acknum:%d",
+					tcpm_strstate(tcpm_state(sock->machine)),
+					sock->local_port,
+					sock->remote_port,
+					sock->remote_node,
+					sock->seq_num,
+					sock->ack_num
+					);
 
+			free((void*)output.tcp_items[i]->description.str);
 			output.tcp_items[i]->description.str=new_text;
 			output.tcp_items[i]->description.length=strlen(new_text);
 
@@ -298,6 +318,7 @@ void update_tcp_table(tcp_socket_t *sock) {
 
 	}
 
+	pthread_mutex_unlock(&output.lock);
 
 }
 
@@ -441,6 +462,8 @@ void switch_to_tab(int t) {
 
 int init_display(int use_curses) {
 
+	pthread_mutex_lock(&output.lock);
+
 	output.use_curses = use_curses;
 	pthread_mutex_init(&output.lock,0);
 	output.tabs[0] = "IP";
@@ -562,6 +585,7 @@ int init_display(int use_curses) {
 			
 	}
 
+	pthread_mutex_unlock(&output.lock);
 	return 0;
 }
 

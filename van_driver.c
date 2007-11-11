@@ -120,6 +120,7 @@ void *tcp_watchdog(void *arg) {
 		for (i = 0; i < MAXSOCKETS; i++) {
 			if (node->socket_table[i] == NULL) continue;
 			tcp_socket_t *sock = node->socket_table[i];
+			update_tcp_table(sock);
 			if ((sock->last_packet > 0) && (time(NULL) - sock->last_packet > 4/*XXX*/)) {
 				nlog(MSG_WARNING, "tcp_watchdog", "Watchdog timer on socket %d.  Doing something about it...", sock->fd);
 				
@@ -227,6 +228,7 @@ void *tcp_thread(void* arg) {
 			sock->local_port = old_sock->local_port;
 			sock->remote_port = src_port;
 			sock->remote_node = src;
+			sock->seq_num = 1000;
 
 			socktable_put(node->tuple_table, sock, FULL_SOCKET);
 		}

@@ -12,7 +12,7 @@
 typedef struct {
 
 	int use_curses;
-	pthread_mutex_t lock;
+	pthread_mutex_t lock; /* lock! every function that outputs to the screen should use this */
 
 	WINDOW *rtable_win;
 	PANEL	*rtable_pan;

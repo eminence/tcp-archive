@@ -146,7 +146,11 @@ int sys_socket(int clone) {
 
 	sock->fd = s;
 	sock->local_port = rand()%65535;
+	sock->remote_port = 0;
 	sock->local_node = this_node;
+	sock->remote_node = 0;
+	sock->seq_num = 0;
+	sock->ack_num = 0;
 	sock->can_handshake = 0;
 	sock->parent = NULL;
 	sock->cond_status = 0;

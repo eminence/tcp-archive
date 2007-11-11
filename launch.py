@@ -9,5 +9,5 @@ if len(sys.argv) < 3:
 tolaunch = int(sys.argv[1])
 network = sys.argv[2]
 for node in range(tolaunch):
-	os.system('xterm -tn xterm-color -T "Node %d" -e ./ip_driver %d %s &' % (node, node, network))
+	os.system('xterm -geometry 100x30 -tn xterm-color -T "Node %d" -e ./ip_driver %d %s &' % (node, node, network))
 
