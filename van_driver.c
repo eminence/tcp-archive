@@ -112,6 +112,7 @@ int set_if_state(ip_node_t *node, int iface, int link_state) {
 /* tcp thread */
 void *tcp_thread(void* arg) {
 	ip_node_t *node = (ip_node_t*)arg;
+  tcp_socket_t *new_sock;
 	char *packet;
 	uint16_t src_port;
 	uint16_t dest_port;
@@ -155,14 +156,36 @@ void *tcp_thread(void* arg) {
 
 				continue;
 			} 
+			
+      /* TODO: THIS IS WRONG!! AFTER FINDING HALF SOCK, NEED TO SLEEP UNTIL ACCEPT IS CALLED (IF IT HASNT ALREADY BEEN CALLED.*/
 		
-			/* Found half-socket. */
-			/* TODO: THIS IS WRONG!! AFTER FINDING HALF SOCK, NEED TO SLEEP UNTIL ACCEPT IS CALLED (IF IT HASNT ALREADY BEEN CALLED.*/
-			sock->remote_port = src_port;
-			sock->remote_node = src;
+			/* Found half-socket. Ensure ready for accept. */
+      if(!sock->can_handshake) {
+        nlog(MSG_ERROR, "tcp_thread", "Found a half socket, but socket not in accept state. Discarding.");
+				assert(packet);
+				free(packet);
 
-			socktable_promote(node->tuple_table, sock);
+        continue;
+      }
+  
+      /* Construct new full socket. */
+      sock->new_fd = sys_socket(1);
+      new_sock = get_socket_from_int(sock->new_fd);
+      
+      assert(new_sock);
+      
+      new_sock->local_node = sock->local_node;
+      new_sock->local_port = sock->local_port;
+			new_sock->remote_port = src_port;
+			new_sock->remote_node = src;
 
+			socktable_put(node->tuple_table, new_sock, FULL_SOCKET);
+
+      /* Notify user. */
+      //notify(sock, TCP_NEWSOCKET);
+    
+      /* Continue using the new socket. */
+      sock = new_sock;
 		}
 
 		/* If we're in the established state, perform primary communication; else, handshake*/
@@ -171,17 +194,13 @@ void *tcp_thread(void* arg) {
 
     } else {
       /* Validate sequence numbers. */
-      if(tcpm_firstrecv(sock->machine)) { /* if we're in LISTEN */
-        /* Set initial sequence number. */
-        sock->seq_num = 1000;
-
-      } else if(!tcpm_synsent(sock->machine) && get_seqnum(ip_to_tcp(packet)) != sock->ack_num) {
+      if(!tcpm_synsent(sock->machine) && get_seqnum(ip_to_tcp(packet)) != sock->ack_num) {
 			  nlog(MSG_WARNING, "tcp_thread", "Invalid sequence number!");
         /* TODO reset connection */
       }
     
-      /* Handshake is a magical place where all ack numbers increase by one. */
-      sock->ack_num = get_seqnum(ip_to_tcp(packet)) + 1;
+      /* Handshake is a magical place where all ack numbers increase by one (so long as flags != ACK). */
+      sock->ack_num = get_seqnum(ip_to_tcp(packet)) + (flags != TCP_FLAG_ACK);
 
 		  nlog(MSG_LOG, "tcp_thread", "Socket not in established state; stepping state machine.");
 

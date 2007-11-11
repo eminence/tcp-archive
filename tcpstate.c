@@ -22,13 +22,13 @@ void* alloc_flags(uint8_t flags) {
 }
 
 /* Core functionality. */
-tcp_machine_t* tcpm_new(tcp_socket_t* context) {
+tcp_machine_t* tcpm_new(tcp_socket_t* context, uint8_t clone) {
   tcp_machine_t *machine        = malloc(sizeof(tcp_machine_t));
   state_t       *st_closed      = state_new(ST_CLOSED,      NULL, 		NULL, NULL),
                 *st_syn_sent    = state_new(ST_SYN_SENT,    NULL, 		NULL, NULL),
                 *st_syn_rcvd    = state_new(ST_SYN_RCVD,    NULL, 		NULL, NULL),
                 *st_listen      = state_new(ST_LISTEN,      NULL, 		NULL, NULL),
-                *st_estab       = state_new(ST_ESTAB,       in_estab, 	NULL, NULL),
+                *st_estab       = state_new(ST_ESTAB,       in_estab,	NULL, NULL),
                 *st_fin_wait_1  = state_new(ST_FIN_WAIT1,   NULL, 		NULL, NULL),
                 *st_fin_wait_2  = state_new(ST_FIN_WAIT2,   NULL, 		NULL, NULL),
                 *st_time_wait   = state_new(ST_TIME_WAIT,   NULL, 		NULL, NULL),
@@ -37,7 +37,11 @@ tcp_machine_t* tcpm_new(tcp_socket_t* context) {
                 *st_last_ack    = state_new(ST_LAST_ACK,    NULL, 		NULL, NULL);
   
   /* Initialize state machine. */
-  machine->sm = machine_new(st_closed, context);
+  if(clone) {
+    machine->sm = machine_new(st_listen, context);
+  } else {
+    machine->sm = machine_new(st_closed, context);
+  }
 
   /* Out of memory: just explode. */
   assert(st_closed);

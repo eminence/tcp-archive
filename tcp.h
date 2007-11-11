@@ -42,12 +42,15 @@ int v_read(int socket, unsigned char *buf, int nbyte);
 int v_write(int socket, const unsigned char *buf, int nbyte);
 int v_close(int socket);
 
+int sys_socket(int clone);
+
 int build_tcp_packet(char *data, int data_size, 
 		uint16_t source_port, uint16_t dest_port,
 		uint32_t seq_num, uint32_t ack_num,
 		uint8_t flags, uint16_t window, char **header);
 
 
-int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags, uint8_t normal_seq);
+int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags);
+tcp_socket_t *get_socket_from_int(int s);
 
 #endif

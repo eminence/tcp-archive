@@ -16,11 +16,10 @@ int send_packet_with_flags(sid_t prev, sid_t next, void* context, void *arg, voi
 	nlog(MSG_LOG,"state:SPWF", "in send_packet_with_flags, with socket %d flags are %p", sock->fd, flags);
 
   /* Use special case sequence number increase. */
-	tcp_sendto(sock, NULL, 0, flags, FALSE);
+	tcp_sendto(sock, NULL, 0, flags);
 
 	return 0; // FIXME XXX TODO
 }
-
 
 int do_listen(sid_t prev, sid_t next, void* context, void *arg, void *tran_arg) {
 	tcp_socket_t *sock = (tcp_socket_t*)context;
@@ -47,8 +46,6 @@ int has_status(int bits, int bit) {
 }
 
 int wait_for_event(tcp_socket_t *sock, int status_bits) {	
-
-
 	pthread_mutex_lock(&sock->lock);
 
 	while (!(has_status(status_bits, sock->cond_status))) {

@@ -25,7 +25,7 @@ tcp_socket_t *get_socket_from_int(int s) {
 
 /* master tcp sender function
  */
-int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags, uint8_t normal_seq) {
+int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) {
 	assert(sock);
 
 	char *packet;
@@ -52,13 +52,10 @@ int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags, 
 		return -1;
 	}
 
-	/* Normal sequence number mode simply adds byte-count to seqnum; else, only add one (etc) */
-  if(normal_seq) {
-		assert (bufsize > 0);           /* TODO double check that this assertion is valid */
-		sock->seq_num += bufsize;
-  } else {
-		sock->seq_num++;                /* increase seq num by one */
-	}
+  /* Increase seq_num by buffer size; add 1 for each special flag. */
+  sock->seq_num += bufsize + !!(flags & TCP_FLAG_SYN)
+                           + !!(flags & TCP_FLAG_FIN)
+                           + !!(flags & TCP_FLAG_RST);
 
 	return retval;
 }
@@ -127,9 +124,7 @@ void v_tcp_init(ip_node_t *node) {
 
 }
 
-/* returns a new unbound socket.
- * on failure, returns a negative value */
-int v_socket() {
+int sys_socket(int clone) {
 	int s = -1;
 	tcp_socket_t *sock = NULL;
 
@@ -148,7 +143,7 @@ int v_socket() {
 	assert(sock);
 	this_node->socket_table[s] = sock;
 
-	sock->machine = tcpm_new(sock); 
+	sock->machine = tcpm_new(sock, clone); 
 
 	sock->fd = s;
 	sock->local_port = rand()%65535;
@@ -163,6 +158,12 @@ int v_socket() {
 	return s;
 }
 
+/* returns a new unbound socket.
+ * on failure, returns a negative value */
+int v_socket() {
+  return sys_socket(0);
+}
+
 /* binds a socket to a port
  * returns 0 on success or negative number on failure */
 int v_bind(int socket, int node, uint16_t port) {
@@ -172,7 +173,6 @@ int v_bind(int socket, int node, uint16_t port) {
 	assert(sock->machine);
 	if (tcpm_state(sock->machine) == ST_CLOSED) {
 		sock->local_port = port;
-
 	} else {
 		nlog(MSG_ERROR,"v_bind","Someone called v_bind, but I'm not in the CLOSED state!");
 		return -1;
@@ -187,10 +187,12 @@ int v_listen(int socket, int backlog /* optional */) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
 
 	assert(sock->machine);
+
+  sock->seq_num = 1000;
+  
 	if (tcpm_event(sock->machine, ON_PASSIVE_OPEN, this_node, NULL)) {
 		nlog(MSG_ERROR,"socket:listen", "Uhh. error.  Couldn't transition states.  noob");
 		return -1;
-
 	}
 
 	return 0;
@@ -237,8 +239,10 @@ int v_accept(int socket) {
 
 	sock->can_handshake = 1;
 
-	int status = wait_for_event(sock, TCP_NEWSOCKET);
+	int status = wait_for_event(sock, TCP_OK);
 	
+	sock->can_handshake = 0;
+
 	tcp_table_new(this_node, sock->new_fd);
 
 	return sock->new_fd;

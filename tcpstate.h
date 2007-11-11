@@ -43,15 +43,15 @@ typedef struct tcp_machine__ {
 struct tcp_socket__;
 
 /* Core functionality. */
-tcp_machine_t* tcpm_new(struct tcp_socket__* context);
+tcp_machine_t* tcpm_new(struct tcp_socket__* context, uint8_t clone);
 void tcpm_destroy(tcp_machine_t* machine);
 int tcpm_event(tcp_machine_t* machine, tinput_t event, void* argt, void* args);
 int tcpm_packet_to_input(const char* packet);
 
-#define tcpm_state(m) ((m)->sm->current->id)
-#define tcpm_canbind(m) (tcpm_state(m) == ST_CLOSED)
-#define tcpm_estab(m) (tcpm_state(m) == ST_ESTAB)
-#define tcpm_firstrecv(m) (tcpm_state(m) == ST_LISTEN)
-#define tcpm_synsent(m) (tcpm_state(m) == ST_SYN_SENT)
+#define tcpm_state(m)       ((m)->sm->current->id)
+#define tcpm_canbind(m)     (tcpm_state(m) == ST_CLOSED)
+#define tcpm_estab(m)       (tcpm_state(m) == ST_ESTAB)
+#define tcpm_firstrecv(m)   (tcpm_state(m) == ST_LISTEN)
+#define tcpm_synsent(m)     (tcpm_state(m) == ST_SYN_SENT)
 
 #endif
