@@ -48,6 +48,9 @@ tags:
 #	ctags --defines --typedefs-and-c++ --members --globals --no-warn *.[chCH]\
 	*.cpp
 
+run: all
+	python launch.py 2 networks/netconfig-bigp2p
+
 .PHONY : clean
 clean: tidy
 	rm -f $(LIBRARY) $(IP_DRIVER) $(VAN_DRIVER) *~
