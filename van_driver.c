@@ -201,7 +201,8 @@ void *tcp_thread(void* arg) {
 
 		  nlog(MSG_LOG, "tcp_thread", "Socket not in established state; stepping state machine.");
 
-      nlog(MSG_LOG, "Passing in old_sock = %d", old_sock->fd);
+      if(old_sock)
+        nlog(MSG_LOG, "tcp_thread", "Passing in old_sock = %d", old_sock->fd);
 
       /* Step state machine (and perform needed action.) */
       if(tcpm_event(sock->machine, tcpm_packet_to_input(ip_to_tcp(packet)), NULL, old_sock)) {
