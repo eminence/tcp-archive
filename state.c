@@ -55,7 +55,8 @@ state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args)
       machine->current->error(machine->current->id, machine->context, args);
     }
 
-    nlog(MSG_ERROR, "machine_step", "invalid input (%d)", input);
+    nlog(MSG_ERROR, "machine_step", "invalid input (%d); returning to root state.", input);
+    machine->current = machine->root;
 
     return NULL;
   }
@@ -69,7 +70,8 @@ state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args)
         machine->current->error(machine->current->id, machine->context, args);
       }
     
-      nlog(MSG_ERROR, "machine_step", "Transition function returned 0");
+      nlog(MSG_ERROR, "machine_step", "Transition function returned 0; returning to root state");
+      machine->current = machine->root;
 
       return NULL;
     }

@@ -86,10 +86,14 @@ void in_estab(sid_t s, void *context, void *argA, void *argB) {
 	tcp_socket_t *sock = (tcp_socket_t*)context;
 	assert(sock);
 
-
 	nlog(MSG_LOG,"state:in_estab", "We're now in the established state.  Attempted to notify the user");
-
-	notify(sock,TCP_OK);
+  
+  /* If argB set, wake up old (parent) socket instead of current socket. */
+  if(argB) {
+    notify(argB, TCP_OK);
+  } else {
+  	notify(sock, TCP_OK);
+  }
 
 	return;
 }

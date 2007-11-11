@@ -112,7 +112,7 @@ int set_if_state(ip_node_t *node, int iface, int link_state) {
 /* tcp thread */
 void *tcp_thread(void* arg) {
 	ip_node_t *node = (ip_node_t*)arg;
-  tcp_socket_t *new_sock;
+  tcp_socket_t *old_sock;
 	char *packet;
 	uint16_t src_port;
 	uint16_t dest_port;
@@ -124,6 +124,8 @@ void *tcp_thread(void* arg) {
 		pthread_cleanup_push((void(*)(void*))bqueue_poorly_implemented_cleanup, node->tcp_q);
 		bqueue_dequeue(node->tcp_q, (void*)&packet); /* this will block */
 		pthread_cleanup_pop(0);
+
+    old_sock = NULL;
 
 		nlog(MSG_LOG,"tcp", "tcp thread dequeued a tcp packet");
 
@@ -170,22 +172,18 @@ void *tcp_thread(void* arg) {
   
       /* Construct new full socket. */
       sock->new_fd = sys_socket(1);
-      new_sock = get_socket_from_int(sock->new_fd);
       
-      assert(new_sock);
+      old_sock = sock;
+      sock = get_socket_from_int(sock->new_fd);
       
-      new_sock->local_node = sock->local_node;
-      new_sock->local_port = sock->local_port;
-			new_sock->remote_port = src_port;
-			new_sock->remote_node = src;
+      assert(sock);
+      
+      sock->local_node = old_sock->local_node;
+      sock->local_port = old_sock->local_port;
+			sock->remote_port = src_port;
+			sock->remote_node = src;
 
-			socktable_put(node->tuple_table, new_sock, FULL_SOCKET);
-
-      /* Notify user. */
-      //notify(sock, TCP_NEWSOCKET);
-    
-      /* Continue using the new socket. */
-      sock = new_sock;
+			socktable_put(node->tuple_table, sock, FULL_SOCKET);
 		}
 
 		/* If we're in the established state, perform primary communication; else, handshake*/
@@ -205,7 +203,7 @@ void *tcp_thread(void* arg) {
 		  nlog(MSG_LOG, "tcp_thread", "Socket not in established state; stepping state machine.");
 
       /* Step state machine (and perform needed action.) */
-      if(tcpm_event(sock->machine, tcpm_packet_to_input(ip_to_tcp(packet)),NULL,NULL)) {
+      if(tcpm_event(sock->machine, tcpm_packet_to_input(ip_to_tcp(packet)), NULL, old_sock)) {
 			  nlog(MSG_WARNING, "tcp_thread", "Invalid transition requested; fail!");
         /* Rely on error function; teardown socket? */
       }
