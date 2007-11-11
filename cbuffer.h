@@ -27,6 +27,11 @@ char* cbuf_get_range(cbuf_t* buf, int start, int len);
 #define cbuf_cmp(c,a,b)         ((cbuf_mod(c,a) == cbuf_mod(c,b)) ? 0 : \
                                  (((cbuf_mod(c,a) < cbuf_mod(c,b)) && ((cbuf_mod(c,b))-(cbuf_mod(c,a)) < cbuf_size(c)/2)) \
                                     || ((cbuf_mod(c,a) > cbuf_mod(c,b)) && ((cbuf_mod(c,a))-(cbuf_mod(c,b)) > cbuf_size(c)/2))) ? -1 : 1)
+#define cbuf_lt(c,a,b)          (cbuf_cmp(c,a,b) == -1)                                    
+#define cbuf_gt(c,a,b)          (cbuf_cmp(c,a,b) ==  1)                                    
+#define cbuf_eq(c,a,b)          (cbuf_cmp(c,a,b) ==  0)                                    
+#define cbuf_lte(c,a,b)         (cbuf_lt(c,a,b) || cbuf_eq(c,a,b))
+#define cbuf_gte(c,a,b)         (cbuf_gt(c,a,b) || cbuf_eq(c,a,b))
 #define cbuf_contains(c,a,b,n)  (cbuf_cmp(c,a,b) 
 
 #endif
