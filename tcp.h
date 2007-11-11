@@ -37,9 +37,13 @@ typedef struct tcp_socket__ {
 
 	int send_una; /* data before this is acked.  after this is sent, but unacked */
 	int send_next; /* data before this is send, but unakced.   after this is not sent, but OK to send */
+	int send_written; /* points to the next location in the buffer we can write incoming data */
+
 	int send_window_size; /* sender window size */
 
 	int recv_next; /* data before this already recvd and ackd.  after this, not yet, but ok to receive*/
+	int recv_read; /* points to the next data in the buffer to be returned via a v_read() call.  any data before this can be overwritten */
+
 	int recv_window_size;
 	
 
