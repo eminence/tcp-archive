@@ -108,6 +108,10 @@ int set_if_state(ip_node_t *node, int iface, int link_state) {
 	return link_state;
 }
 
+/* tcp send thread */
+void *tcp_send_thread(void* arg) {
+  pthread_exit(NULL);
+}
 
 /* tcp thread */
 void *tcp_thread(void* arg) {
@@ -783,6 +787,9 @@ ip_node_t *van_driver_init(char *fname, int num) {
 
 	node->tcp_thread = malloc(sizeof(pthread_t));
 	pthread_create(node->tcp_thread, 0, tcp_thread, (void*)node);
+
+	node->tcp_send_thread = malloc(sizeof(pthread_t));
+	pthread_create(node->tcp_send_thread, 0, tcp_send_thread, (void*)node);
 
 	nlog (MSG_LOG,"init","Node %d running", vn->vn_num);	
 	nlog_set_menu("[node %d]  1:Send data   2:Receive Data   3:Toggle Link State   q:Quit", vn->vn_num);

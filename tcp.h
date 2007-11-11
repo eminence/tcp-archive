@@ -5,6 +5,7 @@
 
 #include "tcpstate.h"
 #include "van_driver.h"
+#include "cbuffer.h"
 
 #define LOCALBUFSIZE 4096
 
