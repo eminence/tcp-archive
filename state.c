@@ -86,7 +86,10 @@ state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args)
   if(machine->current->action) {
     machine->current->action(machine->current->id, machine->context, machine->current->argd, args);
   }
-  
+ 
+  /* Alert GUI of transition. */
+
+
   return machine->current;
 }
 

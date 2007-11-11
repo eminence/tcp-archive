@@ -85,7 +85,11 @@ void tcpm_destroy(tcp_machine_t* machine) {
 }
 
 int tcpm_event(tcp_machine_t* machine, tinput_t event, void* argt, void* args) {
-  return NULL == machine_step(machine->sm, event, argt, args);
+  int result = (NULL == machine_step(machine->sm, event, argt, args));
+
+  update_tcp_table(machine->context);
+
+  return result;
 }
 
 int tcpm_packet_to_input(const char* packet) {
