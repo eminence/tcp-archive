@@ -347,7 +347,7 @@ int get_number(char *msg) {
 	update_panels(); doupdate();
 
 	/* Loop through to get user requests */
-	while((ch = wgetch(my_form_win)) != '`' || (ch != KEY_ENTER) )
+	while((ch = wgetch(my_form_win)) != '`')
 	{	switch(ch)
 		{
 			case KEY_LEFT:

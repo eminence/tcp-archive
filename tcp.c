@@ -117,11 +117,10 @@ void v_tcp_init(ip_node_t *node) {
 		this_node->socket_table[x] = NULL;
 	}
 
+  nlog(MSG_LOG, "v_tcp_init", "Creating tuple table.");
 
 	node->tuple_table = malloc(sizeof(socktable_t));
 	socktable_init(node->tuple_table);
-
-
 }
 
 int sys_socket(int clone) {
@@ -150,6 +149,7 @@ int sys_socket(int clone) {
 	sock->local_node = this_node;
 	sock->can_handshake = 0;
 	sock->parent = NULL;
+  sock->cond_status = 0;
 
 	tcp_table_new(this_node, s);	
 
@@ -224,7 +224,7 @@ int v_connect(int socket, int node, uint16_t port) {
 		return -1;
 	}
 
-	int status = wait_for_event(sock,TCP_OK | TCP_CONNECT_FAILED);
+	int status = wait_for_event(sock, TCP_OK | TCP_CONNECT_FAILED);
 
 	if (status == TCP_OK) return 0;
 	else { return -1; }
@@ -239,14 +239,16 @@ int v_accept(int socket) {
 	// TODO make sure we can call accept
 
 	sock->can_handshake = 1;
-
-	int status = wait_for_event(sock, TCP_OK);
-	
+	int status = wait_for_event(sock, TCP_OK | TCP_CONNECT_FAILED);
 	sock->can_handshake = 0;
 
 	//tcp_table_new(this_node, sock->new_fd);
 
-	return sock->new_fd;
+  if(status == TCP_OK) {
+  	return sock->new_fd;
+  } else {
+    return -1;
+  }
 
 }
 

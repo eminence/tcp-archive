@@ -48,12 +48,14 @@ void fail_with_reset(sid_t id, void* context, void* args) {
 	return; 
 }
 
-int has_status(int bits, int bit) {
-	return (bits & bit) == bit;
+int has_status(int want, int have) {
+	return !!(want & have);
 }
 
 int wait_for_event(tcp_socket_t *sock, int status_bits) {	
 	pthread_mutex_lock(&sock->lock);
+  
+  nlog(MSG_LOG, "wait_for_event", "want: %#x, have: %#x", status_bits, sock->cond_status);
 
 	while (!(has_status(status_bits, sock->cond_status))) {
 		nlog(MSG_LOG,"wait_for_event", "sleeping on cond var");

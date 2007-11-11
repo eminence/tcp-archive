@@ -4,9 +4,9 @@
 #include "tcp.h"
 #include "state.h"
 
-#define TCP_OK 0x00
-#define TCP_CONNECT_FAILED 0x01
-#define TCP_NEWSOCKET 0x02
+#define TCP_OK              0x01
+#define TCP_CONNECT_FAILED  0x02
+#define TCP_NEWSOCKET       0x04
 
 struct tcp_socket__;
 
