@@ -264,7 +264,7 @@ void update_tcp_table(tcp_socket_t *sock) {
 
 
 			char * new_text = malloc(40);
-			sprintf(new_text,"State: %d", tcpm_strstate(tcpm_state(sock->machine)));
+			sprintf(new_text,"State: %s", tcpm_strstate(tcpm_state(sock->machine)));
 
 			output.tcp_items[i]->description.str=new_text;
 			output.tcp_items[i]->description.length=strlen(new_text);
