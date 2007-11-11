@@ -25,7 +25,7 @@ tcp_socket_t *get_socket_from_int(int s) {
 
 /* master tcp sender function
  */
-int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) {
+int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags, uint8_t normal_seq) {
 	assert(sock);
 
 	char *packet;
@@ -52,19 +52,12 @@ int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) 
 		return -1;
 	}
 
-	/* TODO move this special case code somewhere else
-	 * or clean up
-	 * or make it not suck so much
-	 */
-	if ((flags & TCP_FLAG_SYN) == TCP_FLAG_SYN) {
-		sock->seq_num++; /* increase seq num by one */
-	} else if ((flags & TCP_FLAG_ACK) == TCP_FLAG_ACK) {
-		sock->seq_num++;
-	} else if ((flags & TCP_FLAG_FIN) == TCP_FLAG_FIN) {
-		sock->seq_num++;
-	} else {
-		assert (bufsize > 0); /* TODO double check that this assertion is valid */
+	/* Normal sequence number mode simply adds byte-count to seqnum; else, only add one (etc) */
+  if(normal_seq) {
+		assert (bufsize > 0);           /* TODO double check that this assertion is valid */
 		sock->seq_num += bufsize;
+  } else {
+		sock->seq_num++;                /* increase seq num by one */
 	}
 
 	return retval;
