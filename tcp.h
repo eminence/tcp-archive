@@ -35,6 +35,14 @@ typedef struct tcp_socket__ {
 	cbuf_t *r_buf;
 	cbuf_t *s_buf;
 
+	int send_una; /* data before this is acked.  after this is sent, but unacked */
+	int send_next; /* data before this is send, but unakced.   after this is not sent, but OK to send */
+	int send_window_size; /* sender window size */
+
+	int recv_next; /* data before this already recvd and ackd.  after this, not yet, but ok to receive*/
+	int recv_window_size;
+	
+
 } tcp_socket_t;
 
 void v_tcp_init();
