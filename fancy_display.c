@@ -200,16 +200,32 @@ int get_text(char *msg, char* buf, int len) {
 
 
 void test_tcp_menu_update() {
-	//ITEM *curitem = current_item(output.tcp_menu);
+	ITEM *curitem = current_item(output.tcp_menu);
 
-	//char *new_text = malloc(64)
+	unpost_menu(output.tcp_menu);
 
+	int i = 0;
+	while (output.tcp_items[i] != NULL) {
+		if (output.tcp_items[i] == curitem) {
+			nlog(MSG_LOG, "test_tcp", "found item %d", i);
+			// update!
+			ITEM *newitem = new_item(item_name(output.tcp_items[i]), "Hello!");
+			int retval = free_item(output.tcp_items[i]);
+			if (retval != E_OK) {
+				if (retval == E_CONNECTED) nlog(MSG_WARNING, "test_tcp_menu", "didn't free_item %s", "already connected");
+				if (retval == E_BAD_ARGUMENT) nlog(MSG_WARNING, "test_tcp_menu", "didn't free_item %s", "bad agument");
+			}
+			output.tcp_items[i] = newitem;
+			break;
+
+		}
+		i++;
+	}
 	//sprintf(new_text, "State: %d",sock)
 
 	//curitem->description.str="new_txt;
 	//curitem->description.length=strlen(new_text);
 
-	unpost_menu(output.tcp_menu);
 	post_menu(output.tcp_menu);
 
 	redrawwin(output.menu_win);
@@ -253,6 +269,8 @@ void tcp_table_new(ip_node_t *node, int fd) {
 
 void update_tcp_table(tcp_socket_t *sock) {
 	assert(sock);
+
+	return;
 
 	nlog(MSG_LOG,"update_tcp_table", "updating tcp table");
 
