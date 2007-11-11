@@ -125,9 +125,8 @@ void *tcp_thread(void* arg) {
 		bqueue_dequeue(node->tcp_q, (void*)&packet); /* this will block */
 		pthread_cleanup_pop(0);
 
-    old_sock = NULL;
-
 		nlog(MSG_LOG,"tcp", "tcp thread dequeued a tcp packet");
+    old_sock = NULL;
 
 		src_port = get_srcport(ip_to_tcp(packet));
 		dest_port = get_destport(ip_to_tcp(packet));
@@ -201,6 +200,8 @@ void *tcp_thread(void* arg) {
       sock->ack_num = get_seqnum(ip_to_tcp(packet)) + (flags != TCP_FLAG_ACK);
 
 		  nlog(MSG_LOG, "tcp_thread", "Socket not in established state; stepping state machine.");
+
+      nlog(MSG_LOG, "Passing in old_sock = %d", old_sock->fd);
 
       /* Step state machine (and perform needed action.) */
       if(tcpm_event(sock->machine, tcpm_packet_to_input(ip_to_tcp(packet)), NULL, old_sock)) {
