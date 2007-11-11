@@ -6,6 +6,8 @@
 #include "tcpstate.h"
 #include "van_driver.h"
 
+#define LOCALBUFSIZE 4096
+
 /* Forward declaration */
 struct tcp_machine__;
 struct ip_node__;
@@ -14,7 +16,7 @@ typedef struct tcp_socket__ {
 	struct tcp_machine__ *machine;
 	unsigned char can_handshake; /* set by v_accept() */
 	unsigned int fd;
-	uint32_t seq_num;
+	uint32_t seq_num; /* this is the value we will use for our next output packet */
 	uint32_t ack_num;
 
 	/* Socket identifiers. */
@@ -29,6 +31,9 @@ typedef struct tcp_socket__ {
 
 	int new_fd;
 	struct tcp_socket__ *parent;
+
+	cbuf_t *r_buf;
+	cbuf_t *s_buf;
 
 } tcp_socket_t;
 
