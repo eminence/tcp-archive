@@ -1,3 +1,6 @@
 v_accept
 
   Clone FD and retain listening socket, or listening socket BECOMES active socket and no more listener.
+
+State machine
+  error should return machine to root state (i.e., handshake return to close state)

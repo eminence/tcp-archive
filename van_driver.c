@@ -193,8 +193,8 @@ void *tcp_thread(void* arg) {
 			nlog(MSG_LOG, "tcp_thread", "connection established! using sliding window protocol."); /* TODO */
 
     } else {
-      /* Validate sequence numbers. */
-      if(!tcpm_synsent(sock->machine) && get_seqnum(ip_to_tcp(packet)) != sock->ack_num) {
+      /* Validate sequence numbers. */ //TODO use sentinel
+      if(!tcpm_synsent(sock->machine) && !tcpm_firstrecv(sock->machine) && get_seqnum(ip_to_tcp(packet)) != sock->ack_num) {
 			  nlog(MSG_WARNING, "tcp_thread", "Invalid sequence number!");
         /* TODO reset connection */
       }
