@@ -36,6 +36,19 @@ int do_listen(sid_t prev, sid_t next, void* context, void *arg, void *tran_arg) 
 	return 0;
 }
 
+
+void fail_with_reset(sid_t id, void* context, void* args) {
+	tcp_socket_t *sock = (tcp_socket_t*)context;
+	assert(sock);
+
+	nlog(MSG_LOG, "fail_with_reset", "failing socket %d.  sending a RST and moving back to the closed state");
+
+	tcp_sendto(sock, NULL, 0, TCP_FLAG_RST);
+
+	return; 
+}
+
+
 void fail_in_estab() {
 
 
