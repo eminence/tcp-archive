@@ -306,6 +306,7 @@ void *rip_monitor (void *arg) {
 
 		// do we have a route TO the node which just sent us a packet?
 		if (update_route(node, from, iface, 1, from)) {
+			nlog(MSG_LOG,"rip", "Due to an incoming packet, found a new route to %d on interface %d", from, iface);
 			send_route_table(node);
 		}
 
@@ -561,6 +562,9 @@ void *listener (void *arg) {
 				nlog(MSG_LOG,"listener","This packet is not addressed to me.  Will attempt to forward it out interface %d", r->iface);
 
 				set_ttl(packet,ttl - 1 );
+				/* now that we've altered the ttl, recompute the checksum */
+				set_checksum(packet, 0); /* zero it out before recomputing */
+				set_checksum(packet, ip_fast_csum((unsigned char*)packet, 2));
 
 				ip_packet_t *p = malloc(sizeof(ip_packet_t));
 				p->iface = r->iface;
