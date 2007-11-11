@@ -68,7 +68,10 @@ int wait_for_event(tcp_socket_t *sock, int status_bits) {
 
 	}
 	pthread_mutex_unlock(&sock->lock);
-	return sock->cond_status;
+	int to_return = sock->cond_status;
+	sock->cond_status = 0;
+
+	return to_return;
 }
 
 void notify(tcp_socket_t *sock, int status) {
