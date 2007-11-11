@@ -108,6 +108,11 @@ int set_if_state(ip_node_t *node, int iface, int link_state) {
 	return link_state;
 }
 
+/* Handle recv events in estab state. */
+void do_recv_estab(tcp_socket_t* sock, char* packet) {
+  //XXX
+}
+
 /* tcp wathdog thread */
 void *tcp_watchdog(void *arg) {
 	ip_node_t *node = (ip_node_t*)arg;
@@ -153,6 +158,21 @@ void *tcp_watchdog(void *arg) {
 
 /* tcp send thread */
 void *tcp_send_thread(void* arg) {
+  int fd;
+  tcp_socket_t* sock;
+
+  while(1) {
+    for(fd=0; fd < MAXSOCKETS; fd++) {
+      if(!(sock = get_socket_from_int(fd))) {
+        /* Ignore NULL entries. */
+        continue;
+      }
+
+      /* TODO: Any new data to send? Do so. */
+      /* TODO: Update sequence numbers (send might do this automatically... it prolly does) */
+    }
+  }
+
   pthread_exit(NULL);
 }
 
@@ -244,7 +264,8 @@ void *tcp_thread(void* arg) {
 		/* If we're in the established state, perform primary communication; else, handshake*/
     if(tcpm_estab(sock->machine)) {
 			nlog(MSG_LOG, "tcp_thread", "connection established! using sliding window protocol."); /* TODO */
-
+      do_recv_estab(sock, packet);
+      
     } else {
       /* Validate sequence numbers. */ //TODO use sentinel
       if(!tcpm_synsent(sock->machine) && !tcpm_firstrecv(sock->machine) && get_seqnum(ip_to_tcp(packet)) != sock->ack_num) {
@@ -557,16 +578,13 @@ void *listener (void *arg) {
 
 			{
 				/* Check packet checksum. */
-				uint16_t packet_checksum, zero_checksum, calced_checksum;
+				uint16_t packet_checksum, calced_checksum;
 
 				packet_checksum = get_checksum(buf);
 				//nlog(MSG_LOG,"listener","Incoming packet.  Checksum field is: %d", packet_checksum);
 
 				/* Clear checksum field. */
-				//set_checksum(buf, 0);
-				memset(buf+4,0,2);
-				zero_checksum = get_checksum(buf);
-				//nlog(MSG_LOG, "listener", "this should be zero: %d",zero_checksum);
+				set_checksum(buf, 0);
 
 				if((calced_checksum = ip_fast_csum((unsigned char*)buf, 2)) != packet_checksum) {
 					nlog(MSG_ERROR,"listener", "Error: checksum mismatch.  ip_fast_csum returned %d, we think it should be %d", calced_checksum, packet_checksum);
@@ -646,25 +664,42 @@ void *listener (void *arg) {
 					/* give this to the TCP thread, so it can figure out what to do with it */
 					nlog(MSG_LOG, "listener", "got a TCP packet!");
 					char *packet = malloc(total_length); // will be free() when dequeed and sent
+          
+          /* Check packet checksum. */
+          uint16_t packet_checksum, calced_checksum;
 
-					memcpy(packet, buf, total_length);
-					bqueue_enqueue(node->tcp_q, (void*)packet);
+          packet_checksum = get_tcpchecksum(ip_to_tcp(buf));
+          //nlog(MSG_LOG,"listener","Incoming packet.  Checksum field is: %d", packet_checksum);
 
-				} else {
-					nlog(MSG_WARNING,"listener","I got a IP packet with an unknown payload type");
-				}
+          /* Clear checksum field. */
+          set_tcpchecksum(ip_to_tcp(buf), 0);
+
+          if((calced_checksum = calculate_tcp_checksum((unsigned char*)buf)) != packet_checksum) {
+            nlog(MSG_ERROR,"listener", "Error: tcp checksum mismatch.  compute_tcp_checksum returned %d, we think it should be %d", calced_checksum, packet_checksum);
+            continue;
+          } else {
+            //nlog(MSG_LOG,"listener","Checksum match.");
+            /* Restore checksum. */
+            set_checksum(buf, packet_checksum);
+          }
+
+          memcpy(packet, buf, total_length);
+          bqueue_enqueue(node->tcp_q, (void*)packet);
+
+        } else {
+          nlog(MSG_WARNING,"listener","I got a IP packet with an unknown payload type");
+        }
+
+      }
+
+    } else {
+      nlog(MSG_WARNING,"listener","van_node_recv returned %d", retval);
+    }
 
 
-			}
-
-		} else {
-			nlog(MSG_WARNING,"listener","van_node_recv returned %d", retval);
-		}
-
-
-	}
-	pthread_cleanup_pop(1);
-	return NULL;
+  }
+  pthread_cleanup_pop(1);
+  return NULL;
 }
 
 
@@ -672,71 +707,71 @@ void *listener (void *arg) {
  * Dummy function.  Does nothing important
  */
 int van_driver_loaded() {
-	return 1;
+  return 1;
 }
 
 /*
  * free all memory and join with all threads
  */
 void van_driver_destory(ip_node_t *node) {
-	int i;
+  int i;
 
-	nlog(MSG_LOG,"shutdown","Attempting to cancel the sending thread... ");
+  nlog(MSG_LOG,"shutdown","Attempting to cancel the sending thread... ");
 
-	pthread_cancel(*node->sending_thread);
-	pthread_join(*node->sending_thread, NULL);
-	free(node->sending_thread);
+  pthread_cancel(*node->sending_thread);
+  pthread_join(*node->sending_thread, NULL);
+  free(node->sending_thread);
 
-	nlog(MSG_LOG,"shutdown","Attempting to cancel the listening threads... ");
+  nlog(MSG_LOG,"shutdown","Attempting to cancel the listening threads... ");
 
-	for (i = 0; i < van_node_nifs(node->van_node); i++) {
-		pthread_cancel(*node->listening_thread[i]);
-		pthread_join(*node->listening_thread[i], NULL);
-		free(node->listening_thread[i]);
-		nlog(MSG_LOG,"shutdown"," %d Done",i);
-		pthread_cond_destroy(&node->ifaces[i].cond);
-		pthread_mutex_destroy(&node->ifaces[i].lock);
-		pthread_mutex_destroy(&node->ifaces[i].age_lock);
-	}
-
-
-	free(node->ifaces);
-
-	nlog(MSG_LOG,"shutdown","Attempting to cancel the rip thread... ");
-	pthread_cancel(*node->rip_thread);
-	pthread_join(*node->rip_thread, NULL);
-	free(node->rip_thread);
-	//printf("Done.\n");
-
-	nlog(MSG_LOG,"shutdown","Attempting to cancel the rip monitor thread... ");
-	pthread_cancel(*node->rip_monitor_thread);
-	pthread_join(*node->rip_monitor_thread, NULL);
-	free(node->rip_monitor_thread);
-
-	nlog(MSG_LOG,"shutdown","Attempting to cancel the link state thread... ");
-	pthread_cancel(*node->link_state_thread);
-	pthread_join(*node->link_state_thread, NULL);
-	free(node->link_state_thread);
-
-	nlog(MSG_LOG,"shutdown","Attempting to destroy the sending q... ");
-	bqueue_destroy(node->sending_q);
-	free(node->sending_q);
-
-	nlog(MSG_LOG,"shutdown","Attempting to destroy the receiving q... ");
-	bqueue_destroy(node->receiving_q);
-	free(node->receiving_q);
-
-	nlog(MSG_LOG,"shutdown","Attempting to destory the rip q... ");
-	bqueue_destroy(node->rip_q);
-	free(node->rip_q);
-
-	nlog(MSG_LOG,"shutdown","Attempting to destory the route table... ");
-	rtable_destroy(node->route_table);
-	free(node->route_table);
+  for (i = 0; i < van_node_nifs(node->van_node); i++) {
+    pthread_cancel(*node->listening_thread[i]);
+    pthread_join(*node->listening_thread[i], NULL);
+    free(node->listening_thread[i]);
+    nlog(MSG_LOG,"shutdown"," %d Done",i);
+    pthread_cond_destroy(&node->ifaces[i].cond);
+    pthread_mutex_destroy(&node->ifaces[i].lock);
+    pthread_mutex_destroy(&node->ifaces[i].age_lock);
+  }
 
 
-	nlog(MSG_LOG,"shutdown"," -= Bye! =- ");
-	return;
+  free(node->ifaces);
+
+  nlog(MSG_LOG,"shutdown","Attempting to cancel the rip thread... ");
+  pthread_cancel(*node->rip_thread);
+  pthread_join(*node->rip_thread, NULL);
+  free(node->rip_thread);
+  //printf("Done.\n");
+
+  nlog(MSG_LOG,"shutdown","Attempting to cancel the rip monitor thread... ");
+  pthread_cancel(*node->rip_monitor_thread);
+  pthread_join(*node->rip_monitor_thread, NULL);
+  free(node->rip_monitor_thread);
+
+  nlog(MSG_LOG,"shutdown","Attempting to cancel the link state thread... ");
+  pthread_cancel(*node->link_state_thread);
+  pthread_join(*node->link_state_thread, NULL);
+  free(node->link_state_thread);
+
+  nlog(MSG_LOG,"shutdown","Attempting to destroy the sending q... ");
+  bqueue_destroy(node->sending_q);
+  free(node->sending_q);
+
+  nlog(MSG_LOG,"shutdown","Attempting to destroy the receiving q... ");
+  bqueue_destroy(node->receiving_q);
+  free(node->receiving_q);
+
+  nlog(MSG_LOG,"shutdown","Attempting to destory the rip q... ");
+  bqueue_destroy(node->rip_q);
+  free(node->rip_q);
+
+  nlog(MSG_LOG,"shutdown","Attempting to destory the route table... ");
+  rtable_destroy(node->route_table);
+  free(node->route_table);
+
+
+  nlog(MSG_LOG,"shutdown"," -= Bye! =- ");
+  return;
 }
 
 
@@ -745,120 +780,126 @@ void van_driver_destory(ip_node_t *node) {
  * we create
  */
 ip_node_t *van_driver_init(char *fname, int num) {
-	van_node_t *vn = NULL;
-	ip_node_t *node = malloc(sizeof(ip_node_t));
-	int i, nifs;
-	const int down = 0;
-	node_and_num_t *nnn;
+  van_node_t *vn = NULL;
+  ip_node_t *node = malloc(sizeof(ip_node_t));
+  int i, nifs;
+  const int down = 0;
+  node_and_num_t *nnn;
 
-	if (van_init(fname)) {
-		nlog(MSG_ERROR,"init", "Error: Can't init the van driver with network spec '%s'",fname);
-		return NULL;
-	}
-	
-	if ( !(vn = van_node_get(num))) {
-		nlog(MSG_ERROR,"init", "Error Can't get node %d", num);
-		return NULL;
-	}
+  if (van_init(fname)) {
+    nlog(MSG_ERROR,"init", "Error: Can't init the van driver with network spec '%s'",fname);
+    return NULL;
+  }
 
-	assert(vn != NULL);
-	node->van_node = vn;
+  if ( !(vn = van_node_get(num))) {
+    nlog(MSG_ERROR,"init", "Error Can't get node %d", num);
+    return NULL;
+  }
 
-	nifs = van_node_nifs(vn);
-	node->ifaces = malloc(sizeof(iface_t) * nifs);
-	nlog_set_menu("[node %d]  Initializing [=         ]",num );
-	// start sending thread
-	sleep(1);
-	nlog(MSG_LOG, "init","starting sending thread");
-	node->sending_thread = malloc(sizeof(pthread_t));
-	pthread_create(node->sending_thread , 0 , sender, (void*)node);
+  assert(vn != NULL);
+  node->van_node = vn;
 
-	// start listening thread
-	for (i = 0; i < nifs; i++) {
-		nnn = malloc(sizeof(node_and_num_t));
-		nnn->node = node;
-		nnn->iface = i;
-		node->listening_thread[i] = malloc(sizeof(pthread_t));
-		pthread_create(node->listening_thread[i], 0, listener, (void*)nnn);
+  nifs = van_node_nifs(vn);
+  node->ifaces = malloc(sizeof(iface_t) * nifs);
+  nlog_set_menu("[node %d]  Initializing [=         ]",num );
+  // start sending thread
+  sleep(1);
+  nlog(MSG_LOG, "init","starting sending thread");
+  node->sending_thread = malloc(sizeof(pthread_t));
+  pthread_create(node->sending_thread , 0 , sender, (void*)node);
 
-		//init ifaces array
-		node->ifaces[i].cur_state = 0;
-		node->ifaces[i].old_state = 0;
-		node->ifaces[i].peer = -1;		
-		node->ifaces[i].age = time(NULL);
-		node->ifaces[i].timed_out = 0;
+  // start listening thread
+  for (i = 0; i < nifs; i++) {
+    nnn = malloc(sizeof(node_and_num_t));
+    nnn->node = node;
+    nnn->iface = i;
+    node->listening_thread[i] = malloc(sizeof(pthread_t));
+    pthread_create(node->listening_thread[i], 0, listener, (void*)nnn);
 
-		// by default, set all links to be disabled.
-		van_node_setifopt( vn, i, VAN_IO_UPSTATE, (char*)&down, sizeof(int));
+    //init ifaces array
+    node->ifaces[i].cur_state = 0;
+    node->ifaces[i].old_state = 0;
+    node->ifaces[i].peer = -1;		
+    node->ifaces[i].age = time(NULL);
+    node->ifaces[i].timed_out = 0;
 
-		pthread_cond_init(&node->ifaces[i].cond, 0);
-		pthread_mutex_init(&node->ifaces[i].lock, 0);
-		pthread_mutex_init(&node->ifaces[i].age_lock, 0);
+    // by default, set all links to be disabled.
+    van_node_setifopt( vn, i, VAN_IO_UPSTATE, (char*)&down, sizeof(int));
+
+    pthread_cond_init(&node->ifaces[i].cond, 0);
+    pthread_mutex_init(&node->ifaces[i].lock, 0);
+    pthread_mutex_init(&node->ifaces[i].age_lock, 0);
 
 
-	}
-	
+  }
 
-	node->receiving_q = malloc(sizeof(bqueue_t));
-	bqueue_init(node->receiving_q);
 
-	node->rip_q = malloc(sizeof(bqueue_t));
-	bqueue_init(node->rip_q);
+  node->receiving_q = malloc(sizeof(bqueue_t));
+  bqueue_init(node->receiving_q);
 
-	node->tcp_q = malloc(sizeof(bqueue_t));
-	bqueue_init(node->tcp_q);
+  node->rip_q = malloc(sizeof(bqueue_t));
+  bqueue_init(node->rip_q);
 
-	// set up some static routes:
-	node->route_table = rtable_new();
+  node->tcp_q = malloc(sizeof(bqueue_t));
+  bqueue_init(node->tcp_q);
 
-	nlog_set_menu("[node %d]  Initializing [==        ]",num );
-	sleep(1);
-	nlog_set_menu("[node %d]  Initializing [===       ]",num );
-	//sleep(1);
-	nlog_set_menu("[node %d]  Initializing [====      ]",num );
-	//sleep(1);
-	nlog_set_menu("[node %d]  Initializing [=====     ]",num );
-	sleep(1);
-	nlog_set_menu("[node %d]  Initializing [======    ]",num );
-	//sleep(1);
-	nlog_set_menu("[node %d]  Initializing [=======   ]",num );
-	//sleep(1);
-	nlog_set_menu("[node %d]  Initializing [========  ]",num );
-	//sleep(1);
-	nlog_set_menu("[node %d]  Initializing [========= ]",num );
-	//sleep(1);
-	nlog_set_menu("[node %d]  Initializing [==========]",num );
-	sleep(1);
+  // set up some static routes:
+  node->route_table = rtable_new();
 
-	// start up RIP threads
-	
-	node->link_state_thread = malloc(sizeof(pthread_t));
-	pthread_create(node->link_state_thread, 0, link_state_thread, (void*)node);
+  nlog_set_menu("[node %d]  Initializing [==        ]",num );
+  sleep(1);
+  nlog_set_menu("[node %d]  Initializing [===       ]",num );
+  //sleep(1);
+  nlog_set_menu("[node %d]  Initializing [====      ]",num );
+  //sleep(1);
+  nlog_set_menu("[node %d]  Initializing [=====     ]",num );
+  sleep(1);
+  nlog_set_menu("[node %d]  Initializing [======    ]",num );
+  //sleep(1);
+  nlog_set_menu("[node %d]  Initializing [=======   ]",num );
+  //sleep(1);
+  nlog_set_menu("[node %d]  Initializing [========  ]",num );
+  //sleep(1);
+  nlog_set_menu("[node %d]  Initializing [========= ]",num );
+  //sleep(1);
+  nlog_set_menu("[node %d]  Initializing [==========]",num );
+  sleep(1);
 
-	node->rip_monitor_thread = malloc(sizeof(pthread_t));
-	pthread_create(node->rip_monitor_thread, 0, rip_monitor, (void*)node);
+  // start up RIP threads
 
-	node->rip_thread = malloc(sizeof(pthread_t));
-	pthread_create(node->rip_thread, 0, rip, (void*)node);
+  node->link_state_thread = malloc(sizeof(pthread_t));
+  pthread_create(node->link_state_thread, 0, link_state_thread, (void*)node);
 
-	node->tcp_thread = malloc(sizeof(pthread_t));
-	pthread_create(node->tcp_thread, 0, tcp_thread, (void*)node);
+  node->rip_monitor_thread = malloc(sizeof(pthread_t));
+  pthread_create(node->rip_monitor_thread, 0, rip_monitor, (void*)node);
 
-	node->tcp_send_thread = malloc(sizeof(pthread_t));
-	pthread_create(node->tcp_send_thread, 0, tcp_send_thread, (void*)node);
+  node->rip_thread = malloc(sizeof(pthread_t));
+  pthread_create(node->rip_thread, 0, rip, (void*)node);
+  node->tcp_watchdog = malloc(sizeof(pthread_t));
+  pthread_create(node->tcp_watchdog, 0, tcp_watchdog, (void*)node);
 
-	node->tcp_watchdog = malloc(sizeof(pthread_t));
-	pthread_create(node->tcp_watchdog, 0, tcp_watchdog, (void*)node);
+  // init TCP stufffs:
+  v_tcp_init(node);
 
-	// init TCP stufffs:
-	v_tcp_init(node);
-
-	nlog (MSG_LOG,"init","Node %d running", vn->vn_num);	
-	nlog_set_menu("[node %d]  1:Send data   2:Receive Data   3:Toggle Link State   q:Quit", vn->vn_num);
-	// start sending thread
+  nlog (MSG_LOG,"init","Node %d running", vn->vn_num);	
+  nlog_set_menu("[node %d]  1:Send data   2:Receive Data   3:Toggle Link State   q:Quit", vn->vn_num);
+  // start sending thread
 	
 
-	return node;
+  node->tcp_thread = malloc(sizeof(pthread_t));
+  pthread_create(node->tcp_thread, 0, tcp_thread, (void*)node);
+
+  node->tcp_send_thread = malloc(sizeof(pthread_t));
+  pthread_create(node->tcp_send_thread, 0, tcp_send_thread, (void*)node);
+
+  nlog (MSG_LOG,"init","Node %d running", vn->vn_num);	
+  nlog_set_menu("[node %d]  1:Send data   2:Receive Data   3:Toggle Link State   q:Quit", vn->vn_num);
+  // start sending thread
+
+  // init TCP stufffs:
+  v_tcp_init(node);
+
+  return node;
 
 }
 
@@ -870,149 +911,149 @@ ip_node_t *van_driver_init(char *fname, int num) {
  */
 int buildPacket(ip_node_t *node, char *data, int data_size, int to, char  **header, uint8_t proto) {
 
- 	uint16_t total_length =8 + data_size;
-	uint16_t ttl = 32;
-	unsigned char src = node->van_node->vn_num;
-	uint16_t dest = to;
-	unsigned char start = 0;
+  uint16_t total_length =8 + data_size;
+  uint16_t ttl = 32;
+  unsigned char src = node->van_node->vn_num;
+  uint16_t dest = to;
+  unsigned char start = 0;
 
-	uint16_t checksum;
+  uint16_t checksum;
 
-	int packet_size;
+  int packet_size;
 
-	// malloc ourselfs 8 bytes plus the size of the data
-	packet_size = 8 + data_size;
+  // malloc ourselfs 8 bytes plus the size of the data
+  packet_size = 8 + data_size;
 
-	*header = malloc(packet_size);
+  *header = malloc(packet_size);
 
-	// zero everything.
-	memset(*header,0,packet_size);
+  // zero everything.
+  memset(*header,0,packet_size);
 
-	// n=0 LSB
-	start |= (1 << 7); // set ver = 0x1
+  // n=0 LSB
+  start |= (1 << 7); // set ver = 0x1
 
-	//memcpy(*header,&start,1);
-	set_version(*header,1);
-	set_protocol(*header,proto);
+  //memcpy(*header,&start,1);
+  set_version(*header,1);
+  set_protocol(*header,proto);
 
-	//memcpy(*header + 1 ,&total_length, 2);
-	set_total_len(*header, total_length);
+  //memcpy(*header + 1 ,&total_length, 2);
+  set_total_len(*header, total_length);
 
-	//memcpy(*header + 3, &ttl, 1);
-	set_ttl(*header, ttl);
+  //memcpy(*header + 3, &ttl, 1);
+  set_ttl(*header, ttl);
 
-	//	 memcpy the src:
-	// memcpy(*header+6, &src, 1);
-	set_src(*header, src);
+  //	 memcpy the src:
+  // memcpy(*header+6, &src, 1);
+  set_src(*header, src);
 
-	// memcpy the dest:
-	// memcpy(*header+7,&dest+0, 1);
-	set_dst(*header, dest);
+  // memcpy the dest:
+  // memcpy(*header+7,&dest+0, 1);
+  set_dst(*header, dest);
 
-	// calculate the checksum:
-	checksum = ip_fast_csum((unsigned char *)*header, 2);
-	//nlog(MSG_LOG,"buildPacket", "checksum is %d", checksum);
+  // calculate the checksum:
+  checksum = ip_fast_csum((unsigned char *)*header, 2);
+  //nlog(MSG_LOG,"buildPacket", "checksum is %d", checksum);
 
-	//memcpy(*header+4,&checksum,2);
-	set_checksum(*header, checksum);
-	checksum = 0;
-	checksum = get_checksum(*header);
-	//nlog(MSG_LOG, "buildPacket", "readback checksum is %d", checksum);
+  //memcpy(*header+4,&checksum,2);
+  set_checksum(*header, checksum);
+  checksum = 0;
+  checksum = get_checksum(*header);
+  //nlog(MSG_LOG, "buildPacket", "readback checksum is %d", checksum);
 
-	//print_packet(*header,8);
-	
-	memcpy(*header+8, data, data_size);
+  //print_packet(*header,8);
 
-	return packet_size;
+  memcpy(*header+8, data, data_size);
+
+  return packet_size;
 
 
 }
 
 int van_driver_sendto (ip_node_t *node, char *buf, int size, int to, uint8_t proto) {
-	
 
-	char *packet;
-	int packet_size;
 
-	// build packet
+  char *packet;
+  int packet_size;
 
-	if (to == node->van_node->vn_num) {
-		// this packet is addressed to this local host
-		nlog(MSG_LOG,"sendto","I was asked to send a packet to myself! Sending directly into local queue");
-		char *data = malloc(size);	
+  // build packet
 
-		memcpy(data, buf, size);
-		bqueue_enqueue(node->receiving_q, data);
+  if (to == node->van_node->vn_num) {
+    // this packet is addressed to this local host
+    nlog(MSG_LOG,"sendto","I was asked to send a packet to myself! Sending directly into local queue");
+    char *data = malloc(size);	
 
-		return -1;
-	} else {
-		vanaddr_t addr;
-		addr.va_type = AT_P2P;
-		rtable_entry_t *r;
-		ip_packet_t *p = malloc(sizeof(ip_packet_t));
-		int mtu;
+    memcpy(data, buf, size);
+    bqueue_enqueue(node->receiving_q, data);
 
-		// queue up this packet
-		r = rtable_get(node->route_table, to);
-		if (!r) {
-			nlog(MSG_WARNING,"sendto","I was asked to send a packet to node %d, but I have no route to that node", to);
-			free(p);
-			return -1;
-		}
-		
-		van_node_getifopt(node->van_node, r->iface, VAN_IO_MTU, (char*)&mtu, sizeof(int));
+    return -1;
+  } else {
+    vanaddr_t addr;
+    addr.va_type = AT_P2P;
+    rtable_entry_t *r;
+    ip_packet_t *p = malloc(sizeof(ip_packet_t));
+    int mtu;
 
-		//uint16_t dport = get_destport(buf);
-	//	nlog(MSG_LOG,"van_driver_sendto","pre buildPacket dport=%d",dport);
-	//	nlog(MSG_LOG,"van_driver_sendto","about to call buildPacket.  size=%d", size);
-		packet_size = buildPacket(node, buf, size, to, &packet, proto);
+    // queue up this packet
+    r = rtable_get(node->route_table, to);
+    if (!r) {
+      nlog(MSG_WARNING,"sendto","I was asked to send a packet to node %d, but I have no route to that node", to);
+      free(p);
+      return -1;
+    }
 
-		//dport = get_destport(packet+8);
-	//	nlog(MSG_LOG,"van_driver_sendto","get_destport=%d", dport);
+    van_node_getifopt(node->van_node, r->iface, VAN_IO_MTU, (char*)&mtu, sizeof(int));
 
-		if (packet_size > mtu) {
-			nlog(MSG_WARNING, "sendto", "WARNING Will not send this packet -- TOO BIG");
-			free(packet);
-			return -1;
-		}
+    //uint16_t dport = get_destport(buf);
+    //	nlog(MSG_LOG,"van_driver_sendto","pre buildPacket dport=%d",dport);
+    //	nlog(MSG_LOG,"van_driver_sendto","about to call buildPacket.  size=%d", size);
+    packet_size = buildPacket(node, buf, size, to, &packet, proto);
 
-		nlog(MSG_LOG,"sendto","Attempting to send this packet (size %d) out along interface %d", packet_size, r->iface);
-		
-		p->iface = r->iface;
-		p->packet = packet;
-		p->packet_size = packet_size;
-		p->addr_type = r->type;
-		
-		bqueue_enqueue(node->sending_q, (void*)p);
+    //dport = get_destport(packet+8);
+    //	nlog(MSG_LOG,"van_driver_sendto","get_destport=%d", dport);
 
-		// retval = van_node_send(node->van_node, r->iface, packet, packet_size, 0, &addr);
-		// printf("Retval = %d\n", retval);
-		// forward this along to another host
-		//
-	}
-	
-	return packet_size - HEADER_SIZE;
+    if (packet_size > mtu) {
+      nlog(MSG_WARNING, "sendto", "WARNING Will not send this packet -- TOO BIG");
+      free(packet);
+      return -1;
+    }
+
+    nlog(MSG_LOG,"sendto","Attempting to send this packet (size %d) out along interface %d", packet_size, r->iface);
+
+    p->iface = r->iface;
+    p->packet = packet;
+    p->packet_size = packet_size;
+    p->addr_type = r->type;
+
+    bqueue_enqueue(node->sending_q, (void*)p);
+
+    // retval = van_node_send(node->van_node, r->iface, packet, packet_size, 0, &addr);
+    // printf("Retval = %d\n", retval);
+    // forward this along to another host
+    //
+  }
+
+  return packet_size - HEADER_SIZE;
 }
 
 int van_driver_recvfrom (ip_node_t *node, char *buf, int size) {
-	char *data;
-	int data_size;
+  char *data;
+  int data_size;
 
-	// this will block;
-	bqueue_dequeue(node->receiving_q, (void**)&data);
-	data_size = get_total_len(data) - HEADER_SIZE ;
-	nlog(MSG_LOG,"recvfrom","data_size=%d", data_size);
-	nlog(MSG_LOG,"recvfrom","get_total_len=%d", get_total_len(data));
+  // this will block;
+  bqueue_dequeue(node->receiving_q, (void**)&data);
+  data_size = get_total_len(data) - HEADER_SIZE ;
+  nlog(MSG_LOG,"recvfrom","data_size=%d", data_size);
+  nlog(MSG_LOG,"recvfrom","get_total_len=%d", get_total_len(data));
 
-	if (size < data_size) {
-		data_size = size;
-	}
+  if (size < data_size) {
+    data_size = size;
+  }
 
-	//dump_bits(data, (data_size + 8)*8);	
+  //dump_bits(data, (data_size + 8)*8);	
 
-	memcpy(buf, data+HEADER_SIZE, data_size);
-	free(data);
-	return data_size;
+  memcpy(buf, data+HEADER_SIZE, data_size);
+  free(data);
+  return data_size;
 }
 
 
@@ -1021,14 +1062,14 @@ void entry_to_vaddr(rtable_entry_t* entry, vanaddr_t* vaddr) {
 }
 
 rtable_entry_t* lookup_route(ip_node_t *node, int addr) {
-	rtable_entry_t *to_return =  rtable_get(node->route_table, addr);
-	if (!to_return) { return NULL; }
-	if (to_return->cost >= INFINITY) return NULL; else return to_return;
+  rtable_entry_t *to_return =  rtable_get(node->route_table, addr);
+  if (!to_return) { return NULL; }
+  if (to_return->cost >= INFINITY) return NULL; else return to_return;
 }
 
 int update_route(ip_node_t *node, int addr, int iface, int cost, int next_hop) {
-	int to_return;	
-	rtable_entry_t *route = lookup_route(node, addr);
+  int to_return;	
+  rtable_entry_t *route = lookup_route(node, addr);
 	if (!route) { add_route(node, addr, iface, cost, next_hop); return 1;}
 	else {
 		to_return = (route->iface != iface) || (route->cost != cost) || (route->next_hop != next_hop);
