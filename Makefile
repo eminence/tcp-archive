@@ -27,7 +27,7 @@ VAN_DRIVER_LIBS	= -lvan2 -lform -lmenu -lpanel -lncurses
 IP_DRIVER_LIBS	= -l$(PROJECT) -lutil
 IP_LIBRARY_LIBS	= -lvan2 -lpthread -lutil -lrt -ldl -lm -lform -lmenu -lpanel -lncurses
 
-all: $(LIBRARY) $(IP_DRIVER) $(VAN_DRIVER)
+all: $(LIBRARY) $(IP_DRIVER) $(VAN_DRIVER) tags
 
 $(VAN_DRIVER): $(VAN_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(VAN_OBJECTS) $(VAN_DRIVER_LIBS)
