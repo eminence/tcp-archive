@@ -86,6 +86,10 @@ int build_tcp_packet(char *data, int data_size,
 	set_destport(*header, dest_port);
 	set_seqnum(*header, seq_num);
 	set_acknum(*header, ack_num);
+
+  assert(get_seqnum(*header) == seq_num);
+  assert(get_acknum(*header) == ack_num);
+
 	set_flags(*header, flags);
 	set_window(*header, window);
 

@@ -133,8 +133,7 @@ void *tcp_thread(void* arg) {
 		flags = get_flags(ip_to_tcp(packet));
 
 		nlog(MSG_LOG, "tcp", "source = %d, dest = %d, src_port = %d, dest_port = %d, flags = %s%s%s%s , window = %d, len = %d, seqnum=%d, acknum=%d",
-			src, dest, src_port, dest_port, flags & TCP_FLAG_SYN ? " SYN" : "", flags & TCP_FLAG_ACK ? " ACK" : "", flags & TCP_FLAG_RST ? " RST" : "", flags & TCP_FLAG_FIN ? " FIN" : "",
-			get_seqnum(ip_to_tcp(packet)), get_acknum(ip_to_tcp(packet)) );
+			src, dest, src_port, dest_port, flags & TCP_FLAG_SYN ? " SYN" : "", flags & TCP_FLAG_ACK ? " ACK" : "", flags & TCP_FLAG_RST ? " RST" : "", flags & TCP_FLAG_FIN ? " FIN" : "", get_window(ip_to_tcp(packet)), get_data_len(packet), get_seqnum(ip_to_tcp(packet)), get_acknum(ip_to_tcp(packet)));
 
 
 		tcp_socket_t *sock = socktable_get(node->tuple_table, dest, dest_port, src, src_port, FULL_SOCKET);
