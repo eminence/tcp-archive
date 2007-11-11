@@ -75,6 +75,11 @@ int main( int argc, char* argv[] ) {
 				display_msg("v_socket() returned %d", retval);
 				break;
 
+			case KEY_NPAGE:
+			case KEY_PPAGE:
+				scroll_logwin(i);
+				break;
+
 			case KEY_DOWN:
 			case KEY_UP:
 			case ' ':

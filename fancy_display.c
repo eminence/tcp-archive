@@ -27,17 +27,24 @@ void update_link_line(int line, int state) {
 }
 
 void scroll_logwin(int i) {
-	/*switch (i) {
-		case KEY_UP:
-			wscrl(output.log_win,-1);
-			update_panels(); doupdate();
-			break;
-		case KEY_DOWN:
-			wscrl(output.log_win,1);
-			update_panels(); doupdate();
-			break;
+	pthread_mutex_lock(&output.lock);
 
-	}*/
+
+	//	switch (i) {
+	//		case KEY_NPAGE:
+	//			if (output.logwin_scroll >= 0) {
+	//				wscrl(output.log_win,-1);
+	//				output.logwin_scroll += 1;
+	//				update_panels(); doupdate();
+	//			}
+	//			break;
+	//		case KEY_PPAGE:
+	//			wscrl(output.log_win,1);
+	//			output.logwin_scroll += -1;
+	//			update_panels(); doupdate();
+	//			break;
+	//	}
+	pthread_mutex_unlock(&output.lock);
 }
 
 void nlog_set_menu(const char *msg, ...) {
@@ -396,7 +403,9 @@ int init_display(int use_curses) {
 		leaveok(stdscr, FALSE);
 		keypad(stdscr, TRUE);
 
-		output.log_win = newwin(LINES/2, COLS, LINES/2, 0);
+		output.logwin_scroll = 0;
+
+		output.log_win = newwin(2*LINES/3, COLS, LINES/3, 0);
 		mvwhline(output.log_win,0,0,0,COLS); //box(output.log_win, 0, 0);
 		mvwaddch(output.log_win,0,0,ACS_LLCORNER);
 		output.log_pan = new_panel(output.log_win);
@@ -427,7 +436,7 @@ int init_display(int use_curses) {
 		wbkgd(output.menu_win, COLOR_PAIR(MENU_COLOR));
 		wattron(output.menu_win, COLOR_PAIR(MENU_COLOR));
 
-		output.link_win = newwin(LINES/2, 12, 1, COLS-12);
+		output.link_win = newwin(LINES/3, 12, 1, COLS-12);
 		output.link_pan = new_panel(output.link_win);
 
 		wbkgd(output.link_win, COLOR_PAIR(DEFAULT_COLOR));
@@ -440,20 +449,20 @@ int init_display(int use_curses) {
 		mvwprintw(output.link_win, 0,1,"Link State\n");
 		wmove(output.link_win,0,0);
 
-		output.tab_win = newwin(LINES/2-1, COLS-12, 1,0);
+		output.tab_win = newwin(LINES/3-1, COLS-12, 1,0);
 		output.tab_pan = new_panel(output.tab_win);
 
-		mvwvline(output.tab_win,0,0,0,LINES/2 -1);
+		mvwvline(output.tab_win,0,0,0,LINES/3 -1);
 		switch_to_tab(1);
 
 											/*height, width, starty, start */
-		output.rtable_win = newwin(LINES/2-1-3, COLS-12-1, 4,1);
+		output.rtable_win = newwin(LINES/3-1-3, COLS-12-1, 4,1);
 		output.rtable_pan = new_panel(output.rtable_win);
 		leaveok(output.rtable_win, FALSE);
 		//mvwvline(output.rtable_win,0,0,0,LINES/2 -1-3);
 		mvwprintw(output.rtable_win,0,1,"rtable window");
 
-		output.tcp_win = newwin(LINES/2-1-3, COLS-12-1, 4,1);
+		output.tcp_win = newwin(LINES/3-1-3, COLS-12-1, 4,1);
 		output.tcp_pan = new_panel(output.tcp_win);
 		//mvwvline(output.tcp_win,0,0,0,LINES/2 -1-3);
 		mvwprintw(output.tcp_win,0,1,"tcp window");
@@ -578,17 +587,22 @@ void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *t
 	va_start(args, text);
 	pthread_mutex_lock(&output.lock);
 
+
+
+
 	if (c) {
 		int color;
 		if (msg == MSG_LOG) color = COLOR_PAIR(MSG_LOG_COLOR);
 		if (msg == MSG_WARNING) color = COLOR_PAIR(MSG_WARNING_COLOR);
 		if (msg == MSG_ERROR) color = COLOR_PAIR(MSG_ERROR_COLOR);
 
+		wscrl(output.log_win,output.logwin_scroll);
+
 		char lineno[5];
 		int linenol,y,x;
 		assert(log);
 		//wscrl(log, 1);
-		wmove(log, (LINES/2)-1, 0);
+		wmove(log, (2*LINES/3)-1, 0);
 
 		wattron(log, A_BOLD);
 		wprintw(log,"[%s] ",slug);
@@ -610,6 +624,9 @@ void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *t
 		wattroff(log,color);
 		mvwhline(log,0,0,0,COLS);//box(log, 0, 0);
 		mvwaddch(output.log_win,0,0,ACS_LLCORNER);
+
+		wscrl(output.log_win, -output.logwin_scroll);
+
 		update_panels(); doupdate();
 
 	} else {

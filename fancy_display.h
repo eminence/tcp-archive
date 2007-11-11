@@ -35,6 +35,8 @@ typedef struct {
 	WINDOW *link_win;
 	PANEL *link_pan;
 
+	int logwin_scroll;
+
 	char *tabs[3];
 
 	int toptab;
