@@ -70,12 +70,18 @@ int dataFromNetworkToBuffer(tcp_socket_t *sock, char *data, int size) {
 /* when we get a window announcement, pass the window into this function */
 void updateFromWindowAccounce(tcp_socket_t *sock, int window) {
 	sock->remote_flow_window = sock->send_next + window;
-
+		/* XXX we might want to use send_una instead of send_next */
 }
 
 /* do we have room in our cbuffer to accept new data to send from the user */
 int canAcceptDataToSend(tcp_socket_t *sock, int size) {
 	return (sock->send_una + sock->send_window_size - sock->send_written) > 0;
+}
+
+/*  return the amount of data we can accept into our cbuffer */
+int getAmountAbleToAccept(tcp_socket_t *sock) {
+	return (sock->send_una + sock->send_window_size - sock->send_written);
+
 }
 
 /* return the amount of data we have in our cbuff that we can send out in a tcp packet */

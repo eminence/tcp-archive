@@ -70,7 +70,7 @@ void nlog_set_menu(const char *msg, ...) {
 
 void display_msg(char *msg, ...) {
 	va_list args;
-	int l = strlen(msg);
+	//int l = strlen(msg);
 	WINDOW *my_form_win;
 	PANEL *my_form_pan;
 
@@ -80,8 +80,12 @@ void display_msg(char *msg, ...) {
 		if (msg[++c] == '\n') n++;
 	}
 
+	char tmp[1024];
 
 	va_start(args,msg);
+
+	vsnprintf(tmp, 1024, msg, args);
+	int l = strlen(tmp);
 
 	/* Create the window to be associated with the form */
 	my_form_win = newwin(3+n, 2 + l, LINES/2 - (3/2), COLS/2 - ((l+2)/2));
@@ -116,7 +120,7 @@ void display_msg(char *msg, ...) {
 
 
 
-int get_text(char *msg, char* buf, int len) {
+int get_text(char *msg, char* return_, int len) {
 	
 	FIELD *field[2];
 	FORM  *my_form;
@@ -126,8 +130,9 @@ int get_text(char *msg, char* buf, int len) {
 	PANEL *my_form_pan;
 	char *buff = NULL;
 
+
 	/* Initialize the fields */ /* height, width, toprow, leftcol, offscreen, buffs*/
-	field[0] = new_field(2, 15, 1, 1, 0, 0);
+	field[0] = new_field(6, 42, 1, 1, 0, 0);
 	field[1] = NULL;
 
 	/* Set field options */
@@ -187,7 +192,7 @@ int get_text(char *msg, char* buf, int len) {
 				/* If this is a normal character, it gets */
 				/* Printed				  */	
 				form_driver(my_form, ch);
-				//form_driver(my_form, REQ_VALIDATION);
+				form_driver(my_form, REQ_VALIDATION);
 				//form_driver(my_form, REQ_);
 				break;
 		}
@@ -196,9 +201,18 @@ int get_text(char *msg, char* buf, int len) {
 	buff = field_buffer(field[0],0);
 	assert(buff);
 	//printf(buff);
-	//sscanf(buff,"%d", &num);
-	memcpy(buf, buff, 15);
+	int i = 0;
+	int start,end;
+	for (i = 0; i < 252; i++) { /* strip leading space characters */
+		if (buff[i] != ' ') { start = i; break; }	
+	}
+	for (i = 251; i >= 0; i--) { /* strip trailing space characters */
+		if (buff[i] != ' '){ end = i; break; }	
+	}
+	memset(return_,0,len);
+	memcpy(return_, buff+start, end-start);
 
+	//nlog(MSG_LOG,"GETTEXT", "start=%d (buff[0]=%p=%p)  end=%d", start, buff[0],' ', end);
 
 	/* Un post form and free the memory */
 	unpost_form(my_form);
@@ -208,7 +222,7 @@ int get_text(char *msg, char* buf, int len) {
 	delwin(my_form_win);
 	update_panels(); doupdate();
 
-	return 15;
+	return end-start;
 }
 
 

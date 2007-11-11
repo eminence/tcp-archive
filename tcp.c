@@ -11,6 +11,7 @@
 #include "tcpstate.h"
 #include "socktable.h"
 #include "ippacket.h"
+#include "seq.h"
 
 static ip_node_t *this_node;
 
@@ -31,7 +32,7 @@ int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) 
 	char *packet;
 
 	int packet_size = build_tcp_packet(data_buf, bufsize, sock->local_port, sock->remote_port ,
-			sock->seq_num, /*ack*/ sock->ack_num, flags, SEND_WINDOW_SIZE, &packet);
+			sock->seq_num, /*ack*/ sock->ack_num, flags, sock->send_window_size, &packet);
 
 	nlog(MSG_LOG,"tcp_sendto", "now have a packet of size %d ready to be sent to dest_port %d", 
 			packet_size, sock->remote_port);
@@ -144,6 +145,7 @@ int sys_socket(int clone) {
 
 	sock->machine = tcpm_new(sock, clone); 
 
+	/* see tcp.h for some descriptions of what these are */
 	sock->fd = s;
 	sock->local_port = rand()%65535;
 	sock->remote_port = 0;
@@ -155,6 +157,16 @@ int sys_socket(int clone) {
 	sock->parent = NULL;
 	sock->cond_status = 0;
 	sock->last_packet = 0;
+	sock->send_window_size = SEND_WINDOW_SIZE;
+	sock->recv_window_size = SEND_WINDOW_SIZE;
+
+	sock->send_una = 0;
+	sock->send_next = 0;
+	sock->send_written = 0;
+	sock->remote_flow_window = 0;
+
+	sock->recv_next = 0;
+	sock->recv_read = 0;
 
 	tcp_table_new(this_node, s);	
 
@@ -271,10 +283,20 @@ int v_read(int socket, unsigned char *buf, int nbyte) {
 
 /* write on an open socket
  * retursn num bytes written or negative number on failure */
-int v_write(int socket, const unsigned char *buf, int nbyte) {
+int v_write(int socket, const unsigned char *buf, int nbytes) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
 
-	return 0;
+	int can_send = getAmountAbleToAccept(sock);
+	int will_send = MIN(can_send, nbytes);
+
+	nlog(MSG_LOG,"v_write", "have room to accept %d bytes of data.  Will send %d bytes", can_send, will_send);
+
+	copyDataFromUser(sock, buf, will_send);
+
+	can_send = getAmountAbleToAccept(sock);
+	nlog(MSG_LOG,"v_write", "now, postwrite, can accept %d of data", can_send);
+
+	return will_send;
 }
 
 /* close an open socket

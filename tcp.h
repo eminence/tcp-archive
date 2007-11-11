@@ -40,14 +40,13 @@ typedef struct tcp_socket__ {
 	int send_next; /* data before this is send, but unakced.   after this is not sent, but OK to send */
 	int send_written; /* points to the next location in the buffer we can write incoming data */
 
-	int send_window_size; /* sender window size */
-
 	int remote_flow_window; /* the point were we cant send any more due to the remote side flowing off */
 
 	int recv_next; /* data before this already recvd and ackd.  after this, not yet, but ok to receive*/
 	int recv_read; /* points to the next data in the buffer to be returned via a v_read() call.  any data before this can be overwritten */
 
 	int recv_window_size;
+	int send_window_size; /* our window size we advertize in outgoing packets */
 
 	time_t last_packet; /* set this to time(NULL) when you're expecting a timely reply. a clocktick thread will alert someone of something when something happens */
 	

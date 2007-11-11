@@ -26,6 +26,7 @@ int dataFromNetworkToBuffer(tcp_socket_t *sock, char *data, int size);
 
 int canAcceptDataToSend(tcp_socket_t *sock, int size);
 int getAmountAbleToSend(tcp_socket_t *sock);
+int getAmountAbleToAccept(tcp_socket_t *sock);
 void gotAckFor(tcp_socket_t *sock, int start, int len);
 int copyDataFromUser(tcp_socket_t *sock, char *data, int size);
 void unackData(tcp_socket_t *sock, int size);

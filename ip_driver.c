@@ -51,7 +51,7 @@ int main( int argc, char* argv[] ) {
 		memset(buf,0,80);
 		//err = read(STDIN_FILENO, buf, 80);
 		//if( err <= 0 ) { printf("\n"); break; }
-		buf[79] = 0;
+		buf[256] = 0;
 
 		//sscanf(buf, "%d", &i);
 		i = get_key();
@@ -92,7 +92,7 @@ int main( int argc, char* argv[] ) {
 
 			case 'b':
 				{
-					int socket, node;
+					int socket;
 					uint16_t port;
 					socket = get_fd_from_menu();
 					if (socket == -1) {
@@ -151,7 +151,7 @@ int main( int argc, char* argv[] ) {
 				}
 
 				break;
-			case '1':
+			case '2':
 				/* read */
 
 				//retval = van_driver_recvfrom(node, data, 1000);
@@ -161,18 +161,26 @@ int main( int argc, char* argv[] ) {
 				display_msg("Function Not Yet Implemented");
 				break;
 
-			case '2':
+			case '1':
 				/* write */
-				in = get_number("Dest node:" );
-				//scanf( "%d", &in );
+				{
+					int socket = get_fd_from_menu();
+					if (socket == -1) {
+						display_msg("Please select/create a socket first!"); break;
+					} else {
+						int len = get_text( "Message:", buf, 256);
+						display_msg("You entered %d(%d) characters: %s", strlen(buf),len, buf);
 
-				//printf( "Message: " );
-				int len = get_text( "Message:", buf, 256);
-				//scanf( "%s", buf );
-				retval = van_driver_sendto(node, buf, len, in, PROTO_DATA);
+						retval = v_write(socket,buf, len);
+						display_msg("v_write() returned %d", retval);
+					}
+
+				}
+				break;
+
+				//retval = van_driver_sendto(node, buf, len, in, PROTO_DATA);
 				//printf("van_driver_sendto returned %d\n", retval);
 				//display_msg("Function Not Yet Implemented");
-				break;
 
 			case '3':
 				/* set link status */

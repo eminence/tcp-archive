@@ -159,7 +159,7 @@ void *tcp_send_thread(void* arg) {
 /* tcp thread */
 void *tcp_thread(void* arg) {
 	ip_node_t *node = (ip_node_t*)arg;
-  tcp_socket_t *old_sock;
+	tcp_socket_t *old_sock;
 	char *packet;
 	uint16_t src_port;
 	uint16_t dest_port;
@@ -213,6 +213,9 @@ void *tcp_thread(void* arg) {
 				free(packet);
 
 				continue;
+			} else {
+				// XXX we need to wait until accept is called here.
+
 			}
 
 			/* Construct new full socket. */
@@ -232,6 +235,11 @@ void *tcp_thread(void* arg) {
 
 			socktable_put(node->tuple_table, sock, FULL_SOCKET);
 		}
+
+
+		/* IMPORTANT.  we need this line.  should it go here, though? */
+		sock->remote_flow_window = get_window(ip_to_tcp(packet));
+
 
 		/* If we're in the established state, perform primary communication; else, handshake*/
     if(tcpm_estab(sock->machine)) {
