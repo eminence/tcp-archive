@@ -117,10 +117,10 @@ void v_tcp_init(ip_node_t *node) {
 		this_node->socket_table[x] = NULL;
 	}
 
-  nlog(MSG_LOG, "v_tcp_init", "Creating tuple table.");
 
 	node->tuple_table = malloc(sizeof(socktable_t));
 	socktable_init(node->tuple_table);
+	nlog(MSG_LOG, "v_tcp_init", "Creating tuple table: %p", node->tuple_table);
 }
 
 int sys_socket(int clone) {
@@ -149,7 +149,8 @@ int sys_socket(int clone) {
 	sock->local_node = this_node;
 	sock->can_handshake = 0;
 	sock->parent = NULL;
-  sock->cond_status = 0;
+	sock->cond_status = 0;
+	sock->last_packet = 0;
 
 	tcp_table_new(this_node, s);	
 

@@ -108,6 +108,48 @@ int set_if_state(ip_node_t *node, int iface, int link_state) {
 	return link_state;
 }
 
+/* tcp wathdog thread */
+void *tcp_watchdog(void *arg) {
+	ip_node_t *node = (ip_node_t*)arg;
+	assert(arg);
+
+	int i;
+
+	while (1) {
+		sleep(1); /* every second check our list of sockets */
+		for (i = 0; i < MAXSOCKETS; i++) {
+			if (node->socket_table[i] == NULL) continue;
+			tcp_socket_t *sock = node->socket_table[i];
+			if ((sock->last_packet > 0) && (time(NULL) - sock->last_packet > 4/*XXX*/)) {
+				nlog(MSG_WARNING, "tcp_watchdog", "Watchdog timer on socket %d.  Doing something about it...", sock->fd);
+				
+				if (tcpm_state(sock->machine) == ST_SYN_SENT) {
+					/* we havn't gotten a SYNACK, so resend the SYN */
+					nlog(MSG_WARNING, "tcp_watchdog", "We're in SYN_SENT.  assuming packetloss, and retransmitting the SYN");
+					send_packet_with_flags(0, 0, (void*)sock, alloc_flags(TCP_FLAG_SYN), NULL); /* TODO i feel dirty doingn this.  BDiamond:  fix this pls kthx :) */
+					
+				} else if (tcpm_state(sock->machine) == ST_SYN_RCVD) {
+					/* we haven't gotten an ACK, so resend the SYNACK */
+					nlog(MSG_WARNING, "tcp_watchdog", "We're in SYN_RCVD.  assuming packetloss, and retransmitting the SYNACK");
+					send_packet_with_flags(0, 0, (void*)sock, alloc_flags(TCP_FLAG_SYN | TCP_FLAG_ACK), NULL); /* TODO i feel dirty doingn this.  BDiamond:  fix this pls kthx :) */
+		
+				} else {
+					nlog(MSG_WARNING, "tcp_watchdog", "We're in state %s, but not sure what to do!  Disabling watchdog for now...", tcpm_strstate(tcpm_state(sock->machine)));
+					sock->last_packet = 0;
+				}
+
+
+			}
+
+
+		}
+
+
+
+	}
+
+}
+
 /* tcp send thread */
 void *tcp_send_thread(void* arg) {
   pthread_exit(NULL);
@@ -795,12 +837,16 @@ ip_node_t *van_driver_init(char *fname, int num) {
 	node->tcp_send_thread = malloc(sizeof(pthread_t));
 	pthread_create(node->tcp_send_thread, 0, tcp_send_thread, (void*)node);
 
+	node->tcp_watchdog = malloc(sizeof(pthread_t));
+	pthread_create(node->tcp_watchdog, 0, tcp_watchdog, (void*)node);
+
+	// init TCP stufffs:
+	v_tcp_init(node);
+
 	nlog (MSG_LOG,"init","Node %d running", vn->vn_num);	
 	nlog_set_menu("[node %d]  1:Send data   2:Receive Data   3:Toggle Link State   q:Quit", vn->vn_num);
 	// start sending thread
 	
-	// init TCP stufffs:
-	v_tcp_init(node);
 
 	return node;
 

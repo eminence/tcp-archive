@@ -18,6 +18,15 @@ int send_packet_with_flags(sid_t prev, sid_t next, void* context, void *arg, voi
   /* Use special case sequence number increase. */
 	tcp_sendto(sock, NULL, 0, flags);
 
+	/* as long as the packet is not a pure ACK (where pure ACK == only ACK, and no payload), then
+	 * we'll be expecting a reply for this packet */
+	if (flags != TCP_FLAG_ACK) {
+		sock->last_packet = time(NULL);
+	} else {
+		sock->last_packet = 0;
+
+	}
+
 	return 0; // FIXME XXX TODO
 }
 

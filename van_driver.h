@@ -38,6 +38,7 @@ typedef struct ip_node__ {
 	bqueue_t *tcp_q;
 	pthread_t *tcp_thread;
 	pthread_t *tcp_send_thread;
+	pthread_t *tcp_watchdog;
   
   /* Let the fun begin. */
   struct tcp_socket__ *socket_table[MAXSOCKETS];
