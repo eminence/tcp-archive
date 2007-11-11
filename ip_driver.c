@@ -86,6 +86,10 @@ int main( int argc, char* argv[] ) {
 				handle_tcp_menu_input(i);
 				break;
 
+			case '-':
+				test_tcp_menu_update();
+				break;
+
 			case 'b':
 				{
 					int socket, node;

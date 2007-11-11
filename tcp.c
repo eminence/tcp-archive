@@ -149,6 +149,7 @@ int sys_socket(int clone) {
 	sock->local_port = rand()%65535;
 	sock->local_node = this_node;
 	sock->can_handshake = 0;
+	sock->parent = NULL;
 
 	tcp_table_new(this_node, s);	
 
@@ -243,7 +244,7 @@ int v_accept(int socket) {
 	
 	sock->can_handshake = 0;
 
-	tcp_table_new(this_node, sock->new_fd);
+	//tcp_table_new(this_node, sock->new_fd);
 
 	return sock->new_fd;
 

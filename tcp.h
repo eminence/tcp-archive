@@ -28,6 +28,7 @@ typedef struct tcp_socket__ {
 	int cond_status;
 
 	int new_fd;
+	struct tcp_socket__ *parent;
 
 } tcp_socket_t;
 

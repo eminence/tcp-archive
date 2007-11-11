@@ -148,7 +148,7 @@ void *tcp_thread(void* arg) {
 
 			sock = socktable_get(node->tuple_table, dest, dest_port, 0, 0, HALF_SOCKET);
 
-      /* Pwnz0r. */
+			/* Pwnz0r. */
 			if (sock == NULL) {
 				nlog(MSG_ERROR,"tcp_thread", "Ok, not a half socket either.  Discarding.");
 				assert(packet);
@@ -156,29 +156,29 @@ void *tcp_thread(void* arg) {
 
 				continue;
 			} 
-			
-      /* TODO: THIS IS WRONG!! AFTER FINDING HALF SOCK, NEED TO SLEEP UNTIL ACCEPT IS CALLED (IF IT HASNT ALREADY BEEN CALLED.*/
-		
+
+			/* TODO: THIS IS WRONG!! AFTER FINDING HALF SOCK, NEED TO SLEEP UNTIL ACCEPT IS CALLED (IF IT HASNT ALREADY BEEN CALLED.*/
+
 			/* Found half-socket. Ensure ready for accept. */
-      if(!sock->can_handshake) {
-        nlog(MSG_ERROR, "tcp_thread", "Found a half socket, but socket not in accept state. Discarding.");
+			if(!sock->can_handshake) {
+				nlog(MSG_ERROR, "tcp_thread", "Found a half socket, but socket not in accept state. Discarding.");
 				assert(packet);
 				free(packet);
 
-        continue;
-      }
-  
-      /* Construct new full socket. */
-      sock->new_fd = sys_socket(1);
-      
-      old_sock = sock;
-      sock = get_socket_from_int(sock->new_fd);
-      
-      assert(sock);
-      
-      sock->parent = old_sock;
-      sock->local_node = old_sock->local_node;
-      sock->local_port = old_sock->local_port;
+				continue;
+			}
+
+			/* Construct new full socket. */
+			sock->new_fd = sys_socket(1);
+
+			old_sock = sock;
+			sock = get_socket_from_int(sock->new_fd);
+
+			assert(sock);
+
+			sock->parent = old_sock;
+			sock->local_node = old_sock->local_node;
+			sock->local_port = old_sock->local_port;
 			sock->remote_port = src_port;
 			sock->remote_node = src;
 

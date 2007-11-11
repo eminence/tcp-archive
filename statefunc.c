@@ -76,7 +76,7 @@ void notify(tcp_socket_t *sock, int status) {
 	nlog(MSG_LOG,"notify", "attempting to get socket lock");
 	pthread_mutex_lock(&sock->lock);
 	sock->cond_status = status;
-	nlog(MSG_LOG,"notify", "calling pthread_cond_signal");
+	nlog(MSG_LOG,"notify", "calling pthread_cond_signal (for socket %d)", sock->fd);
 	pthread_cond_signal(&sock->cond);
 	pthread_mutex_unlock(&sock->lock);
 

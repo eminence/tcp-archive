@@ -6,6 +6,7 @@
 
 #include "tcp.h"
 #include "van_driver.h"
+#include "tcpstate.h"
 
 static curses_out_t output;
 
@@ -197,6 +198,25 @@ int get_text(char *msg, char* buf, int len) {
 	return 15;
 }
 
+
+void test_tcp_menu_update() {
+	//ITEM *curitem = current_item(output.tcp_menu);
+
+	//char *new_text = malloc(64)
+
+	//sprintf(new_text, "State: %d",sock)
+
+	//curitem->description.str="new_txt;
+	//curitem->description.length=strlen(new_text);
+
+	unpost_menu(output.tcp_menu);
+	post_menu(output.tcp_menu);
+
+	redrawwin(output.menu_win);
+	update_panels(); doupdate();
+
+}
+
 void tcp_table_new(ip_node_t *node, int fd) {
 
 	output.tcp_menu_num_items++;
@@ -231,18 +251,33 @@ void tcp_table_new(ip_node_t *node, int fd) {
 	update_panels(); doupdate();
 }
 
-void update_tcp_table(ip_node_t *node) {
-	assert(node);
-	tcp_socket_t **socket_table = node->socket_table;
-	assert(socket_table);
-	
-	int i;
-	int num_open_sockets = 0;
-	for (i = 0; i < MAXSOCKETS; i++) {
-		if (socket_table[i] != NULL) {
-			num_open_sockets++;
-			//output.tcp_items[i]
+void update_tcp_table(tcp_socket_t *sock) {
+	assert(sock);
+
+	nlog(MSG_LOG,"update_tcp_table", "updating tcp table");
+
+	// find the menu item associtated with this socket:
+	int i = 0;
+	while (output.tcp_items[i] != NULL) {
+		if (item_userptr(output.tcp_items[i]) == (void*)sock) {
+			// update!
+
+
+			char * new_text = malloc(40);
+			sprintf(new_text,"State: %d", tcpm_state(sock->machine));
+
+			output.tcp_items[i]->description.str=new_text;
+			output.tcp_items[i]->description.length=strlen(new_text);
+
+			unpost_menu(output.tcp_menu);
+			post_menu(output.tcp_menu);
+
+			redrawwin(output.menu_win);
+			update_panels(); doupdate();
+			break;
 		}
+		i++;
+
 	}
 
 
