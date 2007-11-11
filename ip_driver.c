@@ -127,6 +127,21 @@ int main( int argc, char* argv[] ) {
 					}
 				}
 				break;
+
+
+			case 'a': /*accept*/
+				{
+					int socket = get_fd_from_menu();
+					if (socket == -1) {
+						display_msg("Please select/create a socket first!"); break;
+					} else {
+						retval = v_accept(socket);
+						display_msg("v_accept() returned %d", retval);
+					}
+
+				}
+
+				break;
 			case '1':
 				/* read */
 

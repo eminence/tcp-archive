@@ -230,7 +230,7 @@ int v_connect(int socket, int node, uint16_t port) {
 /* accept a requested connection
  * returns new socket handle on success or negative number on failure
  * NOTE: this function will block */
-int v_accept(int socket, int *node) {
+int v_accept(int socket) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
 
 	// TODO make sure we can call accept
@@ -239,6 +239,8 @@ int v_accept(int socket, int *node) {
 
 	int status = wait_for_event(sock, TCP_NEWSOCKET);
 	
+	tcp_table_new(this_node, sock->new_fd);
+
 	return sock->new_fd;
 
 }

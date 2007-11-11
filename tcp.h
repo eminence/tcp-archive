@@ -37,7 +37,7 @@ int v_socket();
 int v_bind(int socket, int node, uint16_t port);
 int v_listen(int socket, int backlog /* optional */);
 int v_connect(int socket, int node, uint16_t port);
-int v_accept(int socket, int *node);
+int v_accept(int socket);
 int v_read(int socket, unsigned char *buf, int nbyte);
 int v_write(int socket, const unsigned char *buf, int nbyte);
 int v_close(int socket);
