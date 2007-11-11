@@ -1,0 +1,43 @@
+
+v_write(char *data, int size):
+	- write as much of 'data' into our local buffer as we can.
+	- return the numbers of bytes written.
+
+sender_thread:
+	if we have data in our buffer to send:
+		- gather some data, and pack it into a packet
+		- mark that data as 'sent, but not acked' (aka, move a pointer to right after the data
+		- seqnum += length(data_just_sent)        (seqnum is the seqnum we will next on next packet)
+	if not:
+	 	- sleep for a little bit 
+
+
+
+
+
+		
+recieving:
+
+
+receiving thread:
+	pull some data off the network.
+	if the sequence number is OK, then 
+		continue.
+	if not and the sequence number is within our receive window:
+		save the data in our buffer, and send back an ACK packet, with acknum equal to the sequence number we expect to receive next
+	if not and the sequence number is not within our receive window:
+		drop the packet and send bank an ACK packet, with acknum equal to the sequence number we expect to receive next
+
+
+	continue:
+		copy the incoming data into our local buffer
+		update our window value:  sock.windowsize -= length(incoming_data)
+		send out an ACK for this incoming packet:  acknum = incomingpacket.seqnum + length(incoming_data)
+
+
+
+v_read():
+	if there is data in our buffer, give it to the user
+	update pointers.
+	windowsize += length(data_given_to_user)
+
