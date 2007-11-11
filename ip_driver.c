@@ -90,10 +90,10 @@ int main( int argc, char* argv[] ) {
 						display_msg("Please select/create a socket first!"); break;
 					} else {
 						
-						node = get_number("enter this node number");
+						//node = get_number("enter this node number");
 						port = get_number("Local port to bind to");
 						nlog(MSG_LOG, "socket", "binding socket %d to local port %d", socket, port);
-						retval = v_bind(socket, node, port);
+						retval = v_bind(socket, nodenum, port);
 						display_msg("v_bind() returned %d", retval);
 					}
 				}
@@ -104,7 +104,6 @@ int main( int argc, char* argv[] ) {
 					if (socket == -1) {
 						display_msg("Please select/create a socket first!"); break;
 					} else {
-						display_msg("Using socket %d", socket);
 						retval = v_listen(socket, 0);
 						display_msg("v_listen() returned %d", retval);
 					}

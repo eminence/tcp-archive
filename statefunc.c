@@ -13,8 +13,7 @@ int send_packet_with_flags(sid_t prev, sid_t next, void* context, void *arg, voi
 	assert(arg);
 	uint8_t flags = *(uint8_t*)arg;
 
-	nlog(MSG_LOG,"state:SPWF", "in send_packet_with_flags, with socket %d", sock->fd);
-	nlog(MSG_LOG,"state:SPWF", "flags are: %p", flags);
+	nlog(MSG_LOG,"state:SPWF", "in send_packet_with_flags, with socket %d flags are %p", sock->fd, flags);
 
   /* Use special case sequence number increase. */
 	tcp_sendto(sock, NULL, 0, flags, FALSE);
@@ -31,9 +30,9 @@ int do_listen(sid_t prev, sid_t next, void* context, void *arg, void *tran_arg) 
 	assert(node);
 
 	socktable_put(node->tuple_table, sock, HALF_SOCKET);
-	nlog(MSG_LOG,"do_listen", "just called socktable_put.  i hope it worked");
-	socktable_dump(node->tuple_table, FULL_SOCKET);
-	socktable_dump(node->tuple_table, HALF_SOCKET);
+	//nlog(MSG_LOG,"do_listen", "just called socktable_put.  i hope it worked");
+	//socktable_dump(node->tuple_table, FULL_SOCKET);
+	//socktable_dump(node->tuple_table, HALF_SOCKET);
 
 	return 0;
 }

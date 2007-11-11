@@ -132,12 +132,13 @@ void *tcp_thread(void* arg) {
 		dest = get_dst(packet);
 		flags = get_flags(ip_to_tcp(packet));
 
-		nlog(MSG_LOG, "tcp", "source = %d, dest = %d, src_port = %d, dest_port = %d, flags = %s%s%s%s , window = %d, len = %d",
-			src, dest, src_port, dest_port, flags & TCP_FLAG_SYN ? " SYN" : "", flags & TCP_FLAG_ACK ? " ACK" : "", flags & TCP_FLAG_RST ? " RST" : "", flags & TCP_FLAG_FIN ? " FIN" : "");
+		nlog(MSG_LOG, "tcp", "source = %d, dest = %d, src_port = %d, dest_port = %d, flags = %s%s%s%s , window = %d, len = %d, seqnum=%d, acknum=%d",
+			src, dest, src_port, dest_port, flags & TCP_FLAG_SYN ? " SYN" : "", flags & TCP_FLAG_ACK ? " ACK" : "", flags & TCP_FLAG_RST ? " RST" : "", flags & TCP_FLAG_FIN ? " FIN" : "",
+			get_seqnum(ip_to_tcp(packet)), get_acknum(ip_to_tcp(packet)) );
 
 
 		tcp_socket_t *sock = socktable_get(node->tuple_table, dest, dest_port, src, src_port, FULL_SOCKET);
-		nlog(MSG_LOG,"tcp_thread", "dest=%d, dest_port=%d, src=%d, src_port=%d flags=%d", dest, dest_port, src, src_port, flags);
+		//nlog(MSG_LOG,"tcp_thread", "dest=%d, dest_port=%d, src=%d, src_port=%d flags=%d", dest, dest_port, src, src_port, flags);
 		//nlog(MSG_LOG,"tcp_thread", "about to dump socktable in tcp_thread");
 		//socktable_dump(node->tuple_table, FULL_SOCKET);      
 		//socktable_dump(node->tuple_table, HALF_SOCKET);
@@ -171,7 +172,7 @@ void *tcp_thread(void* arg) {
     } else {
       /* Validate sequence numbers. */
 
-      if(tcpm_firstseq(sock->machine)) {
+      if(tcpm_firstseq(sock->machine)) { /* if we're in LISTEN or SYN_SENT */
         /* Set initial sequence number. */
         sock->seq_num = 1000;
         sock->ack_num = get_seqnum(ip_to_tcp(packet)) + 1;
@@ -877,13 +878,13 @@ int van_driver_sendto (ip_node_t *node, char *buf, int size, int to, uint8_t pro
 		
 		van_node_getifopt(node->van_node, r->iface, VAN_IO_MTU, (char*)&mtu, sizeof(int));
 
-		uint16_t dport = get_destport(buf);
-		nlog(MSG_LOG,"van_driver_sendto","pre buildPacket dport=%d",dport);
-		nlog(MSG_LOG,"van_driver_sendto","about to call buildPacket.  size=%d", size);
+		//uint16_t dport = get_destport(buf);
+	//	nlog(MSG_LOG,"van_driver_sendto","pre buildPacket dport=%d",dport);
+	//	nlog(MSG_LOG,"van_driver_sendto","about to call buildPacket.  size=%d", size);
 		packet_size = buildPacket(node, buf, size, to, &packet, proto);
 
-		dport = get_destport(packet+8);
-		nlog(MSG_LOG,"van_driver_sendto","get_destport=%d", dport);
+		//dport = get_destport(packet+8);
+	//	nlog(MSG_LOG,"van_driver_sendto","get_destport=%d", dport);
 
 		if (packet_size > mtu) {
 			nlog(MSG_WARNING, "sendto", "WARNING Will not send this packet -- TOO BIG");
@@ -891,8 +892,7 @@ int van_driver_sendto (ip_node_t *node, char *buf, int size, int to, uint8_t pro
 			return -1;
 		}
 
-		nlog(MSG_LOG,"sendto","Packet_size: %d (%p)", packet_size, packet);
-		nlog(MSG_LOG,"sendto","Attempting to send this packet out along interface %d", r->iface);
+		nlog(MSG_LOG,"sendto","Attempting to send this packet (size %d) out along interface %d", packet_size, r->iface);
 		
 		p->iface = r->iface;
 		p->packet = packet;
