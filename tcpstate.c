@@ -25,17 +25,17 @@ void* alloc_flags(uint8_t flags) {
 /* Core functionality. */
 tcp_machine_t* tcpm_new(tcp_socket_t* context, uint8_t clone) {
   tcp_machine_t *machine        = malloc(sizeof(tcp_machine_t));
-  state_t       *st_closed      = state_new(ST_CLOSED,      NULL, 		NULL, NULL),
-                *st_syn_sent    = state_new(ST_SYN_SENT,    NULL, 		NULL, NULL),
-                *st_syn_rcvd    = state_new(ST_SYN_RCVD,    NULL, 		NULL, NULL),
-                *st_listen      = state_new(ST_LISTEN,      NULL, 		NULL, NULL),
-                *st_estab       = state_new(ST_ESTAB,       in_estab,	NULL, NULL),
-                *st_fin_wait_1  = state_new(ST_FIN_WAIT1,   NULL, 		NULL, NULL),
-                *st_fin_wait_2  = state_new(ST_FIN_WAIT2,   NULL, 		NULL, NULL),
-                *st_time_wait   = state_new(ST_TIME_WAIT,   NULL, 		NULL, NULL),
-                *st_closing     = state_new(ST_CLOSING,     NULL, 		NULL, NULL),
-                *st_close_wait  = state_new(ST_CLOSE_WAIT,  NULL, 		NULL, NULL),
-                *st_last_ack    = state_new(ST_LAST_ACK,    NULL, 		NULL, NULL);
+  state_t       *st_closed      = state_new(ST_CLOSED,      NULL, 		NULL,             NULL),
+                *st_syn_sent    = state_new(ST_SYN_SENT,    NULL, 		fail_with_reset,  NULL),
+                *st_syn_rcvd    = state_new(ST_SYN_RCVD,    NULL, 		fail_with_reset,  NULL),
+                *st_listen      = state_new(ST_LISTEN,      NULL, 		NULL,             NULL),
+                *st_estab       = state_new(ST_ESTAB,       in_estab,	fail_with_reset,  NULL),
+                *st_fin_wait_1  = state_new(ST_FIN_WAIT1,   NULL, 		NULL,             NULL),
+                *st_fin_wait_2  = state_new(ST_FIN_WAIT2,   NULL, 		NULL,             NULL),
+                *st_time_wait   = state_new(ST_TIME_WAIT,   NULL, 		NULL,             NULL),
+                *st_closing     = state_new(ST_CLOSING,     NULL, 		NULL,             NULL),
+                *st_close_wait  = state_new(ST_CLOSE_WAIT,  NULL, 		NULL,             NULL),
+                *st_last_ack    = state_new(ST_LAST_ACK,    NULL, 		NULL,             NULL);
   
   /* Initialize state machine. */
   if(clone) {

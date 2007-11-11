@@ -48,12 +48,6 @@ void fail_with_reset(sid_t id, void* context, void* args) {
 	return; 
 }
 
-
-void fail_in_estab() {
-
-
-}
-
 int has_status(int bits, int bit) {
 	return (bits & bit) == bit;
 }
