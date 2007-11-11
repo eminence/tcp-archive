@@ -126,7 +126,6 @@ void *tcp_thread(void* arg) {
 		pthread_cleanup_pop(0);
 
 		nlog(MSG_LOG,"tcp", "tcp thread dequeued a tcp packet");
-    old_sock = NULL;
 
 		src_port = get_srcport(ip_to_tcp(packet));
 		dest_port = get_destport(ip_to_tcp(packet));
@@ -177,6 +176,7 @@ void *tcp_thread(void* arg) {
       
       assert(sock);
       
+      sock->parent = old_sock;
       sock->local_node = old_sock->local_node;
       sock->local_port = old_sock->local_port;
 			sock->remote_port = src_port;
@@ -201,11 +201,8 @@ void *tcp_thread(void* arg) {
 
 		  nlog(MSG_LOG, "tcp_thread", "Socket not in established state; stepping state machine.");
 
-      if(old_sock)
-        nlog(MSG_LOG, "tcp_thread", "Passing in old_sock = %d", old_sock->fd);
-
       /* Step state machine (and perform needed action.) */
-      if(tcpm_event(sock->machine, tcpm_packet_to_input(ip_to_tcp(packet)), NULL, old_sock)) {
+      if(tcpm_event(sock->machine, tcpm_packet_to_input(ip_to_tcp(packet)), NULL, NULL)) {
 			  nlog(MSG_WARNING, "tcp_thread", "Invalid transition requested; fail!");
         /* Rely on error function; teardown socket? */
       }
