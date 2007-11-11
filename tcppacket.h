@@ -12,6 +12,8 @@
 #define TCP_FLAG_RST      0x04
 #define TCP_FLAG_ACK      0x10
 
+/* XXX: These functions all take TCP packets (i.e., 0 is the start of the TCP header.) */
+
 /* uint16_t */
 #define get_srcport(p) 		(*((uint16_t*)((p))))
 #define set_srcport(p,v)	do {uint16_t _tmp=(v); memcpy((p), &_tmp, 2);} while(0)

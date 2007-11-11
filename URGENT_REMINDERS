@@ -1,4 +1,4 @@
 notify and sleep stuff
   - always wake on error and return -1 
 
-
+add mutexes to all sockets; any time we touch a socket, lock mutex
