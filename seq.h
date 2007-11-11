@@ -5,7 +5,7 @@
 #include "cbuffer.h"
 
 /*           
- *            [unack    /[next    /[writen    /[
+ *            [unack    /[next    /[writen    /[una + windowsize
  *           /         /         /      ____,/
  *          /         /         /      /
  * +-------+---------+---------+------+----------------
@@ -19,12 +19,13 @@
 int isValidSeqNum(ip_socket_t *sock, int num);
 int haveRoomToReceive(tcp_socket_t *sock);
 void ackData(tcp_socket_t *sock, int size);
-int dataToRead(tcp_socket_t *sock);
+int amountOfDataToRead(tcp_socket_t *sock);
 int getDataFromBuffer(tcp_socket_t *sock, char *buf, int max_size);
+
 
 int canAcceptDataToSend(tcp_socket_t *sock, size);
 int getAmountAbleToSend(tcp_socket_t *sock);
 int gotAckFor(tcp_socket_t *sock, int start, int len);
-int copyDataToBuffer(tcp_socket_t *sock, char *data, int size);
-
+int copyDataFromUser(tcp_socket_t *sock, char *data, int size);
+void unackData(tcp_scoket_t *sock, int size);
 #endif
