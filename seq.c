@@ -29,7 +29,7 @@ int amountOfDataToRead(tcp_socket_t *sock) {
 }
 
 /* copy memory from our cbuffer into a user specified buffer */
-int getDataFromUser(tcp_socket_t *sock, char *buf, int max_size) {
+int getDataFromBuffer(tcp_socket_t *sock, char *buf, int max_size) {
 	assert(buf);
 	int amount = MIN(max_size, dataToRead(sock));
 
