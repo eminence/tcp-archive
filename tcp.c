@@ -19,7 +19,9 @@ tcp_socket_t *get_socket_from_int(int s) {
 	assert(s >= 0);
 	assert(s < MAXSOCKETS);
 	tcp_socket_t *sock = this_node->socket_table[s];
-	assert(sock);
+	
+  /* Learn of unassigned slots by returning NULL. */
+  // assert(sock);
 
 	return sock;
 }
@@ -97,9 +99,13 @@ int build_tcp_packet(char *data, int data_size,
 	// memcpy the data into the packet, if there is any
 	if (data) memcpy(*header+TCP_HEADER_SIZE,data,data_size);
 
-	// TODO set checksum
+  set_tcpchecksum(*header, calculate_tcp_checksum(tcp_to_ip(*header))); 
 
 	return data_size + TCP_HEADER_SIZE;
+}
+
+uint16_t calculate_tcp_checksum(char* packet) {
+  return 0;
 }
 
 /* destroy global tcp structures.
