@@ -171,18 +171,19 @@ void *tcp_thread(void* arg) {
 
     } else {
       /* Validate sequence numbers. */
-      if(tcpm_firstrecv(sock->machine)) { /* if we're in LISTEN or SYN_SENT */
+      if(tcpm_firstrecv(sock->machine)) { /* if we're in LISTEN */
         /* Set initial sequence number. */
         sock->seq_num = 1000;
-      } else if(get_seqnum(ip_to_tcp(packet)) != sock->ack_num) {
+
+      } else if(!tcpm_synsent(sock->machine) && get_seqnum(ip_to_tcp(packet)) != sock->ack_num) {
 			  nlog(MSG_WARNING, "tcp_thread", "Invalid sequence number!");
         /* TODO reset connection */
       }
     
-    /* Handshake is a magical place where all ack numbers increase by one. */
-    sock->ack_num = get_seqnum(ip_to_tcp(packet)) + 1;
+      /* Handshake is a magical place where all ack numbers increase by one. */
+      sock->ack_num = get_seqnum(ip_to_tcp(packet)) + 1;
 
-		nlog(MSG_LOG, "tcp_thread", "Socket not in established state; stepping state machine.");
+		  nlog(MSG_LOG, "tcp_thread", "Socket not in established state; stepping state machine.");
 
       /* Step state machine (and perform needed action.) */
       if(tcpm_event(sock->machine, tcpm_packet_to_input(ip_to_tcp(packet)),NULL,NULL)) {

@@ -52,5 +52,6 @@ int tcpm_packet_to_input(const char* packet);
 #define tcpm_canbind(m) (tcpm_state(m) == ST_CLOSED)
 #define tcpm_estab(m) (tcpm_state(m) == ST_ESTAB)
 #define tcpm_firstrecv(m) (tcpm_state(m) == ST_LISTEN)
+#define tcpm_synsent(m) (tcpm_state(m) == ST_SYN_SENT)
 
 #endif
