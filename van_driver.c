@@ -110,7 +110,41 @@ int set_if_state(ip_node_t *node, int iface, int link_state) {
 
 /* Handle recv events in estab state. */
 void do_recv_estab(tcp_socket_t* sock, char* packet) {
-  //XXX
+
+	uint8_t flags = get_flags(ip_to_tcp(packet));
+	uint32_t seq_num = get_seqnum(ip_to_tcp(packet));
+	uint32_t ack_num = get_acknum(ip_to_tcp(packet));
+	uint32_t data_size = get_data_len(packet);
+
+	/* is regular packet:  AKA, there are no flags set, except maybe ACK (because we can piggypack ACKs on data packets) */
+	if ((flags == 0) || (flags == TCP_FLAG_ACK)) {
+
+		if (isValidSeqNum(sock, seq_num, data_size)) {
+
+			nlog(MSG_LOG,"do_recv_estab", "got a data packet of size %d", data_size );
+			/* if we can fit this in our receive buffer: */
+			if (haveRoomToReceive(sock, data_size)) {
+
+				if (isNextSeqNum(sock, seq_num)) {
+					/* if this packet is the next one we're expecting, update our ack thingy (so we'll ack this packet a few lines below) */
+					sock->ack_num = seq_num + data_size;
+				} /* else { dont update anything, which will cause us to ack again the last packet we want to send a ack for */
+
+				/* ack this packet*/
+				tcp_sendto(socket, NULL, 0, TCP_FLAG_ACK); /* XXX maybe write a sendAck() function? */
+
+			} else {
+				nlog(MSG_WARNING, "do_recv_estab", "got data, but i have no room for it!");
+			}
+
+			} else {
+				nlog(MSG_LOG, "do_recv_estab", "got a data packet, but the SEQ number was off!  ignore this packet!");
+		}
+
+	} else {
+		// TODO, this might be a FIN or RST or something important we need to handle:
+
+	}
 }
 
 /* tcp wathdog thread */
@@ -158,22 +192,36 @@ void *tcp_watchdog(void *arg) {
 
 /* tcp send thread */
 void *tcp_send_thread(void* arg) {
-  int fd;
-  tcp_socket_t* sock;
+	int fd;
+	tcp_socket_t* sock;
+	int amount=0;
 
-  while(1) {
-    for(fd=0; fd < MAXSOCKETS; fd++) {
-      if(!(sock = get_socket_from_int(fd))) {
-        /* Ignore NULL entries. */
-        continue;
-      }
+	nlog(MSG_LOG, "tcp_send_thread", "started");
 
-      /* TODO: Any new data to send? Do so. */
-      /* TODO: Update sequence numbers (send might do this automatically... it prolly does) */
-    }
-  }
+	while(1) {
+		for(fd=0; fd < MAXSOCKETS; fd++) {
+			if(!(sock = get_socket_from_int(fd))) {
+				/* Ignore NULL entries. */
+				continue;
+			}
 
-  pthread_exit(NULL);
+			/* TODO: Any new data to send? Do so. */
+
+			if ((amount = getAmountAbleToSend(sock)) > 0) {
+				nlog(MSG_LOG,"tcp_send_thread", "There are %d bytes waiting to be sent on socket %d", amount, fd);
+				char *data = malloc(amount);
+				int data_returned = dataFromBufferToNetwork(sock, data,amount);
+				assert(data_returned = amount);
+				tcp_sendto(sock, data, amount, 0);
+
+			}
+
+			/* TODO: Update sequence numbers (send might do this automatically... it prolly does) */
+		}
+		sleep(1); /* temporary fix to prevent CPU starvation */
+	}
+
+	pthread_exit(NULL);
 }
 
 /* tcp thread */
@@ -186,6 +234,7 @@ void *tcp_thread(void* arg) {
 	uint8_t src;
 	uint8_t dest;
 	uint8_t flags;
+	uint32_t incoming_seq_num;
 
 	while (1) {
 		pthread_cleanup_push((void(*)(void*))bqueue_poorly_implemented_cleanup, node->tcp_q);
@@ -199,9 +248,10 @@ void *tcp_thread(void* arg) {
 		src = get_src(packet);
 		dest = get_dst(packet);
 		flags = get_flags(ip_to_tcp(packet));
+		incoming_seq_num = get_seqnum(ip_to_tcp(packet));
 
 		nlog(MSG_LOG, "tcp", "source = %d, dest = %d, src_port = %d, dest_port = %d, flags = %s%s%s%s , window = %d, len = %d, seqnum=%d, acknum=%d",
-			src, dest, src_port, dest_port, flags & TCP_FLAG_SYN ? " SYN" : "", flags & TCP_FLAG_ACK ? " ACK" : "", flags & TCP_FLAG_RST ? " RST" : "", flags & TCP_FLAG_FIN ? " FIN" : "", get_window(ip_to_tcp(packet)), get_data_len(packet), get_seqnum(ip_to_tcp(packet)), get_acknum(ip_to_tcp(packet)));
+				src, dest, src_port, dest_port, flags & TCP_FLAG_SYN ? " SYN" : "", flags & TCP_FLAG_ACK ? " ACK" : "", flags & TCP_FLAG_RST ? " RST" : "", flags & TCP_FLAG_FIN ? " FIN" : "", get_window(ip_to_tcp(packet)), get_data_len(packet), get_seqnum(ip_to_tcp(packet)), get_acknum(ip_to_tcp(packet)));
 
 		tcp_socket_t *sock = socktable_get(node->tuple_table, dest, dest_port, src, src_port, FULL_SOCKET);
 		//nlog(MSG_LOG,"tcp_thread", "dest=%d, dest_port=%d, src=%d, src_port=%d flags=%d", dest, dest_port, src, src_port, flags);
@@ -252,6 +302,12 @@ void *tcp_thread(void* arg) {
 			sock->remote_port = src_port;
 			sock->remote_node = src;
 			sock->seq_num = 1000;
+			sock->send_una = sock->seq_num;
+			sock->send_next = sock->seq_num;
+			sock->send_written = sock->seq_num;
+
+			sock->recv_next = incoming_seq_num;
+			sock->recv_read = incoming_seq_num;
 
 			socktable_put(node->tuple_table, sock, FULL_SOCKET);
 		}
@@ -262,34 +318,42 @@ void *tcp_thread(void* arg) {
 
 
 		/* If we're in the established state, perform primary communication; else, handshake*/
-    if(tcpm_estab(sock->machine)) {
+		if(tcpm_estab(sock->machine)) {
 			nlog(MSG_LOG, "tcp_thread", "connection established! using sliding window protocol."); /* TODO */
-      do_recv_estab(sock, packet);
-      
-    } else {
-      /* Validate sequence numbers. */ //TODO use sentinel
-      if(!tcpm_synsent(sock->machine) && !tcpm_firstrecv(sock->machine) && get_seqnum(ip_to_tcp(packet)) != sock->ack_num) {
-			  nlog(MSG_WARNING, "tcp_thread", "Invalid sequence number!");
-        /* TODO reset connection */
-      }
-    
-      /* Handshake is a magical place where all ack numbers increase by one (so long as flags != ACK). */
-      sock->ack_num = get_seqnum(ip_to_tcp(packet)) + (flags != TCP_FLAG_ACK);
+			do_recv_estab(sock, packet);
 
-		  nlog(MSG_LOG, "tcp_thread", "Socket not in established state; stepping state machine.");
+		} else {
+			/* Validate sequence numbers. */ //TODO use sentinel
+			if(!tcpm_synsent(sock->machine) && !tcpm_firstrecv(sock->machine) && get_seqnum(ip_to_tcp(packet)) != sock->ack_num) {
+				nlog(MSG_WARNING, "tcp_thread", "Invalid sequence number!");
+				/* TODO reset connection */
+			}
 
-      /* Step state machine (and perform needed action.) */
-      if(tcpm_event(sock->machine, tcpm_packet_to_input(ip_to_tcp(packet)), NULL, NULL)) {
-			  nlog(MSG_WARNING, "tcp_thread", "Invalid transition requested; fail!");
-        /* Rely on error function; teardown socket? */
-      }
-    }
+			/* Handshake is a magical place where all ack numbers increase by one (so long as flags != ACK). */
+			sock->ack_num = get_seqnum(ip_to_tcp(packet)) + (flags != TCP_FLAG_ACK);
+
+			nlog(MSG_LOG, "tcp_thread", "Socket not in established state; stepping state machine.");
+
+			if (tcpm_state(sock->machine) == ST_SYN_SENT) {
+				/* XXX we need to run this when we get a SYNACK packet and we're in the SYN_SENT state
+				 * where is the best place to put this??? XXX*/
+				sock->recv_next = incoming_seq_num;
+				sock->recv_read = incoming_seq_num;
+
+			}
+
+			/* Step state machine (and perform needed action.) */
+			if(tcpm_event(sock->machine, tcpm_packet_to_input(ip_to_tcp(packet)), NULL, NULL)) {
+				nlog(MSG_WARNING, "tcp_thread", "Invalid transition requested; fail!");
+				/* Rely on error function; teardown socket? */
+			}
+		}
 
 	}
 }
 
 /* query each interface and report when it goes down
- */
+*/
 void *link_state_thread (void *arg) {
 	ip_node_t *node = (ip_node_t*)arg;
 	int i, nifs, link_state, age, timedout;

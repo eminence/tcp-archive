@@ -16,8 +16,9 @@
 
 #define MIN(a,b)	(a < b ? a: b)
 
-int isValidSeqNum(tcp_socket_t *sock, int num);
-int haveRoomToReceive(tcp_socket_t *sock);
+int isValidSeqNum(tcp_socket_t *sock, int num, int size);
+int isNextSeqNum(tcp_socket_t *sock, int num);
+int haveRoomToReceive(tcp_socket_t *sock, int size);
 void ackData(tcp_socket_t *sock, int size);
 int amountOfDataToRead(tcp_socket_t *sock);
 int getDataFromBuffer(tcp_socket_t *sock, char *buf, int max_size);

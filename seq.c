@@ -4,13 +4,24 @@
 
 /* RECEVING FUNCTIONS */
 
-int isValidSeqNum(tcp_socket_t *sock, int num) {
-	return cbuf_btm_contains(sock->r_buf, sock->recv_next, sock->recv_next + sock->recv_window_size, num);
+int isValidSeqNum(tcp_socket_t *sock, int num, int length) {
+	/* if BOTH num and (num + length) is in the range that we're willing to receive */
+
+	return cbuf_btm_contains(sock->r_buf, sock->recv_next, sock->recv_next + sock->recv_window_size, num) &&
+		cbuf_btm_contains(sock->r_buf, sock->recv_next, sock->recv_next + sock->recv_window_size, num+length);
+
 }
 
+/* return true is this sequence number is the next one we're expecting */
+int isNextSeqNum(tcp_socket_t *sock, int num) {
+	return (num == sock->recv_next);
+}
+
+
+
 /* do we have room to copy incoming data into our cbuffer? */
-int haveRoomToReceive(tcp_socket_t *sock) {
-	return sock->recv_window_size > 0;
+int haveRoomToReceive(tcp_socket_t *sock, int size) {
+	return sock->recv_window_size >= size;
 }
 
 /* call this when you send out an ACK packet, to update pointers 
@@ -121,7 +132,7 @@ void unackData(tcp_socket_t *sock, int size) {
 }
 
 
-/* take data from our cbuffer, and give it to the network */
+/* take data from our cbuffer, and give it to the network, and move up send_next */
 int dataFromBufferToNetwork(tcp_socket_t *sock, char *data, int size) {
 	
 	int amount = getAmountAbleToSend(sock);
@@ -129,7 +140,9 @@ int dataFromBufferToNetwork(tcp_socket_t *sock, char *data, int size) {
 	char * memory = cbuf_get_range(sock->s_buf, sock->send_next, amount);
 	memcpy(data, memory, amount);
 	free(memory);
-	
-	return amount;
+	sock->send_next += size;
 
+	return amount;
 }
+
+

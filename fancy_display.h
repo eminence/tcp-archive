@@ -7,6 +7,8 @@
 #include <form.h>
 #include <pthread.h>
 
+struct tcp_socket__;
+
 #define nlog(m,s,t,...) nlog_s(__FILE__,__LINE__,m,s,t,## __VA_ARGS__)
 
 typedef struct {
@@ -78,5 +80,6 @@ void clear_rtable_display();
 int get_text(char *msg, char* buf, int len);
 void handle_tcp_menu_input(int c);
 int get_fd_from_menu();
+void update_tcp_table(struct tcp_socket__ *sock);
 
 #endif

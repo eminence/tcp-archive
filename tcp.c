@@ -55,10 +55,19 @@ int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) 
 		return -1;
 	}
 
-  /* Increase seq_num by buffer size; add 1 for each special flag. */
-  sock->seq_num += bufsize + !!(flags & TCP_FLAG_SYN)
-                           + !!(flags & TCP_FLAG_FIN)
-                           + !!(flags & TCP_FLAG_RST);
+	/* Increase seq_num by buffer size; add 1 for each special flag. */
+	sock->seq_num += bufsize + !!(flags & TCP_FLAG_SYN)
+		+ !!(flags & TCP_FLAG_FIN)
+		+ !!(flags & TCP_FLAG_RST);
+
+	/* as long as the packet is not a pure ACK (where pure ACK == only ACK, and no payload), then
+	 * we'll be expecting a reply for this packet */
+	if (flags != TCP_FLAG_ACK) {
+		sock->last_packet = time(NULL);
+	} else {
+		sock->last_packet = 0;
+
+	}
 
 	return retval;
 }
@@ -237,6 +246,10 @@ int v_connect(int socket, int node, uint16_t port) {
 	sock->seq_num = 100; /* an arbitrary inital seq number. TODO make this random */ 
 	sock->ack_num = 0;
 	sock->can_handshake = 1;
+
+	sock->send_una = sock->seq_num;
+	sock->send_next = sock->seq_num;
+	sock->send_written = sock->seq_num;
 
   /* Update tuple table with FULL socket. */
   socktable_put(this_node->tuple_table, sock, FULL_SOCKET);

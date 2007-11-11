@@ -1,4 +1,4 @@
-cscope 15 /home/achin/course/networks/tcp               0000514283
+cscope 15 /home/achin/course/networks/tcp               0000517495
 	@cbuffer.c
 
 1 
@@ -4261,7 +4261,11 @@ __FANCY_DISPLAY_
 	~<±hªad.h
 >
 
-10 
+10 
+	gt˝_sockë__
+;
+
+12 
 	#∆og
 (
 m
@@ -4281,197 +4285,197 @@ __VA_ARGS__
 
 	)
 
-14 
+16 
 	mu£_cur£s
 ;
 
-15 
+17 
 ±hªad_muãx_t
  
 	mlock
 ;
 
-17 
+19 
 WINDOW
  *
 	mπabÀ_wö
 ;
 
-18 
+20 
 PANEL
  *
 	mπabÀ_∑n
 ;
 
-20 
+22 
 WINDOW
  *
 	mt˝_wö
 ;
 
-21 
+23 
 PANEL
  *
 	mt˝_∑n
 ;
 
-22 
+24 
 ITEM
  **
 	mt˝_ôems
 ;
 
-23 
+25 
 MENU
  *
 	mt˝_míu
 ;
 
-24 
+26 
 	mt˝_míu_num_ôems
 ;
 
-26 
+28 
 WINDOW
  *
 	mèb_wö
 ;
 
-27 
+29 
 PANEL
  *
 	mèb_∑n
 ;
 
-29 
+31 
 WINDOW
  *
 	mlog_wö
 ;
 
-30 
+32 
 PANEL
  *
 	mlog_∑n
 ;
 
-32 
+34 
 WINDOW
  *
 	mmíu_wö
 ;
 
-33 
+35 
 PANEL
  *
 	mmíu_∑n
 ;
 
-35 
+37 
 WINDOW
  *
 	mlök_wö
 ;
 
-36 
+38 
 PANEL
  *
 	mlök_∑n
 ;
 
-38 
+40 
 	mlogwö_s¸ﬁl
 ;
 
-40 *
+42 *
 	mèbs
 [3];
 
-42 
+44 
 	mt›èb
 ;
 
-44 } 
+46 } 
 	tcur£s_out_t
 ;
 
-47 
+49 
 	mMSG_LOG
 ,
 
-48 
+50 
 	mMSG_WARNING
 ,
 
-49 
+51 
 	mMSG_ERROR
 ,
 
-50 } 
+52 } 
 	tmsg_ty≥
 ;
 
-52 
+54 
 	#MENU_COLOR
  2
 
 	)
 
-54 
+56 
 	#MSG_LOG_COLOR
  10
 
 	)
 
-55 
+57 
 	#MSG_WARNING_COLOR
  11
 
 	)
 
-56 
+58 
 	#MSG_ERROR_COLOR
  12
 
 	)
 
-57 
+59 
 	#DEFAULT_COLOR
  13
 
 	)
 
-59 
+61 
 	#LINK_DOWN_COLOR
  14
 
 	)
 
-60 
+62 
 	#LINK_UP_COLOR
  15
 
 	)
 
-62 
+64 
 	#USE_CURSES
  1
 
 	)
 
-63 
+65 
 	#NO_USE_CURSES
  0
 
 	)
 
-65 
+67 
 öô_di•œy
 (
 u£_cur£s
 );
 
-67 
+69 
 ∆og_s
 (c⁄° *
 wfûe
@@ -4487,53 +4491,53 @@ msg
 ãxt
 , ...);
 
-68 
+70 
 gë_key
 ();
 
-69 
+71 
 gë_numbî
 (*);
 
-70 
+72 
 di•œy_msg
 (*
 msg
 , ...);
 
-71 
+73 
 upd©e_lök_löe
 (, );
 
-72 
+74 
 s¸ﬁl_logwö
 ();
 
-73 
+75 
 ∆og_£t_míu
 (c⁄° *
 msg
 , ...);
 
-74 
+76 
 show_rouã_èbÀ
 ();
 
-75 
+77 
 show_t˝_èbÀ
 ();
 
-76 
+78 
 πabÀ_¥öt
 –*
 ãxt
 , ...);
 
-77 
+79 
 ˛ór_πabÀ_di•œy
 ();
 
-78 
+80 
 gë_ãxt
 (*
 msg
@@ -4543,15 +4547,23 @@ buf
 Àn
 );
 
-79 
+81 
 h™dÀ_t˝_míu_öput
 (
 c
 );
 
-80 
+82 
 gë_fd_‰om_míu
 ();
+
+83 
+upd©e_t˝_èbÀ
+(
+t˝_sockë__
+ *
+sock
+);
 
 	@ip_driver.c
 
@@ -6605,9 +6617,11 @@ t˝_sockë_t
 sock
 , 
 num
+, 
+Àngth
 ) {
 
-8  
+10  
 	`cbuf_btm_c⁄èös
 (
 sock
@@ -6619,31 +6633,73 @@ r_buf
 ªcv_wödow_size
 , 
 num
+) &&
+
+11 
+	`cbuf_btm_c⁄èös
+(
+sock
+->
+r_buf
+, sock->
+ªcv_√xt
+, sock->ªcv_√xà+ sock->
+ªcv_wödow_size
+, 
+num
++
+Àngth
 );
 
-9 
+13 
 	}
 }
 
-12 
+16 
+	$isNextSeqNum
+(
+t˝_sockë_t
+ *
+sock
+, 
+num
+) {
+
+17  (
+num
+ =
+sock
+->
+ªcv_√xt
+);
+
+18 
+	}
+}
+
+23 
 	$haveRoomToRe˚ive
 (
 t˝_sockë_t
  *
 sock
+, 
+size
 ) {
 
-13  
+24  
 sock
 ->
 ªcv_wödow_size
- > 0;
+ >
+size
+;
 
-14 
+25 
 	}
 }
 
-20 
+31 
 	$ackD©a
 (
 t˝_sockë_t
@@ -6653,7 +6709,7 @@ sock
 size
 ) {
 
-21 
+32 
 sock
 ->
 ªcv_√xt
@@ -6661,7 +6717,7 @@ sock
 size
 ;
 
-22 
+33 
 sock
 ->
 £q_num
@@ -6669,11 +6725,11 @@ sock
 size
 ;
 
-23 
+34 
 	}
 }
 
-27 
+38 
 	$amou¡OfD©aToRód
 (
 t˝_sockë_t
@@ -6681,7 +6737,7 @@ t˝_sockë_t
 sock
 ) {
 
-28 
+39 
 	`as£π
 (
 sock
@@ -6691,7 +6747,7 @@ sock
 ªcv_ªad
 );
 
-30  (
+41  (
 sock
 ->
 ªcv_√xt
@@ -6699,11 +6755,11 @@ sock
 ªcv_ªad
 );
 
-31 
+42 
 	}
 }
 
-34 
+45 
 	$gëD©aFromBuf„r
 (
 t˝_sockë_t
@@ -6715,13 +6771,13 @@ buf
 max_size
 ) {
 
-35 
+46 
 	`as£π
 (
 buf
 );
 
-36 
+47 
 amou¡
  = 
 	`MIN
@@ -6733,13 +6789,13 @@ max_size
 sock
 ));
 
-38 
+49 
 	`as£π
 (
 amou¡
  > 0);
 
-40 *
+51 *
 mem‹y
  = 
 	`cbuf_gë_ønge
@@ -6753,7 +6809,7 @@ r_buf
 amou¡
 );
 
-41 
+52 
 	`mem˝y
 (
 buf
@@ -6763,13 +6819,13 @@ mem‹y
 amou¡
 );
 
-42 
+53 
 	`‰ì
 (
 mem‹y
 );
 
-44 
+55 
 sock
 ->
 ªcv_ªad
@@ -6777,7 +6833,7 @@ sock
 amou¡
 ;
 
-45 
+56 
 sock
 ->
 ªcv_wödow_size
@@ -6785,7 +6841,7 @@ sock
 amou¡
 ;
 
-46 
+57 
 	`as£π
 (
 sock
@@ -6795,15 +6851,15 @@ sock
 ªcv_√xt
 );
 
-49  
+60  
 amou¡
 ;
 
-51 
+62 
 	}
 }
 
-54 
+65 
 	$amou¡WeC™Re˚ive
 (
 t˝_sockë_t
@@ -6811,17 +6867,17 @@ t˝_sockë_t
 sock
 ) {
 
-55  
+66  
 sock
 ->
 ªcv_wödow_size
 ;
 
-56 
+67 
 	}
 }
 
-59 
+70 
 	$d©aFromNëw‹kToBuf„r
 (
 t˝_sockë_t
@@ -6833,7 +6889,7 @@ d©a
 size
 ) {
 
-60 
+71 
 	`as£π
  (
 size
@@ -6843,7 +6899,7 @@ sock
 ªcv_wödow_size
 );
 
-62 
+73 
 	`cbuf_put_ønge
 (
 sock
@@ -6857,11 +6913,11 @@ d©a
 size
 );
 
-65 
+76 
 	}
 }
 
-71 
+82 
 	$upd©eFromWödowAccoun˚
 (
 t˝_sockë_t
@@ -6871,7 +6927,7 @@ sock
 wödow
 ) {
 
-72 
+83 
 sock
 ->
 ªmŸe_Êow_wödow
@@ -6881,11 +6937,11 @@ sock
 wödow
 ;
 
-74 
+85 
 	}
 }
 
-77 
+88 
 	$ˇnAc˚±D©aToSíd
 (
 t˝_sockë_t
@@ -6895,7 +6951,7 @@ sock
 size
 ) {
 
-78  (
+89  (
 sock
 ->
 £nd_u«
@@ -6905,11 +6961,11 @@ sock
 £nd_wrôãn
 ) > 0;
 
-79 
+90 
 	}
 }
 
-82 
+93 
 	$gëAmou¡AbÀToAc˚±
 (
 t˝_sockë_t
@@ -6917,7 +6973,7 @@ t˝_sockë_t
 sock
 ) {
 
-83  (
+94  (
 sock
 ->
 £nd_u«
@@ -6927,11 +6983,11 @@ sock
 £nd_wrôãn
 );
 
-85 
+96 
 	}
 }
 
-88 
+99 
 	$gëAmou¡AbÀToSíd
 (
 t˝_sockë_t
@@ -6939,11 +6995,11 @@ t˝_sockë_t
 sock
 ) {
 
-89  
+100  
 	`MIN
 (
 
-90 
+101 
 sock
 ->
 £nd_wrôãn
@@ -6951,7 +7007,7 @@ sock
 £nd_√xt
 ,
 
-91 
+102 
 sock
 ->
 ªmŸe_Êow_wödow
@@ -6959,11 +7015,11 @@ sock
 £nd_√xt
 );
 
-92 
+103 
 	}
 }
 
-95 
+106 
 	$gŸAckF‹
 (
 t˝_sockë_t
@@ -6975,7 +7031,7 @@ sock
 Àn
 ) {
 
-97 
+108 
 sock
 ->
 £nd_u«
@@ -6983,7 +7039,7 @@ sock
 Àn
 ;
 
-99 
+110 
 	`as£π
 (
 sock
@@ -6993,11 +7049,11 @@ sock
 £nd_√xt
 );
 
-100 
+111 
 	}
 }
 
-103 
+114 
 	$c›yD©aFromU£r
 (
 t˝_sockë_t
@@ -7009,7 +7065,7 @@ d©a
 size
 ) {
 
-104 
+115 
 	`as£π
 (
 	`ˇnAc˚±D©aToSíd
@@ -7019,7 +7075,7 @@ sock
 size
 ));
 
-105 
+116 
 	`as£π
 (
 sock
@@ -7029,7 +7085,7 @@ sock
 £nd_√xt
 );
 
-106 
+117 
 	`as£π
 (
 sock
@@ -7043,7 +7099,7 @@ size
 £nd_wödow_size
 );
 
-108 
+119 
 	`cbuf_put_ønge
 (
 sock
@@ -7057,7 +7113,7 @@ d©a
 size
 );
 
-109 
+120 
 sock
 ->
 £nd_wrôãn
@@ -7065,11 +7121,11 @@ sock
 size
 ;
 
-111 
+122 
 	}
 }
 
-114 
+125 
 	$haveD©aToSíd
 (
 t˝_sockë_t
@@ -7077,17 +7133,17 @@ t˝_sockë_t
 sock
 ) {
 
-115  (
+126  (
 	`gëAmou¡AbÀToSíd
 (
 sock
 ) > 0);
 
-116 
+127 
 	}
 }
 
-119 
+130 
 	$u«ckD©a
 (
 t˝_sockë_t
@@ -7097,7 +7153,7 @@ sock
 size
 ) {
 
-120 
+131 
 sock
 ->
 £nd_√xt
@@ -7105,11 +7161,11 @@ sock
 £nd_u«
 ;
 
-121 
+132 
 	}
 }
 
-125 
+136 
 	$d©aFromBuf„rToNëw‹k
 (
 t˝_sockë_t
@@ -7121,7 +7177,7 @@ d©a
 size
 ) {
 
-127 
+138 
 amou¡
  = 
 	`gëAmou¡AbÀToSíd
@@ -7129,7 +7185,7 @@ amou¡
 sock
 );
 
-129 * 
+140 * 
 mem‹y
  = 
 	`cbuf_gë_ønge
@@ -7143,7 +7199,7 @@ s_buf
 amou¡
 );
 
-130 
+141 
 	`mem˝y
 (
 d©a
@@ -7153,17 +7209,25 @@ mem‹y
 amou¡
 );
 
-131 
+142 
 	`‰ì
 (
 mem‹y
 );
 
-133  
+143 
+sock
+->
+£nd_√xt
+ +
+size
+;
+
+145  
 amou¡
 ;
 
-135 
+146 
 	}
 }
 
@@ -7205,17 +7269,31 @@ t˝_sockë_t
 sock
 , 
 num
+, 
+size
 );
 
 20 
+isNextSeqNum
+(
+t˝_sockë_t
+ *
+sock
+, 
+num
+);
+
+21 
 haveRoomToRe˚ive
 (
 t˝_sockë_t
  *
 sock
+, 
+size
 );
 
-21 
+22 
 ackD©a
 (
 t˝_sockë_t
@@ -7225,7 +7303,7 @@ sock
 size
 );
 
-22 
+23 
 amou¡OfD©aToRód
 (
 t˝_sockë_t
@@ -7233,7 +7311,7 @@ t˝_sockë_t
 sock
 );
 
-23 
+24 
 gëD©aFromBuf„r
 (
 t˝_sockë_t
@@ -7245,7 +7323,7 @@ buf
 max_size
 );
 
-24 
+25 
 amou¡WeC™Re˚ive
 (
 t˝_sockë_t
@@ -7253,7 +7331,7 @@ t˝_sockë_t
 sock
 );
 
-25 
+26 
 d©aFromNëw‹kToBuf„r
 (
 t˝_sockë_t
@@ -7265,7 +7343,7 @@ d©a
 size
 );
 
-27 
+28 
 ˇnAc˚±D©aToSíd
 (
 t˝_sockë_t
@@ -7275,7 +7353,7 @@ sock
 size
 );
 
-28 
+29 
 gëAmou¡AbÀToSíd
 (
 t˝_sockë_t
@@ -7283,7 +7361,7 @@ t˝_sockë_t
 sock
 );
 
-29 
+30 
 gëAmou¡AbÀToAc˚±
 (
 t˝_sockë_t
@@ -7291,7 +7369,7 @@ t˝_sockë_t
 sock
 );
 
-30 
+31 
 gŸAckF‹
 (
 t˝_sockë_t
@@ -7303,7 +7381,7 @@ sock
 Àn
 );
 
-31 
+32 
 c›yD©aFromU£r
 (
 t˝_sockë_t
@@ -7315,7 +7393,7 @@ d©a
 size
 );
 
-32 
+33 
 u«ckD©a
 (
 t˝_sockë_t
@@ -7325,7 +7403,7 @@ sock
 size
 );
 
-33 
+34 
 d©aFromBuf„rToNëw‹k
 (
 t˝_sockë_t
@@ -9539,33 +9617,11 @@ NULL
 Êags
 );
 
-23 i‡(
-Êags
- !
-TCP_FLAG_ACK
-) {
-
-24 
-sock
-->
-œ°_∑ckë
- = 
-	`time
-(
-NULL
-);
-
-26 
-sock
-->
-œ°_∑ckë
- = 0;
-
-31 
+23 
 	}
 }
 
-33 
+25 
 	$do_li°í
 (
 sid_t
@@ -9581,7 +9637,7 @@ c⁄ãxt
 å™_¨g
 ) {
 
-34 
+26 
 t˝_sockë_t
  *
 sock
@@ -9589,13 +9645,13 @@ sock
 c⁄ãxt
 ;
 
-35 
+27 
 	`as£π
 (
 sock
 );
 
-37 
+29 
 ù_node_t
  *
 node
@@ -9603,13 +9659,13 @@ node
 å™_¨g
 ;
 
-38 
+30 
 	`as£π
 (
 node
 );
 
-40 
+32 
 	`sockèbÀ_put
 (
 node
@@ -9621,11 +9677,11 @@ sock
 HALF_SOCKET
 );
 
-46 
+38 
 	}
 }
 
-49 
+41 
 	$Áû_wôh_ª£t
 (
 sid_t
@@ -9637,7 +9693,7 @@ c⁄ãxt
 ¨gs
 ) {
 
-50 
+42 
 t˝_sockë_t
  *
 sock
@@ -9645,19 +9701,19 @@ sock
 c⁄ãxt
 ;
 
-51 
+43 
 	`as£π
 (
 sock
 );
 
-53 
+45 
 	`∆og
 (
 MSG_LOG
 , "fail_with_reset", "failing socket %d. sendingá RSTánd moving backÅoÅhe closed state");
 
-55 
+47 
 	`t˝_£ndto
 (
 sock
@@ -9667,11 +9723,11 @@ NULL
 TCP_FLAG_RST
 );
 
-58 
+50 
 	}
 }
 
-60 
+52 
 	$has_°©us
 (
 w™t
@@ -9679,17 +9735,17 @@ w™t
 have
 ) {
 
-61  !!(
+53  !!(
 w™t
  & 
 have
 );
 
-62 
+54 
 	}
 }
 
-64 
+56 
 	$waô_f‹_evít
 (
 t˝_sockë_t
@@ -9699,7 +9755,7 @@ sock
 °©us_bôs
 ) {
 
-65 
+57 
 	`±hªad_muãx_lock
 (&
 sock
@@ -9707,7 +9763,7 @@ sock
 lock
 );
 
-67 
+59 
 	`∆og
 (
 MSG_LOG
@@ -9719,7 +9775,7 @@ sock
 c⁄d_°©us
 );
 
-69 !(
+61 !(
 	`has_°©us
 (
 °©us_bôs
@@ -9729,13 +9785,13 @@ sock
 c⁄d_°©us
 ))) {
 
-70 
+62 
 	`∆og
 (
 MSG_LOG
 ,"wait_for_event", "sleeping on cond var");
 
-71 
+63 
 	`±hªad_c⁄d_waô
 (&
 sock
@@ -9745,13 +9801,13 @@ c⁄d
 lock
 );
 
-72 
+64 
 	`∆og
 (
 MSG_LOG
 ,"wait_for_event", "cond var woke me up");
 
-75 
+67 
 	`±hªad_muãx_u∆ock
 (&
 sock
@@ -9759,7 +9815,7 @@ sock
 lock
 );
 
-76 
+68 
 to_ªtu∫
  = 
 sock
@@ -9767,21 +9823,21 @@ sock
 c⁄d_°©us
 ;
 
-77 
+69 
 sock
 ->
 c⁄d_°©us
  = 0;
 
-79  
+71  
 to_ªtu∫
 ;
 
-80 
+72 
 	}
 }
 
-82 
+74 
 	$nŸify
 (
 t˝_sockë_t
@@ -9791,13 +9847,13 @@ sock
 °©us
 ) {
 
-84 
+76 
 	`∆og
 (
 MSG_LOG
 ,"notify", "attemptingÅo get socketÜock");
 
-85 
+77 
 	`±hªad_muãx_lock
 (&
 sock
@@ -9805,7 +9861,7 @@ sock
 lock
 );
 
-86 
+78 
 sock
 ->
 c⁄d_°©us
@@ -9813,7 +9869,7 @@ c⁄d_°©us
 °©us
 ;
 
-87 
+79 
 	`∆og
 (
 MSG_LOG
@@ -9823,7 +9879,7 @@ sock
 fd
 );
 
-88 
+80 
 	`±hªad_c⁄d_sig«l
 (&
 sock
@@ -9831,7 +9887,7 @@ sock
 c⁄d
 );
 
-89 
+81 
 	`±hªad_muãx_u∆ock
 (&
 sock
@@ -9839,11 +9895,11 @@ sock
 lock
 );
 
-91 
+83 
 	}
 }
 
-93 
+85 
 	$ö_e°ab
 (
 sid_t
@@ -9857,7 +9913,7 @@ c⁄ãxt
 ¨gB
 ) {
 
-94 
+86 
 t˝_sockë_t
  *
 sock
@@ -9865,25 +9921,25 @@ sock
 c⁄ãxt
 ;
 
-95 
+87 
 	`as£π
 (
 sock
 );
 
-97 
+89 
 	`∆og
 (
 MSG_LOG
 ,"state:in_estab", "We'reÇow inÅheÉstablished state. AttemptedÅoÇotifyÅhe user");
 
-100 if(
+92 if(
 sock
 ->
 ∑ª¡
 ) {
 
-101 
+93 
 	`nŸify
 (
 sock
@@ -9893,7 +9949,7 @@ sock
 TCP_OK
 );
 
-103 
+95 
 	`nŸify
 (
 sock
@@ -9901,7 +9957,7 @@ sock
 TCP_OK
 );
 
-107 
+99 
 	}
 }
 
@@ -10103,21 +10159,15 @@ sockë_èbÀ
 s
 ];
 
-22 
-	`as£π
-(
-sock
-);
-
-24  
+26  
 sock
 ;
 
-25 
+27 
 	}
 }
 
-29 
+31 
 	$t˝_£ndto
 (
 t˝_sockë_t
@@ -10133,17 +10183,17 @@ uöt8_t
 Êags
 ) {
 
-30 
+32 
 	`as£π
 (
 sock
 );
 
-32 *
+34 *
 ∑ckë
 ;
 
-34 
+36 
 ∑ckë_size
  = 
 	`buûd_t˝_∑ckë
@@ -10159,7 +10209,7 @@ loˇl_p‹t
 ªmŸe_p‹t
  ,
 
-35 
+37 
 sock
 ->
 £q_num
@@ -10173,13 +10223,13 @@ ack_num
 ∑ckë
 );
 
-37 
+39 
 	`∆og
 (
 MSG_LOG
 ,"tcp_sendto", "now haveáÖacket of size %dÑeadyÅo be sentÅo dest_port %d",
 
-38 
+40 
 ∑ckë_size
 , 
 sock
@@ -10187,7 +10237,7 @@ sock
 ªmŸe_p‹t
 );
 
-41 
+43 
 uöt16_t
  
 dp‹t
@@ -10197,7 +10247,7 @@ dp‹t
 ∑ckë
 );
 
-42 
+44 
 	`∆og
 (
 MSG_LOG
@@ -10209,7 +10259,7 @@ sock
 ªmŸe_p‹t
 );
 
-47 
+49 
 ªtvÆ
  = 
 	`v™_drivî_£ndto
@@ -10227,23 +10277,23 @@ loˇl_node
 PROTO_TCP
 );
 
-49 
+51 
 	`‰ì
 (
 ∑ckë
 );
 
-51 i‡(
+53 i‡(
 ªtvÆ
  == -1) {
 
-52 
+54 
 	`∆og
 (
 MSG_ERROR
 ,"tcp_sendto", "van_driver_sendtoÑeturned -1! AÅcpÖacket just gotÜost!");
 
-57 
+59 
 sock
 ->
 £q_num
@@ -10255,27 +10305,49 @@ bufsize
 TCP_FLAG_SYN
 )
 
-58 + !!(
+60 + !!(
 Êags
  & 
 TCP_FLAG_FIN
 )
 
-59 + !!(
+61 + !!(
 Êags
  & 
 TCP_FLAG_RST
 );
 
-61  
+65 i‡(
+Êags
+ !
+TCP_FLAG_ACK
+) {
+
+66 
+sock
+->
+œ°_∑ckë
+ = 
+	`time
+(
+NULL
+);
+
+68 
+sock
+->
+œ°_∑ckë
+ = 0;
+
+72  
 ªtvÆ
 ;
 
-62 
+73 
 	}
 }
 
-70 
+81 
 	$buûd_t˝_∑ckë
 (*
 d©a
@@ -10283,7 +10355,7 @@ d©a
 d©a_size
 ,
 
-71 
+82 
 uöt16_t
  
 sour˚_p‹t
@@ -10291,7 +10363,7 @@ sour˚_p‹t
 de°_p‹t
 ,
 
-72 
+83 
 uöt32_t
  
 £q_num
@@ -10299,7 +10371,7 @@ uöt32_t
 ack_num
 ,
 
-73 
+84 
 uöt8_t
  
 Êags
@@ -10311,7 +10383,7 @@ wödow
 hódî
 ) {
 
-75 
+86 
 tŸÆ_∑ckë_Àngth
  = 
 d©a_size
@@ -10319,7 +10391,7 @@ d©a_size
 TCP_HEADER_SIZE
 ;
 
-77 *
+88 *
 hódî
  = 
 	`mÆloc
@@ -10327,7 +10399,7 @@ hódî
 tŸÆ_∑ckë_Àngth
 );
 
-78 
+89 
 	`mem£t
 (*
 hódî
@@ -10335,13 +10407,13 @@ hódî
 tŸÆ_∑ckë_Àngth
 );
 
-80 
+91 
 	`∆og
 (
 MSG_LOG
 , "build_tcp_packet", "src_port = %d, dest_port = %d, seq_num = %d,áck_num = %d, flags = %s%s%s%s , window = %d,Üen = %d",
 
-81 
+92 
 sour˚_p‹t
 , 
 de°_p‹t
@@ -10365,7 +10437,7 @@ wödow
 d©a_size
 );
 
-83 
+94 
 	`£t_§˝‹t
 (*
 hódî
@@ -10373,7 +10445,7 @@ hódî
 sour˚_p‹t
 );
 
-84 
+95 
 	`£t_de°p‹t
 (*
 hódî
@@ -10381,7 +10453,7 @@ hódî
 de°_p‹t
 );
 
-85 
+96 
 	`£t_£qnum
 (*
 hódî
@@ -10389,7 +10461,7 @@ hódî
 £q_num
 );
 
-86 
+97 
 	`£t_acknum
 (*
 hódî
@@ -10397,7 +10469,7 @@ hódî
 ack_num
 );
 
-88 
+99 
 	`as£π
 (
 	`gë_£qnum
@@ -10407,7 +10479,7 @@ hódî
 £q_num
 );
 
-89 
+100 
 	`as£π
 (
 	`gë_acknum
@@ -10417,7 +10489,7 @@ hódî
 ack_num
 );
 
-91 
+102 
 	`£t_Êags
 (*
 hódî
@@ -10425,7 +10497,7 @@ hódî
 Êags
 );
 
-92 
+103 
 	`£t_wödow
 (*
 hódî
@@ -10433,7 +10505,7 @@ hódî
 wödow
 );
 
-94 
+105 
 uöt16_t
  
 de°_p‹t2
@@ -10443,7 +10515,7 @@ de°_p‹t2
 hódî
 );
 
-95 
+106 
 	`∆og
 (
 MSG_LOG
@@ -10453,7 +10525,7 @@ de°_p‹t2
 de°_p‹t
 );
 
-98 i‡(
+109 i‡(
 d©a
 Ë
 	`mem˝y
@@ -10465,17 +10537,39 @@ TCP_HEADER_SIZE
 d©a_size
 );
 
-102  
+111 
+	`£t_t˝checksum
+(*
+hódî
+, 
+	`ˇlcuœã_t˝_checksum
+(
+	`t˝_to_ù
+(*header)));
+
+113  
 d©a_size
  + 
 TCP_HEADER_SIZE
 ;
 
-103 
+114 
 	}
 }
 
-107 
+116 
+uöt16_t
+ 
+	$ˇlcuœã_t˝_checksum
+(* 
+∑ckë
+) {
+
+118 
+	}
+}
+
+122 
 	$v_t˝_de°roy
 (
 ù_node_t
@@ -10483,7 +10577,7 @@ TCP_HEADER_SIZE
 node
 ) {
 
-108 
+123 
 	`sockèbÀ_de°roy
 (
 node
@@ -10491,11 +10585,11 @@ node
 tu∂e_èbÀ
 );
 
-109 
+124 
 	}
 }
 
-113 
+128 
 	$v_t˝_öô
 (
 ù_node_t
@@ -10503,23 +10597,23 @@ tu∂e_èbÀ
 node
 ) {
 
-115 
+130 
 x
 ;
 
-116 
+131 
 this_node
  = 
 node
 ;
 
-117 
+132 
 x
  = 0; x < 
 MAXSOCKETS
 ; x++) {
 
-118 
+133 
 this_node
 ->
 sockë_èbÀ
@@ -10529,7 +10623,7 @@ x
 NULL
 ;
 
-122 
+137 
 node
 ->
 tu∂e_èbÀ
@@ -10539,7 +10633,7 @@ tu∂e_èbÀ
 sockèbÀ_t
 ));
 
-123 
+138 
 	`sockèbÀ_öô
 (
 node
@@ -10547,7 +10641,7 @@ node
 tu∂e_èbÀ
 );
 
-124 
+139 
 	`∆og
 (
 MSG_LOG
@@ -10557,21 +10651,21 @@ node
 tu∂e_èbÀ
 );
 
-125 
+140 
 	}
 }
 
-127 
+142 
 	$sys_sockë
 (
 ˛⁄e
 ) {
 
-128 
+143 
 s
  = -1;
 
-129 
+144 
 t˝_sockë_t
  *
 sock
@@ -10579,17 +10673,17 @@ sock
 NULL
 ;
 
-132 
+147 
 x
 ;
 
-133 
+148 
 x
  = 0; x < 
 MAXSOCKETS
 ; x++){
 
-134 i‡(
+149 i‡(
 this_node
 ->
 sockë_èbÀ
@@ -10601,11 +10695,11 @@ NULL
 s
  = x; ; }
 
-137 i‡(
+152 i‡(
 s
  == -1) {
 
-142 
+157 
 sock
  = 
 	`mÆloc
@@ -10613,13 +10707,13 @@ sock
 t˝_sockë_t
 ) );
 
-143 
+158 
 	`as£π
 (
 sock
 );
 
-144 
+159 
 this_node
 ->
 sockë_èbÀ
@@ -10629,7 +10723,7 @@ s
 sock
 ;
 
-146 
+161 
 sock
 ->
 machöe
@@ -10639,7 +10733,7 @@ machöe
 ˛⁄e
 );
 
-149 
+164 
 sock
 ->
 fd
@@ -10647,7 +10741,7 @@ fd
 s
 ;
 
-150 
+165 
 sock
 ->
 loˇl_p‹t
@@ -10655,13 +10749,13 @@ loˇl_p‹t
 	`ønd
 ()%65535;
 
-151 
+166 
 sock
 ->
 ªmŸe_p‹t
  = 0;
 
-152 
+167 
 sock
 ->
 loˇl_node
@@ -10669,31 +10763,31 @@ loˇl_node
 this_node
 ;
 
-153 
+168 
 sock
 ->
 ªmŸe_node
  = 0;
 
-154 
+169 
 sock
 ->
 £q_num
  = 0;
 
-155 
+170 
 sock
 ->
 ack_num
  = 0;
 
-156 
+171 
 sock
 ->
 ˇn_h™dshake
  = 0;
 
-157 
+172 
 sock
 ->
 ∑ª¡
@@ -10701,19 +10795,19 @@ sock
 NULL
 ;
 
-158 
+173 
 sock
 ->
 c⁄d_°©us
  = 0;
 
-159 
+174 
 sock
 ->
 œ°_∑ckë
  = 0;
 
-160 
+175 
 sock
 ->
 £nd_wödow_size
@@ -10721,7 +10815,7 @@ sock
 SEND_WINDOW_SIZE
 ;
 
-161 
+176 
 sock
 ->
 ªcv_wödow_size
@@ -10729,43 +10823,43 @@ sock
 SEND_WINDOW_SIZE
 ;
 
-163 
+178 
 sock
 ->
 £nd_u«
  = 0;
 
-164 
+179 
 sock
 ->
 £nd_√xt
  = 0;
 
-165 
+180 
 sock
 ->
 £nd_wrôãn
  = 0;
 
-166 
+181 
 sock
 ->
 ªmŸe_Êow_wödow
  = 0;
 
-168 
+183 
 sock
 ->
 ªcv_√xt
  = 0;
 
-169 
+184 
 sock
 ->
 ªcv_ªad
  = 0;
 
-171 
+186 
 	`t˝_èbÀ_√w
 (
 this_node
@@ -10773,7 +10867,7 @@ this_node
 s
 );
 
-173 
+188 
 	`±hªad_c⁄d_öô
 (&
 sock
@@ -10783,7 +10877,7 @@ c⁄d
 NULL
 );
 
-174 
+189 
 	`±hªad_muãx_öô
 (&
 sock
@@ -10793,27 +10887,27 @@ lock
 NULL
 );
 
-176  
+191  
 s
 ;
 
-177 
+192 
 	}
 }
 
-181 
+196 
 	$v_sockë
 () {
 
-182  
+197  
 	`sys_sockë
 (0);
 
-183 
+198 
 	}
 }
 
-187 
+202 
 	$v_böd
 (
 sockë
@@ -10825,7 +10919,7 @@ uöt16_t
 p‹t
 ) {
 
-188 
+203 
 t˝_sockë_t
  *
 sock
@@ -10835,13 +10929,13 @@ sock
 sockë
 );
 
-189 
+204 
 uöt16_t
  
 ﬁd_p‹t
 ;
 
-191 
+206 
 	`as£π
 (
 sock
@@ -10849,7 +10943,7 @@ sock
 machöe
 );
 
-192 i‡(
+207 i‡(
 	`t˝m_°©e
 (
 sock
@@ -10859,7 +10953,7 @@ machöe
 ST_CLOSED
 ) {
 
-193 
+208 
 sock
 ->
 loˇl_p‹t
@@ -10867,17 +10961,17 @@ loˇl_p‹t
 p‹t
 ;
 
-195 
+210 
 	`∆og
 (
 MSG_ERROR
 ,"v_bind","Someone called v_bind, but I'mÇot inÅhe CLOSED state!");
 
-200 
+215 
 	}
 }
 
-204 
+219 
 	$v_li°í
 (
 sockë
@@ -10885,7 +10979,7 @@ sockë
 backlog
  ) {
 
-205 
+220 
 t˝_sockë_t
  *
 sock
@@ -10895,7 +10989,7 @@ sock
 sockë
 );
 
-207 
+222 
 	`as£π
 (
 sock
@@ -10903,13 +10997,13 @@ sock
 machöe
 );
 
-209 
+224 
 sock
 ->
 £q_num
  = 1000;
 
-211 i‡(
+226 i‡(
 	`t˝m_evít
 (
 sock
@@ -10923,17 +11017,17 @@ this_node
 NULL
 )) {
 
-212 
+227 
 	`∆og
 (
 MSG_ERROR
 ,"socket:listen", "Uhh.Érror. Couldn'tÅransition states.Çoob");
 
-217 
+232 
 	}
 }
 
-222 
+237 
 	$v_c⁄√˘
 (
 sockë
@@ -10945,7 +11039,7 @@ uöt16_t
 p‹t
 ) {
 
-223 
+238 
 t˝_sockë_t
  *
 sock
@@ -10955,7 +11049,7 @@ sock
 sockë
 );
 
-228 
+243 
 sock
 ->
 ªmŸe_node
@@ -10963,7 +11057,7 @@ sock
 node
 ;
 
-229 
+244 
 sock
 ->
 ªmŸe_p‹t
@@ -10971,25 +11065,49 @@ sock
 p‹t
 ;
 
-231 
+246 
 sock
 ->
 £q_num
  = 100;
 
-232 
+247 
 sock
 ->
 ack_num
  = 0;
 
-233 
+248 
 sock
 ->
 ˇn_h™dshake
  = 1;
 
-236 
+250 
+sock
+->
+£nd_u«
+ = sock->
+£q_num
+;
+
+251 
+sock
+->
+£nd_√xt
+ = sock->
+£q_num
+;
+
+252 
+sock
+->
+£nd_wrôãn
+ = sock->
+£q_num
+;
+
+255 
 	`sockèbÀ_put
 (
 this_node
@@ -11001,7 +11119,7 @@ sock
 FULL_SOCKET
 );
 
-238 
+257 
 	`as£π
 (
 sock
@@ -11009,7 +11127,7 @@ sock
 machöe
 );
 
-239 i‡(
+258 i‡(
 	`t˝m_evít
 (
 sock
@@ -11021,13 +11139,13 @@ ON_ACTIVE_OPEN
 NULL
 , NULL)) {
 
-240 
+259 
 	`∆og
 (
 MSG_ERROR
 ,"socket:connect","Uhh.Érror. Couldn'tÅransition states.Çoob");
 
-244 
+263 
 °©us
  = 
 	`waô_f‹_evít
@@ -11039,23 +11157,23 @@ TCP_OK
 TCP_CONNECT_FAILED
 );
 
-246 i‡(
+265 i‡(
 °©us
  =
 TCP_OK
 )  0;
 
-248 
+267 
 	}
 }
 
-253 
+272 
 	$v_ac˚±
 (
 sockë
 ) {
 
-254 
+273 
 t˝_sockë_t
  *
 sock
@@ -11065,13 +11183,13 @@ sock
 sockë
 );
 
-258 
+277 
 sock
 ->
 ˇn_h™dshake
  = 1;
 
-259 
+278 
 °©us
  = 
 	`waô_f‹_evít
@@ -11083,29 +11201,29 @@ TCP_OK
 TCP_CONNECT_FAILED
 );
 
-260 
+279 
 sock
 ->
 ˇn_h™dshake
  = 0;
 
-264 if(
+283 if(
 °©us
  =
 TCP_OK
 ) {
 
-265  
+284  
 sock
 ->
 √w_fd
 ;
 
-270 
+289 
 	}
 }
 
-275 
+294 
 	$v_ªad
 (
 sockë
@@ -11115,7 +11233,7 @@ buf
 nbyã
 ) {
 
-276 
+295 
 t˝_sockë_t
  *
 sock
@@ -11125,11 +11243,11 @@ sock
 sockë
 );
 
-282 
+301 
 	}
 }
 
-286 
+305 
 	$v_wrôe
 (
 sockë
@@ -11139,7 +11257,7 @@ buf
 nbyãs
 ) {
 
-287 
+306 
 t˝_sockë_t
  *
 sock
@@ -11149,7 +11267,7 @@ sock
 sockë
 );
 
-289 
+308 
 ˇn_£nd
  = 
 	`gëAmou¡AbÀToAc˚±
@@ -11157,7 +11275,7 @@ sockë
 sock
 );
 
-290 
+309 
 wûl_£nd
  = 
 	`MIN
@@ -11167,7 +11285,7 @@ wûl_£nd
 nbyãs
 );
 
-292 
+311 
 	`∆og
 (
 MSG_LOG
@@ -11177,7 +11295,7 @@ MSG_LOG
 wûl_£nd
 );
 
-294 
+313 
 	`c›yD©aFromU£r
 (
 sock
@@ -11187,7 +11305,7 @@ buf
 wûl_£nd
 );
 
-296 
+315 
 ˇn_£nd
  = 
 	`gëAmou¡AbÀToAc˚±
@@ -11195,7 +11313,7 @@ wûl_£nd
 sock
 );
 
-297 
+316 
 	`∆og
 (
 MSG_LOG
@@ -11203,21 +11321,21 @@ MSG_LOG
 ˇn_£nd
 );
 
-299  
+318  
 wûl_£nd
 ;
 
-300 
+319 
 	}
 }
 
-304 
+323 
 	$v_˛o£
 (
 sockë
 ) {
 
-307 
+326 
 	}
 }
 
@@ -11537,6 +11655,14 @@ gë_sockë_‰om_öt
 s
 );
 
+77 
+uöt16_t
+ 
+ˇlcuœã_t˝_checksum
+(* 
+∑ckë
+);
+
 	@tcppacket.h
 
 1 #i‚de‡
@@ -11595,7 +11721,7 @@ TCPCONSTANTS_T
 
 	)
 
-16 
+18 
 	#gë_§˝‹t
 (
 p
@@ -11605,7 +11731,7 @@ uöt16_t
 
 	)
 
-17 
+19 
 	#£t_§˝‹t
 (
 p
@@ -11621,7 +11747,7 @@ _tmp
 
 	)
 
-20 
+22 
 	#gë_de°p‹t
 (
 p
@@ -11631,7 +11757,7 @@ uöt16_t
 
 	)
 
-21 
+23 
 	#£t_de°p‹t
 (
 p
@@ -11647,7 +11773,7 @@ _tmp
 
 	)
 
-24 
+26 
 	#gë_£qnum
 (
 p
@@ -11657,7 +11783,7 @@ uöt32_t
 
 	)
 
-25 
+27 
 	#£t_£qnum
 (
 p
@@ -11673,7 +11799,7 @@ _tmp
 
 	)
 
-28 
+30 
 	#gë_acknum
 (
 p
@@ -11683,7 +11809,7 @@ uöt32_t
 
 	)
 
-29 
+31 
 	#£t_acknum
 (
 p
@@ -11699,7 +11825,7 @@ _tmp
 
 	)
 
-32 
+34 
 	#gë_wödow
 (
 p
@@ -11709,7 +11835,7 @@ uöt16_t
 
 	)
 
-33 
+35 
 	#£t_wödow
 (
 p
@@ -11725,7 +11851,7 @@ _tmp
 
 	)
 
-36 
+38 
 	#gë_t˝checksum
 (
 p
@@ -11735,7 +11861,7 @@ uöt16_t
 
 	)
 
-37 
+39 
 	#£t_t˝checksum
 (
 p
@@ -11751,7 +11877,7 @@ _tmp
 
 	)
 
-39 
+41 
 	#£t_Êags
 (
 p
@@ -11763,7 +11889,7 @@ uöt8_t
 
 	)
 
-40 
+42 
 	#gë_Êags
 (
 p
@@ -11773,7 +11899,7 @@ uöt8_t
 
 	)
 
-43 
+45 
 	#gë_fö
 (
 p
@@ -11783,7 +11909,7 @@ uöt8_t
 
 	)
 
-44 
+46 
 	#£t_fö
 (
 p
@@ -11793,7 +11919,7 @@ uöt8_t
 
 	)
 
-45 
+47 
 	#˛ór_fö
 (
 p
@@ -11803,7 +11929,7 @@ uöt8_t
 
 	)
 
-47 
+49 
 	#gë_syn
 (
 p
@@ -11813,7 +11939,7 @@ uöt8_t
 
 	)
 
-48 
+50 
 	#£t_syn
 (
 p
@@ -11823,7 +11949,7 @@ uöt8_t
 
 	)
 
-49 
+51 
 	#˛ór_syn
 (
 p
@@ -11833,7 +11959,7 @@ uöt8_t
 
 	)
 
-51 
+53 
 	#gë_r°
 (
 p
@@ -11843,7 +11969,7 @@ uöt8_t
 
 	)
 
-52 
+54 
 	#£t_r°
 (
 p
@@ -11853,7 +11979,7 @@ uöt8_t
 
 	)
 
-53 
+55 
 	#˛ór_r°
 (
 p
@@ -11863,7 +11989,7 @@ uöt8_t
 
 	)
 
-55 
+57 
 	#gë_ack
 (
 p
@@ -11873,7 +11999,7 @@ uöt8_t
 
 	)
 
-56 
+58 
 	#£t_ack
 (
 p
@@ -11883,7 +12009,7 @@ uöt8_t
 
 	)
 
-57 
+59 
 	#˛ór_ack
 (
 p
@@ -11893,7 +12019,7 @@ uöt8_t
 
 	)
 
-60 
+62 
 	#gë_d©a_Àn
 (
 p
@@ -11907,7 +12033,7 @@ TCP_HEADER_SIZE
 
 	)
 
-61 
+63 
 	#ù_to_t˝
 (
 p
@@ -11917,7 +12043,7 @@ HEADER_SIZE
 
 	)
 
-62 
+64 
 	#t˝_to_ù
 (
 p
@@ -13367,13 +13493,145 @@ lök_°©e
 	}
 }
 
-112 *
+112 
+	$do_ªcv_e°ab
+(
+t˝_sockë_t
+* 
+sock
+, * 
+∑ckë
+) {
+
+114 
+uöt8_t
+ 
+Êags
+ = 
+	`gë_Êags
+(
+	`ù_to_t˝
+(
+∑ckë
+));
+
+115 
+uöt32_t
+ 
+£q_num
+ = 
+	`gë_£qnum
+(
+	`ù_to_t˝
+(
+∑ckë
+));
+
+116 
+uöt32_t
+ 
+ack_num
+ = 
+	`gë_acknum
+(
+	`ù_to_t˝
+(
+∑ckë
+));
+
+117 
+uöt32_t
+ 
+d©a_size
+ = 
+	`gë_d©a_Àn
+(
+∑ckë
+);
+
+120 i‡((
+Êags
+ =0Ë|| (Êag†=
+TCP_FLAG_ACK
+)) {
+
+122 i‡(
+	`isVÆidSeqNum
+(
+sock
+, 
+£q_num
+, 
+d©a_size
+)) {
+
+124 
+	`∆og
+(
+MSG_LOG
+,"do_ªcv_e°ab", "gŸá d©®∑ckë o‡sizê%d", 
+d©a_size
+ );
+
+126 i‡(
+	`haveRoomToRe˚ive
+(
+sock
+, 
+d©a_size
+)) {
+
+128 i‡(
+	`isNextSeqNum
+(
+sock
+, 
+£q_num
+)) {
+
+130 
+sock
+->
+ack_num
+ = 
+£q_num
+ + 
+d©a_size
+;
+
+134 
+	`t˝_£ndto
+(
+sockë
+, 
+NULL
+, 0, 
+TCP_FLAG_ACK
+);
+
+137 
+	`∆og
+(
+MSG_WARNING
+, "do_recv_estab", "got data, but i haveÇoÑoom for it!");
+
+141 
+	`∆og
+(
+MSG_LOG
+, "do_recv_estab", "gotá dataÖacket, butÅhe SEQÇumber was off! ignoreÅhisÖacket!");
+
+148 
+	}
+}
+
+151 *
 	$t˝_w©chdog
 (*
 ¨g
 ) {
 
-113 
+152 
 ù_node_t
  *
 node
@@ -13381,27 +13639,27 @@ node
 ¨g
 ;
 
-114 
+153 
 	`as£π
 (
 ¨g
 );
 
-116 
+155 
 i
 ;
 
-119 
+158 
 	`¶ìp
 (1);
 
-120 
+159 
 i
  = 0; i < 
 MAXSOCKETS
 ; i++) {
 
-121 i‡(
+160 i‡(
 node
 ->
 sockë_èbÀ
@@ -13411,7 +13669,7 @@ i
 NULL
 ) ;
 
-122 
+161 
 t˝_sockë_t
  *
 sock
@@ -13423,13 +13681,13 @@ sockë_èbÀ
 i
 ];
 
-123 
+162 
 	`upd©e_t˝_èbÀ
 (
 sock
 );
 
-124 i‡((
+163 i‡((
 sock
 ->
 œ°_∑ckë
@@ -13439,7 +13697,7 @@ sock
 NULL
 ) - sock->last_packet > 4 )) {
 
-125 
+164 
 	`∆og
 (
 MSG_WARNING
@@ -13449,7 +13707,7 @@ sock
 fd
 );
 
-127 i‡(
+166 i‡(
 	`t˝m_°©e
 (
 sock
@@ -13459,13 +13717,13 @@ machöe
 ST_SYN_SENT
 ) {
 
-129 
+168 
 	`∆og
 (
 MSG_WARNING
 , "tcp_watchdog", "We're in SYN_SENT.ássumingÖacketloss,ándÑetransmittingÅhe SYN");
 
-130 
+169 
 	`£nd_∑ckë_wôh_Êags
 (0, 0, (*)
 sock
@@ -13477,7 +13735,7 @@ TCP_FLAG_SYN
 NULL
 );
 
-132 } i‡(
+171 } i‡(
 	`t˝m_°©e
 (
 sock
@@ -13487,13 +13745,13 @@ machöe
 ST_SYN_RCVD
 ) {
 
-134 
+173 
 	`∆og
 (
 MSG_WARNING
 , "tcp_watchdog", "We're in SYN_RCVD.ássumingÖacketloss,ándÑetransmittingÅhe SYNACK");
 
-135 
+174 
 	`£nd_∑ckë_wôh_Êags
 (0, 0, (*)
 sock
@@ -13507,7 +13765,7 @@ TCP_FLAG_ACK
 NULL
 );
 
-138 
+177 
 	`∆og
 (
 MSG_WARNING
@@ -13521,39 +13779,133 @@ sock
 machöe
 )));
 
-139 
+178 
 sock
 ->
 œ°_∑ckë
  = 0;
 
-152 
+191 
 	}
 }
 
-155 *
+194 *
 	$t˝_£nd_thªad
 (* 
 ¨g
 ) {
 
-156 
+195 
+fd
+;
+
+196 
+t˝_sockë_t
+* 
+sock
+;
+
+197 
+amou¡
+=0;
+
+199 
+	`∆og
+(
+MSG_LOG
+, "tcp_send_thread", "started");
+
+202 
+fd
+=0; fd < 
+MAXSOCKETS
+; fd++) {
+
+203 if(!(
+sock
+ = 
+	`gë_sockë_‰om_öt
+(
+fd
+))) {
+
+210 i‡((
+amou¡
+ = 
+	`gëAmou¡AbÀToSíd
+(
+sock
+)) > 0) {
+
+211 
+	`∆og
+(
+MSG_LOG
+,"t˝_£nd_thªad", "Thîê¨ê%d byã†waôögÅÿbê£¡ o¿sockë %d", 
+amou¡
+, 
+fd
+);
+
+212 *
+d©a
+ = 
+	`mÆloc
+(
+amou¡
+);
+
+213 
+d©a_ªtu∫ed
+ = 
+	`d©aFromBuf„rToNëw‹k
+(
+sock
+, 
+d©a
+,
+amou¡
+);
+
+214 
+	`as£π
+(
+d©a_ªtu∫ed
+ = 
+amou¡
+);
+
+215 
+	`t˝_£ndto
+(
+sock
+, 
+d©a
+, 
+amou¡
+, 0);
+
+221 
+	`¶ìp
+(1);
+
+224 
 	`±hªad_exô
 (
 NULL
 );
 
-157 
+225 
 	}
 }
 
-160 *
+228 *
 	$t˝_thªad
 (* 
 ¨g
 ) {
 
-161 
+229 
 ù_node_t
  *
 node
@@ -13561,47 +13913,53 @@ node
 ¨g
 ;
 
-162 
+230 
 t˝_sockë_t
  *
 ﬁd_sock
 ;
 
-163 *
+231 *
 ∑ckë
 ;
 
-164 
+232 
 uöt16_t
  
 §c_p‹t
 ;
 
-165 
+233 
 uöt16_t
  
 de°_p‹t
 ;
 
-166 
+234 
 uöt8_t
  
 §c
 ;
 
-167 
+235 
 uöt8_t
  
 de°
 ;
 
-168 
+236 
 uöt8_t
  
 Êags
 ;
 
-171 
+237 
+uöt32_t
+ 
+öcomög_£q_num
+;
+
+240 
 	`±hªad_˛ónup_push
 (((*)(*))
 bqueue_po‹ly_im∂emíãd_˛ónup
@@ -13611,7 +13969,7 @@ node
 t˝_q
 );
 
-172 
+241 
 	`bqueue_dequeue
 (
 node
@@ -13621,17 +13979,17 @@ t˝_q
 ∑ckë
 );
 
-173 
+242 
 	`±hªad_˛ónup_p›
 (0);
 
-175 
+244 
 	`∆og
 (
 MSG_LOG
 ,"tcp", "tcpÅhread dequeuedáÅcpÖacket");
 
-177 
+246 
 §c_p‹t
  = 
 	`gë_§˝‹t
@@ -13641,7 +13999,7 @@ MSG_LOG
 ∑ckë
 ));
 
-178 
+247 
 de°_p‹t
  = 
 	`gë_de°p‹t
@@ -13651,7 +14009,7 @@ de°_p‹t
 ∑ckë
 ));
 
-179 
+248 
 §c
  = 
 	`gë_§c
@@ -13659,7 +14017,7 @@ de°_p‹t
 ∑ckë
 );
 
-180 
+249 
 de°
  = 
 	`gë_d°
@@ -13667,7 +14025,7 @@ de°
 ∑ckë
 );
 
-181 
+250 
 Êags
  = 
 	`gë_Êags
@@ -13677,13 +14035,23 @@ de°
 ∑ckë
 ));
 
-183 
+251 
+öcomög_£q_num
+ = 
+	`gë_£qnum
+(
+	`ù_to_t˝
+(
+∑ckë
+));
+
+253 
 	`∆og
 (
 MSG_LOG
 , "tcp", "source = %d, dest = %d, src_port = %d, dest_port = %d, flags = %s%s%s%s , window = %d,Üen = %d, seqnum=%d,ácknum=%d",
 
-184 
+254 
 §c
 , 
 de°
@@ -13715,7 +14083,7 @@ TCP_FLAG_FIN
 	`gë_acknum
 (ip_to_tcp(packet)));
 
-186 
+256 
 t˝_sockë_t
  *
 sock
@@ -13737,19 +14105,19 @@ de°_p‹t
 FULL_SOCKET
 );
 
-193 i‡(
+263 i‡(
 sock
  =
 NULL
 ) {
 
-194 
+264 
 	`∆og
 (
 MSG_WARNING
 , "tcp_thread", "We gotáÅcpÖacket, but it doesn't seemÅo haveá full socketássociated with it. Halfchecking...");
 
-196 
+266 
 sock
  = 
 	`sockèbÀ_gë
@@ -13765,55 +14133,55 @@ de°_p‹t
 HALF_SOCKET
 );
 
-199 i‡(
+269 i‡(
 sock
  =
 NULL
 ) {
 
-200 
+270 
 	`∆og
 (
 MSG_ERROR
 ,"tcp_thread", "Ok,Çotá half socketÉither. Discarding.");
 
-201 
+271 
 	`as£π
 (
 ∑ckë
 );
 
-202 
+272 
 	`‰ì
 (
 ∑ckë
 );
 
-210 if(!
+280 if(!
 sock
 ->
 ˇn_h™dshake
 ) {
 
-211 
+281 
 	`∆og
 (
 MSG_ERROR
 , "tcp_thread", "Foundá half socket, but socketÇot ináccept state. Discarding.");
 
-212 
+282 
 	`as£π
 (
 ∑ckë
 );
 
-213 
+283 
 	`‰ì
 (
 ∑ckë
 );
 
-222 
+292 
 sock
 ->
 √w_fd
@@ -13821,13 +14189,13 @@ sock
 	`sys_sockë
 (1);
 
-224 
+294 
 ﬁd_sock
  = 
 sock
 ;
 
-225 
+295 
 sock
  = 
 	`gë_sockë_‰om_öt
@@ -13835,13 +14203,13 @@ sock
 √w_fd
 );
 
-227 
+297 
 	`as£π
 (
 sock
 );
 
-229 
+299 
 sock
 ->
 ∑ª¡
@@ -13849,7 +14217,7 @@ sock
 ﬁd_sock
 ;
 
-230 
+300 
 sock
 ->
 loˇl_node
@@ -13857,7 +14225,7 @@ loˇl_node
 ﬁd_sock
 ->local_node;
 
-231 
+301 
 sock
 ->
 loˇl_p‹t
@@ -13865,7 +14233,7 @@ loˇl_p‹t
 ﬁd_sock
 ->local_port;
 
-232 
+302 
 sock
 ->
 ªmŸe_p‹t
@@ -13873,7 +14241,7 @@ sock
 §c_p‹t
 ;
 
-233 
+303 
 sock
 ->
 ªmŸe_node
@@ -13881,13 +14249,53 @@ sock
 §c
 ;
 
-234 
+304 
 sock
 ->
 £q_num
  = 1000;
 
-236 
+305 
+sock
+->
+£nd_u«
+ = sock->
+£q_num
+;
+
+306 
+sock
+->
+£nd_√xt
+ = sock->
+£q_num
+;
+
+307 
+sock
+->
+£nd_wrôãn
+ = sock->
+£q_num
+;
+
+309 
+sock
+->
+ªcv_√xt
+ = 
+öcomög_£q_num
+;
+
+310 
+sock
+->
+ªcv_ªad
+ = 
+öcomög_£q_num
+;
+
+312 
 	`sockèbÀ_put
 (
 node
@@ -13899,7 +14307,7 @@ sock
 FULL_SOCKET
 );
 
-241 
+317 
 sock
 ->
 ªmŸe_Êow_wödow
@@ -13911,7 +14319,7 @@ sock
 ∑ckë
 ));
 
-245 if(
+321 if(
 	`t˝m_e°ab
 (
 sock
@@ -13919,13 +14327,21 @@ sock
 machöe
 )) {
 
-246 
+322 
 	`∆og
 (
 MSG_LOG
 , "tcp_thread", "connectionÉstablished! using sliding windowÖrotocol.");
 
-250 if(!
+323 
+	`do_ªcv_e°ab
+(
+sock
+, 
+∑ckë
+);
+
+327 if(!
 	`t˝m_syn£¡
 (
 sock
@@ -13943,13 +14359,13 @@ machöe
 ack_num
 ) {
 
-251 
+328 
 	`∆og
 (
 MSG_WARNING
 , "tcp_thread", "Invalid sequenceÇumber!");
 
-256 
+333 
 sock
 ->
 ack_num
@@ -13965,13 +14381,39 @@ ack_num
 TCP_FLAG_ACK
 );
 
-258 
+335 
 	`∆og
 (
 MSG_LOG
 , "tcp_thread", "SocketÇot inÉstablished state; stepping state machine.");
 
-261 if(
+337 i‡(
+	`t˝m_°©e
+(
+sock
+->
+machöe
+Ë=
+ST_SYN_SENT
+) {
+
+340 
+sock
+->
+ªcv_√xt
+ = 
+öcomög_£q_num
+;
+
+341 
+sock
+->
+ªcv_ªad
+ = 
+öcomög_£q_num
+;
+
+346 if(
 	`t˝m_evít
 (
 sock
@@ -13987,23 +14429,23 @@ machöe
 NULL
 , NULL)) {
 
-262 
+347 
 	`∆og
 (
 MSG_WARNING
 , "tcp_thread", "InvalidÅransitionÑequested; fail!");
 
-268 
+353 
 	}
 }
 
-272 *
+357 *
 	$lök_°©e_thªad
  (*
 ¨g
 ) {
 
-273 
+358 
 ù_node_t
  *
 node
@@ -14011,7 +14453,7 @@ node
 ¨g
 ;
 
-274 
+359 
 i
 , 
 nifs
@@ -14023,7 +14465,7 @@ age
 timedout
 ;
 
-276 
+361 
 nifs
  = 
 	`v™_node_nifs
@@ -14033,7 +14475,7 @@ node
 v™_node
 );
 
-278 
+363 
 	`∆og
 (
 MSG_LOG
@@ -14041,21 +14483,21 @@ MSG_LOG
 nifs
 );
 
-281 
+366 
 	`±hªad_ã°ˇn˚l
 ();
 
-282 
+367 
 	`¶ìp
 (1);
 
-284 
+369 
 i
  = 0; i < 
 nifs
 ; i++) {
 
-285 
+370 
 	`v™_node_gëif›t
 (
 node
@@ -14069,7 +14511,7 @@ VAN_IO_UPSTATE
 lök_°©e
 , ());
 
-286 
+371 
 	`upd©e_lök_löe
 (
 i
@@ -14077,7 +14519,7 @@ i
 lök_°©e
 );
 
-288 
+373 
 	`±hªad_muãx_lock
 (&
 node
@@ -14089,7 +14531,7 @@ i
 age_lock
 );
 
-289 
+374 
 age
  = 
 node
@@ -14099,7 +14541,7 @@ iÁ˚s
 i
 ].age;
 
-290 
+375 
 timedout
  = 
 node
@@ -14111,7 +14553,7 @@ i
 timed_out
 ;
 
-291 
+376 
 	`±hªad_muãx_u∆ock
 (&
 node
@@ -14123,7 +14565,7 @@ i
 age_lock
 );
 
-293 i‡((
+378 i‡((
 lök_°©e
 Ë&& !
 timedout
@@ -14137,7 +14579,7 @@ age
 LINK_TIMEOUT
 )) {
 
-294 
+379 
 	`πabÀ_pois⁄_iÁ˚
 (
 node
@@ -14147,7 +14589,7 @@ rouã_èbÀ
 i
 );
 
-296 
+381 
 	`±hªad_muãx_lock
 (&
 node
@@ -14159,7 +14601,7 @@ i
 age_lock
 );
 
-297 
+382 
 node
 ->
 iÁ˚s
@@ -14169,7 +14611,7 @@ i
 timed_out
  = 1;
 
-298 
+383 
 	`±hªad_muãx_u∆ock
 (&
 node
@@ -14181,7 +14623,7 @@ i
 age_lock
 );
 
-300 
+385 
 	`∆og
 (
 MSG_WARNING
@@ -14191,13 +14633,13 @@ i
 LINK_TIMEOUT
 );
 
-301 
+386 
 	`£nd_rouã_èbÀ
 (
 node
 );
 
-302 
+387 
 	`πabÀ_dump
 (
 node
@@ -14205,7 +14647,7 @@ node
 rouã_èbÀ
 );
 
-305 i‡(
+390 i‡(
 lök_°©e
  =
 node
@@ -14217,7 +14659,7 @@ i
 cur_°©e
 ) ;
 
-307 i‡((
+392 i‡((
 lök_°©e
 Ë&& (
 node
@@ -14229,7 +14671,7 @@ i
 cur_°©e
  == 0)) {
 
-308 
+393 
 	`∆og
 (
 MSG_LOG
@@ -14243,7 +14685,7 @@ vn_num
 i
 );
 
-309 
+394 
 	`±hªad_muãx_lock
 (&
 node
@@ -14255,7 +14697,7 @@ i
 lock
 );
 
-310 
+395 
 	`±hªad_c⁄d_sig«l
 (&
 node
@@ -14267,7 +14709,7 @@ i
 c⁄d
 );
 
-311 
+396 
 	`±hªad_muãx_u∆ock
 (&
 node
@@ -14279,13 +14721,13 @@ i
 lock
 );
 
-313 
+398 
 	`£nd_rouã_èbÀ
 (
 node
 );
 
-315 } i‡–(!
+400 } i‡–(!
 lök_°©e
 Ë&& (
 node
@@ -14297,7 +14739,7 @@ i
 cur_°©e
  == 1)) {
 
-316 
+401 
 	`∆og
 (
 MSG_LOG
@@ -14311,7 +14753,7 @@ vn_num
 i
 );
 
-317 
+402 
 	`πabÀ_pois⁄_iÁ˚
 (
 node
@@ -14321,13 +14763,13 @@ rouã_èbÀ
 i
 );
 
-320 
+405 
 	`£nd_rouã_èbÀ
 (
 node
 );
 
-325 
+410 
 node
 ->
 iÁ˚s
@@ -14339,21 +14781,21 @@ cur_°©e
 lök_°©e
 ;
 
-331  
+416  
 NULL
 ;
 
-332 
+417 
 	}
 }
 
-338 *
+423 *
 	$rù_m⁄ô‹
  (*
 ¨g
 ) {
 
-339 
+424 
 ù_node_t
  *
 node
@@ -14361,31 +14803,31 @@ node
 ¨g
 ;
 
-341 
+426 
 ‰om
 ;
 
-342 
+427 
 iÁ˚
 ;
 
-344 
+429 
 πabÀ_t
  *
 √w_πabÀ
 ;
 
-345 
+430 
 tŸÆ_Àngth
 ;
 
-346 
+431 
 rù_∑ckë_t
  *
 rù
 ;
 
-349 
+434 
 	`±hªad_˛ónup_push
 (((*)(*))
 bqueue_po‹ly_im∂emíãd_˛ónup
@@ -14395,7 +14837,7 @@ node
 rù_q
 );
 
-350 
+435 
 	`bqueue_dequeue
 (
 node
@@ -14405,11 +14847,11 @@ rù_q
 rù
 );
 
-351 
+436 
 	`±hªad_˛ónup_p›
 (0);
 
-353 
+438 
 ‰om
  = 
 	`gë_§c
@@ -14419,7 +14861,7 @@ rù
 ∑ckë
 );
 
-354 
+439 
 tŸÆ_Àngth
  = 
 	`gë_tŸÆ_Àn
@@ -14429,13 +14871,13 @@ rù
 ∑ckë
 );
 
-355 
+440 
 iÁ˚
  = 
 rù
 ->iface;
 
-360 i‡(
+445 i‡(
 	`upd©e_rouã
 (
 node
@@ -14445,7 +14887,7 @@ node
 iÁ˚
 , 1, from)) {
 
-361 
+446 
 	`∆og
 (
 MSG_LOG
@@ -14455,13 +14897,13 @@ MSG_LOG
 iÁ˚
 );
 
-362 
+447 
 	`£nd_rouã_èbÀ
 (
 node
 );
 
-368 
+453 
 	`πabÀ_dump
 (
 node
@@ -14469,7 +14911,7 @@ node
 rouã_èbÀ
 );
 
-371 
+456 
 √w_πabÀ
  = 
 	`πabÀ_un£rülize
@@ -14483,7 +14925,7 @@ HEADER_SIZE
 tŸÆ_Àngth
  - HEADER_SIZE);
 
-374 if(
+459 if(
 	`πabÀ_mîge
 (
 node
@@ -14501,31 +14943,31 @@ rouã_èbÀ
 ‰om
 ))) {
 
-375 
+460 
 	`∆og
 (
 MSG_LOG
 ,"rip","ItáppearsÅhatÑtable_merge has updated ourÜocalÑouteÅable. Broadcasting itÅoÉveryone");
 
-376 
+461 
 	`£nd_rouã_èbÀ
 (
 node
 );
 
-386 
+471 
 	`πabÀ_de°roy
 (
 √w_πabÀ
 );
 
-387 
+472 
 	`‰ì
 (
 √w_πabÀ
 );
 
-388 
+473 
 	`‰ì
 (
 rù
@@ -14533,17 +14975,17 @@ rù
 ∑ckë
 );
 
-389 
+474 
 	`‰ì
 (
 rù
 );
 
-393 
+478 
 	}
 }
 
-399 
+484 
 	$£nd_rouã_èbÀ
 (
 ù_node_t
@@ -14551,7 +14993,7 @@ rù
 node
 ) {
 
-401 
+486 
 πabÀ_size
 , 
 nifs
@@ -14559,7 +15001,7 @@ nifs
 i
 ;
 
-402 
+487 
 nifs
  = 
 	`v™_node_nifs
@@ -14569,27 +15011,27 @@ node
 v™_node
 );
 
-403 
+488 
 ªtvÆ
 , 
 ∑ckë_size
 ;
 
-404 *
+489 *
 ∑ckë
 ;
 
-405 *
+490 *
 πabÀ
 ;
 
-406 
+491 
 v™addr_t
  
 va
 ;
 
-407 
+492 
 va
 .
 va_ty≥
@@ -14597,13 +15039,13 @@ va_ty≥
 AT_P2P
 ;
 
-409 
+494 
 i
  = 0; i < 
 nifs
 ; i++) {
 
-411 i‡(
+496 i‡(
 	`gë_if_°©e
 (
 node
@@ -14611,7 +15053,7 @@ node
 i
 ) == 0) ;
 
-419 
+504 
 πabÀ
  = 
 	`πabÀ_£rülize
@@ -14629,7 +15071,7 @@ i
 ≥î
  >= 0?Çode->ifaces[i].peer: -1) );
 
-421 
+506 
 ∑ckë_size
  = 
 	`buûdPackë
@@ -14645,7 +15087,7 @@ node
 PROTO_RIP
 );
 
-424 
+509 
 ªtvÆ
  = 
 	`v™_node_£nd
@@ -14663,29 +15105,29 @@ i
 va
 );
 
-426 
+511 
 	`‰ì
 (
 ∑ckë
 );
 
-430 
+515 
 	`‰ì
  (
 πabÀ
 );
 
-433 
+518 
 	}
 }
 
-440 *
+525 *
 	$rù
  (*
 ¨g
 ) {
 
-441 
+526 
 ù_node_t
  *
 node
@@ -14693,43 +15135,43 @@ node
 ¨g
 ;
 
-443 
+528 
 	`¶ìp
 (4);
 
-444 
+529 
 	`∆og
 (
 MSG_LOG
 ,"rip","ripÅhread started");
 
-447 
+532 
 	`±hªad_ã°ˇn˚l
 ();
 
-448 
+533 
 	`¶ìp
 (
 RIP_SLEEP
 );
 
-449 
+534 
 	`£nd_rouã_èbÀ
 (
 node
 );
 
-453 
+538 
 	}
 }
 
-459 *
+544 *
 	$£ndî
  (*
 ¨g
 ) {
 
-460 
+545 
 ù_node_t
  *
 this_node
@@ -14737,31 +15179,31 @@ this_node
 ¨g
 ;
 
-461 
+546 
 ù_∑ckë_t
  *
 d©a
 ;
 
-462 
+547 
 v™addr_t
  
 va
 ;
 
-463 
+548 
 ªtvÆ
 , 
 rvÆ
 ;
 
-465 
+550 
 	`∆og
 (
 MSG_LOG
 ,"sender","SenderingÅhread started!");
 
-467 
+552 
 this_node
 ->
 £ndög_q
@@ -14771,7 +15213,7 @@ this_node
 bqueue_t
 ));
 
-468 
+553 
 	`bqueue_öô
 (
 this_node
@@ -14779,7 +15221,7 @@ this_node
 £ndög_q
 );
 
-473 
+558 
 	`±hªad_˛ónup_push
 (((*)(*))
 bqueue_po‹ly_im∂emíãd_˛ónup
@@ -14789,7 +15231,7 @@ this_node
 £ndög_q
 );
 
-474 
+559 
 rvÆ
  = 
 	`bqueue_dequeue
@@ -14801,33 +15243,33 @@ this_node
 d©a
 );
 
-475 
+560 
 	`±hªad_˛ónup_p›
 (0);
 
-477 i‡(
+562 i‡(
 rvÆ
  =-
 EINVAL
 ) {
 
-478 
+563 
 	`∆og
 (
 MSG_ERROR
 ,"sender", "our queue disappeared!");
 
-479 
+564 
 	`exô
 (1);
 
-481 
+566 
 	`∆og
 (
 MSG_LOG
 ,"sender","Dequeued something...");
 
-482 
+567 
 va
 .
 va_ty≥
@@ -14837,7 +15279,7 @@ d©a
 addr_ty≥
 ;
 
-484 
+569 
 ªtvÆ
  = 
 	`v™_node_£nd
@@ -14857,13 +15299,13 @@ iÁ˚
 va
 );
 
-485 
+570 
 	`as£π
 (
 d©a
 );
 
-486 
+571 
 	`as£π
 (
 d©a
@@ -14871,7 +15313,7 @@ d©a
 ∑ckë
 );
 
-487 
+572 
 	`‰ì
 (
 d©a
@@ -14879,43 +15321,43 @@ d©a
 ∑ckë
 );
 
-488 
+573 
 	`‰ì
 (
 d©a
 );
 
-491  
+576  
 NULL
 ;
 
-492 
+577 
 	}
 }
 
-494 
+579 
 	$li°íî_˛ónup
  (*
 buf
 ) {
 
-496 
+581 
 	`‰ì
 (
 buf
 );
 
-497 
+582 
 	}
 }
 
-502 *
+587 *
 	$li°íî
  (*
 ¨g
 ) {
 
-503 
+588 
 node_™d_num_t
  *
 ¬n
@@ -14923,7 +15365,7 @@ node_™d_num_t
 ¨g
 ;
 
-505 
+590 
 öãrÁ˚
  = 
 ¬n
@@ -14931,7 +15373,7 @@ node_™d_num_t
 iÁ˚
 ;
 
-506 
+591 
 ù_node_t
  *
 node
@@ -14939,19 +15381,19 @@ node
 ¬n
 ->node;
 
-508 
+593 
 ªtvÆ
 ;
 
-509 *
+594 *
 buf
 ;
 
-510 
+595 
 mtu
 ;
 
-511 c⁄° 
+596 c⁄° 
 me
  = 
 node
@@ -14961,41 +15403,41 @@ v™_node
 vn_num
 ;
 
-513 
+598 
 v™addr_t
  
 addr
 ;
 
-514 
+599 
 de°
 ;
 
-515 
+600 
 §c
 ;
 
-516 
+601 
 âl
 ;
 
-517 
+602 
 ¥Ÿo
 ;
 
-518 
+603 
 uöt16_t
  
 tŸÆ_Àngth
 ;
 
-520 
+605 
 	`as£π
 (
 node
 );
 
-522 
+607 
 	`v™_node_gëif›t
 (
 node
@@ -15009,13 +15451,13 @@ VAN_IO_MTU
 mtu
 , ());
 
-524 
+609 
 	`‰ì
 (
 ¬n
 );
 
-527 
+612 
 buf
  = 
 	`mÆloc
@@ -15023,7 +15465,7 @@ buf
 mtu
 );
 
-529 
+614 
 	`±hªad_˛ónup_push
 (((*)(*))
 li°íî_˛ónup
@@ -15031,7 +15473,7 @@ li°íî_˛ónup
 buf
 );
 
-531 
+616 
 	`∆og
 (
 MSG_LOG
@@ -15045,7 +15487,7 @@ vn_num
 öãrÁ˚
 );
 
-534 
+619 
 	`±hªad_muãx_lock
 (&
 node
@@ -15057,7 +15499,7 @@ iÁ˚s
 lock
 );
 
-535 
+620 
 	`gë_if_°©e
 (
 node
@@ -15065,7 +15507,7 @@ node
 öãrÁ˚
 ) == 0) {
 
-537 
+622 
 	`±hªad_c⁄d_waô
 (&
 node
@@ -15079,7 +15521,7 @@ c⁄d
 lock
 );
 
-539 
+624 
 	`±hªad_muãx_u∆ock
 (&
 node
@@ -15091,7 +15533,7 @@ iÁ˚s
 lock
 );
 
-543 
+628 
 ªtvÆ
  = 
 	`v™_node_ªcv
@@ -15109,11 +15551,11 @@ mtu
 addr
  );
 
-545 i‡(
+630 i‡(
 ªtvÆ
  >= 0) {
 
-546 i‡(
+631 i‡(
 ªtvÆ
  > 
 mtu
@@ -15125,7 +15567,7 @@ MSG_WARNING
 öãrÁ˚
 ,Ñetval, mtu);
 
-550 
+635 
 	`±hªad_muãx_lock
 (&
 node
@@ -15137,7 +15579,7 @@ iÁ˚s
 age_lock
 );
 
-551 
+636 
 node
 ->
 iÁ˚s
@@ -15151,7 +15593,7 @@ age
 NULL
 );
 
-552 
+637 
 node
 ->
 iÁ˚s
@@ -15161,7 +15603,7 @@ iÁ˚s
 timed_out
  = 0;
 
-553 
+638 
 	`±hªad_muãx_u∆ock
 (&
 node
@@ -15173,7 +15615,7 @@ iÁ˚s
 age_lock
 );
 
-555 
+640 
 tŸÆ_Àngth
  = 
 	`gë_tŸÆ_Àn
@@ -15181,7 +15623,7 @@ tŸÆ_Àngth
 buf
 );
 
-556 
+641 
 ¥Ÿo
  = 
 	`gë_¥Ÿocﬁ
@@ -15189,17 +15631,15 @@ buf
 buf
 );
 
-560 
+645 
 uöt16_t
  
 ∑ckë_checksum
 , 
-zîo_checksum
-, 
 ˇl˚d_checksum
 ;
 
-562 
+647 
 ∑ckë_checksum
  = 
 	`gë_checksum
@@ -15207,21 +15647,13 @@ zîo_checksum
 buf
 );
 
-567 
-	`mem£t
+651 
+	`£t_checksum
 (
 buf
-+4,0,2);
+, 0);
 
-568 
-zîo_checksum
- = 
-	`gë_checksum
-(
-buf
-);
-
-571 if((
+653 if((
 ˇl˚d_checksum
  = 
 	`ù_Á°_csum
@@ -15231,7 +15663,7 @@ buf
 ∑ckë_checksum
 ) {
 
-572 
+654 
 	`∆og
 (
 MSG_ERROR
@@ -15241,7 +15673,7 @@ MSG_ERROR
 ∑ckë_checksum
 );
 
-579 
+661 
 	`£t_checksum
 (
 buf
@@ -15249,13 +15681,13 @@ buf
 ∑ckë_checksum
 );
 
-583 i‡(
+665 i‡(
 ¥Ÿo
  =
 PROTO_RIP
 ) {
 
-585 *
+667 *
 ∑ckë
  = 
 	`mÆloc
@@ -15263,7 +15695,7 @@ PROTO_RIP
 tŸÆ_Àngth
 );
 
-586 
+668 
 	`mem˝y
 (
 ∑ckë
@@ -15273,7 +15705,7 @@ buf
 tŸÆ_Àngth
 );
 
-589 
+671 
 rù_∑ckë_t
  *
 rù
@@ -15281,13 +15713,13 @@ rù
 	`mÆloc
 ((rip_packet_t));
 
-591 
+673 
 rù
 ->
 ∑ckë
  =Öacket;
 
-592 
+674 
 rù
 ->
 iÁ˚
@@ -15295,7 +15727,7 @@ iÁ˚
 öãrÁ˚
 ;
 
-594 
+676 
 	`±hªad_˛ónup_push
 (((*)(*))
 bqueue_po‹ly_im∂emíãd_˛ónup
@@ -15305,7 +15737,7 @@ node
 rù_q
 );
 
-595 
+677 
 	`bqueue_íqueue
 (
 node
@@ -15315,11 +15747,11 @@ rù_q
 rù
 );
 
-596 
+678 
 	`±hªad_˛ónup_p›
 (0);
 
-601 
+683 
 de°
  = 
 	`gë_d°
@@ -15327,7 +15759,7 @@ de°
 buf
 );
 
-602 
+684 
 §c
  = 
 	`gë_§c
@@ -15335,7 +15767,7 @@ buf
 buf
 );
 
-603 
+685 
 âl
  = 
 	`gë_âl
@@ -15343,7 +15775,7 @@ buf
 buf
 );
 
-605 
+687 
 	`∆og
 (
 MSG_LOG
@@ -15357,7 +15789,7 @@ de°
 tŸÆ_Àngth
 );
 
-606 i‡(
+688 i‡(
 tŸÆ_Àngth
  > 
 mtu
@@ -15367,13 +15799,13 @@ mtu
 MSG_WARNING
 ,"listener","WARNING:áccordingÅoÅhis IPÖacket header,ÅheÅotalÜength ofÅheÖacket is %d, butÅhis MTU forÅhisÜink is only %d !!! WillÇot forward.",Åotal_length, mtu); ; }
 
-608 i‡(
+690 i‡(
 de°
  !
 me
 ) {
 
-609 
+691 
 πabÀ_íåy_t
  *
 r
@@ -15385,7 +15817,7 @@ node
 de°
 );
 
-610 *
+692 *
 ∑ckë
  = 
 	`mÆloc
@@ -15393,7 +15825,7 @@ de°
 tŸÆ_Àngth
 );
 
-612 
+694 
 	`mem˝y
 (
 ∑ckë
@@ -15403,7 +15835,7 @@ buf
 tŸÆ_Àngth
 );
 
-614 
+696 
 	`∆og
 (
 MSG_LOG
@@ -15413,7 +15845,7 @@ r
 iÁ˚
 );
 
-616 
+698 
 	`£t_âl
 (
 ∑ckë
@@ -15421,13 +15853,13 @@ iÁ˚
 âl
  - 1 );
 
-618 
+700 
 	`£t_checksum
 (
 ∑ckë
 , 0);
 
-619 
+701 
 	`£t_checksum
 (
 ∑ckë
@@ -15435,7 +15867,7 @@ iÁ˚
 	`ù_Á°_csum
 ((*)packet, 2));
 
-621 
+703 
 ù_∑ckë_t
  *
 p
@@ -15443,7 +15875,7 @@ p
 	`mÆloc
 ((ip_packet_t));
 
-622 
+704 
 p
 ->
 iÁ˚
@@ -15451,13 +15883,13 @@ iÁ˚
 r
 ->iface;
 
-623 
+705 
 p
 ->
 ∑ckë
  =Öacket;
 
-624 
+706 
 p
 ->
 ∑ckë_size
@@ -15465,7 +15897,7 @@ p
 tŸÆ_Àngth
 ;
 
-625 
+707 
 p
 ->
 addr_ty≥
@@ -15475,7 +15907,7 @@ r
 ty≥
 ;
 
-627 
+709 
 	`±hªad_˛ónup_push
 (((*)(*))
 bqueue_po‹ly_im∂emíãd_˛ónup
@@ -15485,7 +15917,7 @@ node
 £ndög_q
 );
 
-628 
+710 
 	`bqueue_íqueue
 (
 node
@@ -15495,23 +15927,23 @@ node
 p
 );
 
-629 
+711 
 	`±hªad_˛ónup_p›
 (0);
 
-633 
+715 
 	`∆og
 (
 MSG_LOG
 ,"listener","ThisÖacket isáddressesedÅo me!");
 
-635 i‡(
+717 i‡(
 ¥Ÿo
  =
 PROTO_DATA
 ) {
 
-636 *
+718 *
 d©a
  = 
 	`mÆloc
@@ -15519,13 +15951,13 @@ d©a
 tŸÆ_Àngth
 );
 
-637 
+719 
 	`∆og
 (
 MSG_LOG
 ,"listener","WillÖass upÅoÅheÇextÜayer");
 
-638 
+720 
 	`mem˝y
 (
 d©a
@@ -15535,7 +15967,7 @@ buf
 tŸÆ_Àngth
 );
 
-641 
+723 
 	`±hªad_˛ónup_push
 (((*)(*))
 bqueue_po‹ly_im∂emíãd_˛ónup
@@ -15545,7 +15977,7 @@ node
 ª˚ivög_q
 );
 
-642 
+724 
 	`bqueue_íqueue
 (
 node
@@ -15555,23 +15987,23 @@ node
 d©a
 );
 
-643 
+725 
 	`±hªad_˛ónup_p›
 (0);
 
-645 } i‡(
+727 } i‡(
 ¥Ÿo
  =
 PROTO_TCP
 ) {
 
-647 
+729 
 	`∆og
 (
 MSG_LOG
 , "listener", "gotá TCPÖacket!");
 
-648 *
+730 *
 ∑ckë
  = 
 	`mÆloc
@@ -15579,7 +16011,61 @@ MSG_LOG
 tŸÆ_Àngth
 );
 
-650 
+733 
+uöt16_t
+ 
+∑ckë_checksum
+, 
+ˇl˚d_checksum
+;
+
+735 
+∑ckë_checksum
+ = 
+	`gë_t˝checksum
+(
+	`ù_to_t˝
+(
+buf
+));
+
+739 
+	`£t_t˝checksum
+(
+	`ù_to_t˝
+(
+buf
+), 0);
+
+741 if((
+ˇl˚d_checksum
+ = 
+	`ˇlcuœã_t˝_checksum
+((*)
+buf
+)Ë!
+∑ckë_checksum
+) {
+
+742 
+	`∆og
+(
+MSG_ERROR
+,"li°íî", "Eº‹:Å˝ checksum mism©ch. compuã_t˝_checksumÑëu∫ed %d, wêthök iàshould bê%d", 
+ˇl˚d_checksum
+, 
+∑ckë_checksum
+);
+
+747 
+	`£t_checksum
+(
+buf
+, 
+∑ckë_checksum
+);
+
+750 
 	`mem˝y
 (
 ∑ckë
@@ -15589,7 +16075,7 @@ buf
 tŸÆ_Àngth
 );
 
-651 
+751 
 	`bqueue_íqueue
 (
 node
@@ -15599,13 +16085,13 @@ t˝_q
 ∑ckë
 );
 
-654 
+754 
 	`∆og
 (
 MSG_WARNING
 ,"listener","I gotá IPÖacket withán unknownÖayloadÅype");
 
-661 
+760 
 	`∆og
 (
 MSG_WARNING
@@ -15613,27 +16099,27 @@ MSG_WARNING
 ªtvÆ
 );
 
-666 
+765 
 	`±hªad_˛ónup_p›
 (1);
 
-667  
+766  
 NULL
 ;
 
-668 
+767 
 	}
 }
 
-674 
+773 
 	$v™_drivî_lﬂded
 () {
 
-676 
+775 
 	}
 }
 
-681 
+780 
 	$v™_drivî_de°‹y
 (
 ù_node_t
@@ -15641,17 +16127,17 @@ NULL
 node
 ) {
 
-682 
+781 
 i
 ;
 
-684 
+783 
 	`∆og
 (
 MSG_LOG
 ,"shutdown","AttemptingÅo cancelÅhe sendingÅhread... ");
 
-686 
+785 
 	`±hªad_ˇn˚l
 (*
 node
@@ -15659,7 +16145,7 @@ node
 £ndög_thªad
 );
 
-687 
+786 
 	`±hªad_joö
 (*
 node
@@ -15669,7 +16155,7 @@ node
 NULL
 );
 
-688 
+787 
 	`‰ì
 (
 node
@@ -15677,13 +16163,13 @@ node
 £ndög_thªad
 );
 
-690 
+789 
 	`∆og
 (
 MSG_LOG
 ,"shutdown","AttemptingÅo cancelÅheÜisteningÅhreads... ");
 
-692 
+791 
 i
  = 0; i < 
 	`v™_node_nifs
@@ -15693,7 +16179,7 @@ node
 v™_node
 ); i++) {
 
-693 
+792 
 	`±hªad_ˇn˚l
 (*
 node
@@ -15703,7 +16189,7 @@ li°íög_thªad
 i
 ]);
 
-694 
+793 
 	`±hªad_joö
 (*
 node
@@ -15715,7 +16201,7 @@ i
 NULL
 );
 
-695 
+794 
 	`‰ì
 (
 node
@@ -15725,7 +16211,7 @@ li°íög_thªad
 i
 ]);
 
-696 
+795 
 	`∆og
 (
 MSG_LOG
@@ -15733,7 +16219,7 @@ MSG_LOG
 i
 );
 
-697 
+796 
 	`±hªad_c⁄d_de°roy
 (&
 node
@@ -15745,7 +16231,7 @@ i
 c⁄d
 );
 
-698 
+797 
 	`±hªad_muãx_de°roy
 (&
 node
@@ -15757,7 +16243,7 @@ i
 lock
 );
 
-699 
+798 
 	`±hªad_muãx_de°roy
 (&
 node
@@ -15769,7 +16255,7 @@ i
 age_lock
 );
 
-703 
+802 
 	`‰ì
 (
 node
@@ -15777,13 +16263,13 @@ node
 iÁ˚s
 );
 
-705 
+804 
 	`∆og
 (
 MSG_LOG
 ,"shutdown","AttemptingÅo cancelÅheÑipÅhread... ");
 
-706 
+805 
 	`±hªad_ˇn˚l
 (*
 node
@@ -15791,7 +16277,7 @@ node
 rù_thªad
 );
 
-707 
+806 
 	`±hªad_joö
 (*
 node
@@ -15801,7 +16287,7 @@ rù_thªad
 NULL
 );
 
-708 
+807 
 	`‰ì
 (
 node
@@ -15809,13 +16295,13 @@ node
 rù_thªad
 );
 
-711 
+810 
 	`∆og
 (
 MSG_LOG
 ,"shutdown","AttemptingÅo cancelÅheÑip monitorÅhread... ");
 
-712 
+811 
 	`±hªad_ˇn˚l
 (*
 node
@@ -15823,7 +16309,7 @@ node
 rù_m⁄ô‹_thªad
 );
 
-713 
+812 
 	`±hªad_joö
 (*
 node
@@ -15833,7 +16319,7 @@ rù_m⁄ô‹_thªad
 NULL
 );
 
-714 
+813 
 	`‰ì
 (
 node
@@ -15841,13 +16327,13 @@ node
 rù_m⁄ô‹_thªad
 );
 
-716 
+815 
 	`∆og
 (
 MSG_LOG
 ,"shutdown","AttemptingÅo cancelÅheÜink stateÅhread... ");
 
-717 
+816 
 	`±hªad_ˇn˚l
 (*
 node
@@ -15855,7 +16341,7 @@ node
 lök_°©e_thªad
 );
 
-718 
+817 
 	`±hªad_joö
 (*
 node
@@ -15865,7 +16351,7 @@ lök_°©e_thªad
 NULL
 );
 
-719 
+818 
 	`‰ì
 (
 node
@@ -15873,13 +16359,13 @@ node
 lök_°©e_thªad
 );
 
-721 
+820 
 	`∆og
 (
 MSG_LOG
 ,"shutdown","AttemptingÅo destroyÅhe sending q... ");
 
-722 
+821 
 	`bqueue_de°roy
 (
 node
@@ -15887,7 +16373,7 @@ node
 £ndög_q
 );
 
-723 
+822 
 	`‰ì
 (
 node
@@ -15895,13 +16381,13 @@ node
 £ndög_q
 );
 
-725 
+824 
 	`∆og
 (
 MSG_LOG
 ,"shutdown","AttemptingÅo destroyÅheÑeceiving q... ");
 
-726 
+825 
 	`bqueue_de°roy
 (
 node
@@ -15909,7 +16395,7 @@ node
 ª˚ivög_q
 );
 
-727 
+826 
 	`‰ì
 (
 node
@@ -15917,13 +16403,13 @@ node
 ª˚ivög_q
 );
 
-729 
+828 
 	`∆og
 (
 MSG_LOG
 ,"shutdown","AttemptingÅo destoryÅheÑip q... ");
 
-730 
+829 
 	`bqueue_de°roy
 (
 node
@@ -15931,7 +16417,7 @@ node
 rù_q
 );
 
-731 
+830 
 	`‰ì
 (
 node
@@ -15939,13 +16425,13 @@ node
 rù_q
 );
 
-733 
+832 
 	`∆og
 (
 MSG_LOG
 ,"shutdown","AttemptingÅo destoryÅheÑouteÅable... ");
 
-734 
+833 
 	`πabÀ_de°roy
 (
 node
@@ -15953,7 +16439,7 @@ node
 rouã_èbÀ
 );
 
-735 
+834 
 	`‰ì
 (
 node
@@ -15961,17 +16447,17 @@ node
 rouã_èbÀ
 );
 
-738 
+837 
 	`∆og
 (
 MSG_LOG
 ,"shutdown"," -= Bye! =- ");
 
-740 
+839 
 	}
 }
 
-747 
+846 
 ù_node_t
  *
 	$v™_drivî_öô
@@ -15981,7 +16467,7 @@ MSG_LOG
 num
 ) {
 
-748 
+847 
 v™_node_t
  *
 vn
@@ -15989,7 +16475,7 @@ vn
 NULL
 ;
 
-749 
+848 
 ù_node_t
  *
 node
@@ -15997,29 +16483,29 @@ node
 	`mÆloc
 ((ip_node_t));
 
-750 
+849 
 i
 , 
 nifs
 ;
 
-751 c⁄° 
+850 c⁄° 
 down
  = 0;
 
-752 
+851 
 node_™d_num_t
  *
 ¬n
 ;
 
-754 i‡(
+853 i‡(
 	`v™_öô
 (
 ‚ame
 )) {
 
-755 
+854 
 	`∆og
 (
 MSG_ERROR
@@ -16027,11 +16513,11 @@ MSG_ERROR
 ‚ame
 );
 
-756  
+855  
 NULL
 ;
 
-759 i‡–!(
+858 i‡–!(
 vn
  = 
 	`v™_node_gë
@@ -16039,7 +16525,7 @@ vn
 num
 ))) {
 
-760 
+859 
 	`∆og
 (
 MSG_ERROR
@@ -16047,11 +16533,11 @@ MSG_ERROR
 num
 );
 
-761  
+860  
 NULL
 ;
 
-764 
+863 
 	`as£π
 (
 vn
@@ -16059,7 +16545,7 @@ vn
 NULL
 );
 
-765 
+864 
 node
 ->
 v™_node
@@ -16067,7 +16553,7 @@ v™_node
 vn
 ;
 
-767 
+866 
 nifs
  = 
 	`v™_node_nifs
@@ -16075,7 +16561,7 @@ nifs
 vn
 );
 
-768 
+867 
 node
 ->
 iÁ˚s
@@ -16087,23 +16573,23 @@ iÁ˚_t
 nifs
 );
 
-769 
+868 
 	`∆og_£t_míu
 ("[nodê%d] Inôülizög [ ]",
 num
  );
 
-771 
+870 
 	`¶ìp
 (1);
 
-772 
+871 
 	`∆og
 (
 MSG_LOG
 , "init","starting sendingÅhread");
 
-773 
+872 
 node
 ->
 £ndög_thªad
@@ -16113,7 +16599,7 @@ node
 ±hªad_t
 ));
 
-774 
+873 
 	`±hªad_¸óã
 (
 node
@@ -16123,13 +16609,13 @@ node
 £ndî
 , (*)node);
 
-777 
+876 
 i
  = 0; i < 
 nifs
 ; i++) {
 
-778 
+877 
 ¬n
  = 
 	`mÆloc
@@ -16137,13 +16623,13 @@ nifs
 node_™d_num_t
 ));
 
-779 
+878 
 ¬n
 ->
 node
  =Çode;
 
-780 
+879 
 ¬n
 ->
 iÁ˚
@@ -16151,7 +16637,7 @@ iÁ˚
 i
 ;
 
-781 
+880 
 node
 ->
 li°íög_thªad
@@ -16163,7 +16649,7 @@ i
 ±hªad_t
 ));
 
-782 
+881 
 	`±hªad_¸óã
 (
 node
@@ -16177,7 +16663,7 @@ li°íî
 ¬n
 );
 
-785 
+884 
 node
 ->
 iÁ˚s
@@ -16187,7 +16673,7 @@ i
 cur_°©e
  = 0;
 
-786 
+885 
 node
 ->
 iÁ˚s
@@ -16197,7 +16683,7 @@ i
 ﬁd_°©e
  = 0;
 
-787 
+886 
 node
 ->
 iÁ˚s
@@ -16207,7 +16693,7 @@ i
 ≥î
  = -1;
 
-788 
+887 
 node
 ->
 iÁ˚s
@@ -16221,7 +16707,7 @@ age
 NULL
 );
 
-789 
+888 
 node
 ->
 iÁ˚s
@@ -16231,7 +16717,7 @@ i
 timed_out
  = 0;
 
-792 
+891 
 	`v™_node_£tif›t
 –
 vn
@@ -16243,7 +16729,7 @@ VAN_IO_UPSTATE
 down
 , ());
 
-794 
+893 
 	`±hªad_c⁄d_öô
 (&
 node
@@ -16255,7 +16741,7 @@ i
 c⁄d
 , 0);
 
-795 
+894 
 	`±hªad_muãx_öô
 (&
 node
@@ -16267,7 +16753,7 @@ i
 lock
 , 0);
 
-796 
+895 
 	`±hªad_muãx_öô
 (&
 node
@@ -16279,7 +16765,7 @@ i
 age_lock
 , 0);
 
-802 
+901 
 node
 ->
 ª˚ivög_q
@@ -16289,7 +16775,7 @@ node
 bqueue_t
 ));
 
-803 
+902 
 	`bqueue_öô
 (
 node
@@ -16297,7 +16783,7 @@ node
 ª˚ivög_q
 );
 
-805 
+904 
 node
 ->
 rù_q
@@ -16307,7 +16793,7 @@ rù_q
 bqueue_t
 ));
 
-806 
+905 
 	`bqueue_öô
 (
 node
@@ -16315,7 +16801,7 @@ node
 rù_q
 );
 
-808 
+907 
 node
 ->
 t˝_q
@@ -16325,7 +16811,7 @@ t˝_q
 bqueue_t
 ));
 
-809 
+908 
 	`bqueue_öô
 (
 node
@@ -16333,7 +16819,7 @@ node
 t˝_q
 );
 
-812 
+911 
 node
 ->
 rouã_èbÀ
@@ -16341,73 +16827,73 @@ rouã_èbÀ
 	`πabÀ_√w
 ();
 
-814 
+913 
 	`∆og_£t_míu
 ("[nodê%d] Inôülizög [= ]",
 num
  );
 
-815 
+914 
 	`¶ìp
 (1);
 
-816 
+915 
 	`∆og_£t_míu
 ("[nodê%d] Inôülizög [== ]",
 num
  );
 
-818 
+917 
 	`∆og_£t_míu
 ("[nodê%d] Inôülizög [=== ]",
 num
  );
 
-820 
+919 
 	`∆og_£t_míu
 ("[nodê%d] Inôülizög [==== ]",
 num
  );
 
-821 
+920 
 	`¶ìp
 (1);
 
-822 
+921 
 	`∆og_£t_míu
 ("[nodê%d] Inôülizög [===== ]",
 num
  );
 
-824 
+923 
 	`∆og_£t_míu
 ("[nodê%d] Inôülizög [====== ]",
 num
  );
 
-826 
+925 
 	`∆og_£t_míu
 ("[nodê%d] Inôülizög [======= ]",
 num
  );
 
-828 
+927 
 	`∆og_£t_míu
 ("[nodê%d] Inôülizög [========]",
 num
  );
 
-830 
+929 
 	`∆og_£t_míu
 ("[nodê%d] Inôülizög [==========]",
 num
  );
 
-831 
+930 
 	`¶ìp
 (1);
 
-835 
+934 
 node
 ->
 lök_°©e_thªad
@@ -16417,7 +16903,7 @@ lök_°©e_thªad
 ±hªad_t
 ));
 
-836 
+935 
 	`±hªad_¸óã
 (
 node
@@ -16425,7 +16911,7 @@ node
 lök_°©e_thªad
 , 0,Üink_state_thread, (*)node);
 
-838 
+937 
 node
 ->
 rù_m⁄ô‹_thªad
@@ -16435,7 +16921,7 @@ rù_m⁄ô‹_thªad
 ±hªad_t
 ));
 
-839 
+938 
 	`±hªad_¸óã
 (
 node
@@ -16445,7 +16931,7 @@ rù_m⁄ô‹_thªad
 rù_m⁄ô‹
 , (*)node);
 
-841 
+940 
 node
 ->
 rù_thªad
@@ -16455,7 +16941,7 @@ rù_thªad
 ±hªad_t
 ));
 
-842 
+941 
 	`±hªad_¸óã
 (
 node
@@ -16465,43 +16951,7 @@ rù_thªad
 rù
 , (*)node);
 
-844 
-node
-->
-t˝_thªad
- = 
-	`mÆloc
-((
-±hªad_t
-));
-
-845 
-	`±hªad_¸óã
-(
-node
-->
-t˝_thªad
-, 0,Åcp_thread, (*)node);
-
-847 
-node
-->
-t˝_£nd_thªad
- = 
-	`mÆloc
-((
-±hªad_t
-));
-
-848 
-	`±hªad_¸óã
-(
-node
-->
-t˝_£nd_thªad
-, 0,Åcp_send_thread, (*)node);
-
-850 
+942 
 node
 ->
 t˝_w©chdog
@@ -16511,7 +16961,7 @@ t˝_w©chdog
 ±hªad_t
 ));
 
-851 
+943 
 	`±hªad_¸óã
 (
 node
@@ -16519,13 +16969,13 @@ node
 t˝_w©chdog
 , 0,Åcp_watchdog, (*)node);
 
-854 
+946 
 	`v_t˝_öô
 (
 node
 );
 
-856 
+948 
 	`∆og
  (
 MSG_LOG
@@ -16535,7 +16985,7 @@ vn
 vn_num
 );
 
-857 
+949 
 	`∆og_£t_míu
 ("[nodê%d] 1:Síd d©® 2:Re˚ivêD©® 3:ToggÀ Lök Sèã q:Quô", 
 vn
@@ -16543,15 +16993,75 @@ vn
 vn_num
 );
 
-861  
+953 
+node
+->
+t˝_thªad
+ = 
+	`mÆloc
+((
+±hªad_t
+));
+
+954 
+	`±hªad_¸óã
+(
+node
+->
+t˝_thªad
+, 0,Åcp_thread, (*)node);
+
+956 
+node
+->
+t˝_£nd_thªad
+ = 
+	`mÆloc
+((
+±hªad_t
+));
+
+957 
+	`±hªad_¸óã
+(
+node
+->
+t˝_£nd_thªad
+, 0,Åcp_send_thread, (*)node);
+
+959 
+	`∆og
+ (
+MSG_LOG
+,"öô","Nodê%dÑu¬ög", 
+vn
+->
+vn_num
+);
+
+960 
+	`∆og_£t_míu
+("[nodê%d] 1:Síd d©® 2:Re˚ivêD©® 3:ToggÀ Lök Sèã q:Quô", 
+vn
+->
+vn_num
+);
+
+964 
+	`v_t˝_öô
+(
+node
+);
+
+966  
 node
 ;
 
-863 
+968 
 	}
 }
 
-871 
+976 
 	$buûdPackë
 (
 ù_node_t
@@ -16571,7 +17081,7 @@ uöt8_t
 ¥Ÿo
 ) {
 
-873 
+978 
 uöt16_t
  
 tŸÆ_Àngth
@@ -16579,13 +17089,13 @@ tŸÆ_Àngth
 d©a_size
 ;
 
-874 
+979 
 uöt16_t
  
 âl
  = 32;
 
-875 
+980 
 §c
  = 
 node
@@ -16595,7 +17105,7 @@ v™_node
 vn_num
 ;
 
-876 
+981 
 uöt16_t
  
 de°
@@ -16603,27 +17113,27 @@ de°
 to
 ;
 
-877 
+982 
 °¨t
  = 0;
 
-879 
+984 
 uöt16_t
  
 checksum
 ;
 
-881 
+986 
 ∑ckë_size
 ;
 
-884 
+989 
 ∑ckë_size
  = 8 + 
 d©a_size
 ;
 
-886 *
+991 *
 hódî
  = 
 	`mÆloc
@@ -16631,7 +17141,7 @@ hódî
 ∑ckë_size
 );
 
-889 
+994 
 	`mem£t
 (*
 hódî
@@ -16639,17 +17149,17 @@ hódî
 ∑ckë_size
 );
 
-892 
+997 
 °¨t
  |= (1 << 7);
 
-895 
+1000 
 	`£t_vîsi⁄
 (*
 hódî
 ,1);
 
-896 
+1001 
 	`£t_¥Ÿocﬁ
 (*
 hódî
@@ -16657,7 +17167,7 @@ hódî
 ¥Ÿo
 );
 
-899 
+1004 
 	`£t_tŸÆ_Àn
 (*
 hódî
@@ -16665,7 +17175,7 @@ hódî
 tŸÆ_Àngth
 );
 
-902 
+1007 
 	`£t_âl
 (*
 hódî
@@ -16673,7 +17183,7 @@ hódî
 âl
 );
 
-906 
+1011 
 	`£t_§c
 (*
 hódî
@@ -16681,7 +17191,7 @@ hódî
 §c
 );
 
-910 
+1015 
 	`£t_d°
 (*
 hódî
@@ -16689,7 +17199,7 @@ hódî
 de°
 );
 
-913 
+1018 
 checksum
  = 
 	`ù_Á°_csum
@@ -16697,7 +17207,7 @@ checksum
 hódî
 , 2);
 
-917 
+1022 
 	`£t_checksum
 (*
 hódî
@@ -16705,11 +17215,11 @@ hódî
 checksum
 );
 
-918 
+1023 
 checksum
  = 0;
 
-919 
+1024 
 checksum
  = 
 	`gë_checksum
@@ -16717,7 +17227,7 @@ checksum
 hódî
 );
 
-924 
+1029 
 	`mem˝y
 (*
 hódî
@@ -16727,15 +17237,15 @@ d©a
 d©a_size
 );
 
-926  
+1031  
 ∑ckë_size
 ;
 
-929 
+1034 
 	}
 }
 
-931 
+1036 
 	$v™_drivî_£ndto
  (
 ù_node_t
@@ -16753,15 +17263,15 @@ uöt8_t
 ¥Ÿo
 ) {
 
-934 *
+1039 *
 ∑ckë
 ;
 
-935 
+1040 
 ∑ckë_size
 ;
 
-939 i‡(
+1044 i‡(
 to
  =
 node
@@ -16771,13 +17281,13 @@ v™_node
 vn_num
 ) {
 
-941 
+1046 
 	`∆og
 (
 MSG_LOG
 ,"sendto","I wasáskedÅo sendáÖacketÅo myself! Sending directly intoÜocal queue");
 
-942 *
+1047 *
 d©a
  = 
 	`mÆloc
@@ -16785,7 +17295,7 @@ d©a
 size
 );
 
-944 
+1049 
 	`mem˝y
 (
 d©a
@@ -16795,7 +17305,7 @@ buf
 size
 );
 
-945 
+1050 
 	`bqueue_íqueue
 (
 node
@@ -16805,13 +17315,13 @@ node
 d©a
 );
 
-949 
+1054 
 v™addr_t
  
 addr
 ;
 
-950 
+1055 
 addr
 .
 va_ty≥
@@ -16819,13 +17329,13 @@ va_ty≥
 AT_P2P
 ;
 
-951 
+1056 
 πabÀ_íåy_t
  *
 r
 ;
 
-952 
+1057 
 ù_∑ckë_t
  *
 p
@@ -16833,11 +17343,11 @@ p
 	`mÆloc
 ((ip_packet_t));
 
-953 
+1058 
 mtu
 ;
 
-956 
+1061 
 r
  = 
 	`πabÀ_gë
@@ -16849,11 +17359,11 @@ rouã_èbÀ
 to
 );
 
-957 i‡(!
+1062 i‡(!
 r
 ) {
 
-958 
+1063 
 	`∆og
 (
 MSG_WARNING
@@ -16861,13 +17371,13 @@ MSG_WARNING
 to
 );
 
-959 
+1064 
 	`‰ì
 (
 p
 );
 
-963 
+1068 
 	`v™_node_gëif›t
 (
 node
@@ -16883,7 +17393,7 @@ VAN_IO_MTU
 mtu
 , ());
 
-968 
+1073 
 ∑ckë_size
  = 
 	`buûdPackë
@@ -16901,25 +17411,25 @@ to
 ¥Ÿo
 );
 
-973 i‡(
+1078 i‡(
 ∑ckë_size
  > 
 mtu
 ) {
 
-974 
+1079 
 	`∆og
 (
 MSG_WARNING
 , "sendto", "WARNING WillÇot sendÅhisÖacket -- TOO BIG");
 
-975 
+1080 
 	`‰ì
 (
 ∑ckë
 );
 
-979 
+1084 
 	`∆og
 (
 MSG_LOG
@@ -16931,7 +17441,7 @@ r
 iÁ˚
 );
 
-981 
+1086 
 p
 ->
 iÁ˚
@@ -16939,19 +17449,19 @@ iÁ˚
 r
 ->iface;
 
-982 
+1087 
 p
 ->
 ∑ckë
  =Öacket;
 
-983 
+1088 
 p
 ->
 ∑ckë_size
  =Öacket_size;
 
-984 
+1089 
 p
 ->
 addr_ty≥
@@ -16961,7 +17471,7 @@ r
 ty≥
 ;
 
-986 
+1091 
 	`bqueue_íqueue
 (
 node
@@ -16971,17 +17481,17 @@ node
 p
 );
 
-994  
+1099  
 ∑ckë_size
  - 
 HEADER_SIZE
 ;
 
-995 
+1100 
 	}
 }
 
-997 
+1102 
 	$v™_drivî_ªcv‰om
  (
 ù_node_t
@@ -16993,15 +17503,15 @@ buf
 size
 ) {
 
-998 *
+1103 *
 d©a
 ;
 
-999 
+1104 
 d©a_size
 ;
 
-1002 
+1107 
 	`bqueue_dequeue
 (
 node
@@ -17011,7 +17521,7 @@ node
 d©a
 );
 
-1003 
+1108 
 d©a_size
  = 
 	`gë_tŸÆ_Àn
@@ -17021,7 +17531,7 @@ d©a
 HEADER_SIZE
  ;
 
-1004 
+1109 
 	`∆og
 (
 MSG_LOG
@@ -17029,7 +17539,7 @@ MSG_LOG
 d©a_size
 );
 
-1005 
+1110 
 	`∆og
 (
 MSG_LOG
@@ -17039,19 +17549,19 @@ MSG_LOG
 d©a
 ));
 
-1007 i‡(
+1112 i‡(
 size
  < 
 d©a_size
 ) {
 
-1008 
+1113 
 d©a_size
  = 
 size
 ;
 
-1013 
+1118 
 	`mem˝y
 (
 buf
@@ -17063,21 +17573,21 @@ HEADER_SIZE
 d©a_size
 );
 
-1014 
+1119 
 	`‰ì
 (
 d©a
 );
 
-1015  
+1120  
 d©a_size
 ;
 
-1016 
+1121 
 	}
 }
 
-1019 
+1124 
 	$íåy_to_vaddr
 (
 πabÀ_íåy_t
@@ -17089,7 +17599,7 @@ v™addr_t
 vaddr
 ) {
 
-1020 
+1125 
 vaddr
 ->
 va_ty≥
@@ -17099,11 +17609,11 @@ va_ty≥
 ty≥
 ;
 
-1021 
+1126 
 	}
 }
 
-1023 
+1128 
 πabÀ_íåy_t
 * 
 	$lookup_rouã
@@ -17115,7 +17625,7 @@ node
 addr
 ) {
 
-1024 
+1129 
 πabÀ_íåy_t
  *
 to_ªtu∫
@@ -17129,13 +17639,13 @@ rouã_èbÀ
 addr
 );
 
-1025 i‡(!
+1130 i‡(!
 to_ªtu∫
 Ë{  
 NULL
 ; }
 
-1026 i‡(
+1131 i‡(
 to_ªtu∫
 ->
 co°
@@ -17145,11 +17655,11 @@ INFINITY
 NULL
 ; Åo_return;
 
-1027 
+1132 
 	}
 }
 
-1029 
+1134 
 	$upd©e_rouã
 (
 ù_node_t
@@ -17165,11 +17675,11 @@ co°
 √xt_h›
 ) {
 
-1030 
+1135 
 to_ªtu∫
 ;
 
-1031 
+1136 
 πabÀ_íåy_t
  *
 rouã
@@ -17181,7 +17691,7 @@ node
 addr
 );
 
-1032 i‡(!
+1137 i‡(!
 rouã
 Ë{ 
 	`add_rouã
@@ -17197,7 +17707,7 @@ co°
 √xt_h›
 );  1;}
 
-1034 
+1139 
 to_ªtu∫
  = (
 rouã
@@ -17209,33 +17719,33 @@ co°
 √xt_h›
  !=Çext_hop);
 
-1035 
+1140 
 rouã
 ->
 iÁ˚
  = iface;
 
-1036 
+1141 
 rouã
 ->
 co°
  = cost;
 
-1037 
+1142 
 rouã
 ->
 √xt_h›
  =Çext_hop;
 
-1038  
+1143  
 to_ªtu∫
 ;
 
-1041 
+1146 
 	}
 }
 
-1043 
+1148 
 	$add_rouã
 (
 ù_node_t
@@ -17251,7 +17761,7 @@ co°
 √xt_h›
 ) {
 
-1044 
+1149 
 πabÀ_íåy_t
 * 
 íåy
@@ -17259,17 +17769,17 @@ co°
 	`mÆloc
 ((rtable_entry_t));
 
-1045 
+1150 
 v™addr_t
  
 va
 ;
 
-1047 if(!
+1152 if(!
 íåy
 ) {
 
-1052 
+1157 
 	`v™_node_gëif›t
 (
 node
@@ -17285,19 +17795,19 @@ va
 va_ty≥
 , ());
 
-1055 
+1160 
 íåy
 ->
 addr
  =áddr;
 
-1056 
+1161 
 íåy
 ->
 iÁ˚
  = iface;
 
-1057 
+1162 
 íåy
 ->
 ty≥
@@ -17307,19 +17817,19 @@ va
 va_ty≥
 ;
 
-1058 
+1163 
 íåy
 ->
 co°
  = cost;
 
-1059 
+1164 
 íåy
 ->
 √xt_h›
  =Çext_hop;
 
-1062 
+1167 
 	`πabÀ_put
 (
 node
@@ -17329,11 +17839,11 @@ rouã_èbÀ
 íåy
 );
 
-1065 
+1170 
 	}
 }
 
-1067 
+1172 
 	$öô_°
 (
 t˝_sockë_t
@@ -17351,7 +17861,7 @@ uöt16_t
 Ω
 ) {
 
-1068 
+1173 
 thög
 ->
 loˇl_node
@@ -17361,7 +17871,7 @@ loˇl_node
 ù_node_t
 ));
 
-1069 
+1174 
 thög
 ->
 loˇl_node
@@ -17373,7 +17883,7 @@ v™_node
 v™_node_t
 ));
 
-1070 
+1175 
 thög
 ->
 loˇl_node
@@ -17385,7 +17895,7 @@ vn_num
  
 ;
 
-1072 
+1177 
 thög
 ->
 loˇl_p‹t
@@ -17393,7 +17903,7 @@ loˇl_p‹t
 Õ
 ;
 
-1073 
+1178 
 thög
 ->
 ªmŸe_node
@@ -17401,7 +17911,7 @@ thög
 ∫
 ;
 
-1074 
+1179 
 thög
 ->
 ªmŸe_p‹t
@@ -17409,11 +17919,11 @@ thög
 Ω
 ;
 
-1075 
+1180 
 	}
 }
 
-1077 
+1182 
 	$maö
 –
 ¨gc
@@ -17421,13 +17931,13 @@ thög
 ¨gv
 [] ) {
 
-1078 
+1183 
 v™_node_t
  *
 vn
 ;
 
-1079 
+1184 
 i
  = 0, 
 ö
@@ -17435,43 +17945,43 @@ i
 Àn
 ;
 
-1080 
+1185 
 buf
 [ 256 ];
 
-1081 
+1186 
 v™addr_t
  
 va
 ;
 
-1083 if–
+1188 if–
 ¨gc
  != 3 ) {
 
-1084 
+1189 
 	`¥ötf
 ("ußge: %†node_numÇëc⁄fig\n",
 ¨gv
 [0]);
 
-1088 if–
+1193 if–
 	`v™_öô
 –
 ¨gv
 [ 2 ] ) ) {
 
-1089 
+1194 
 	`Ârötf
 –
 °dîr
 , "doh: van_init\n" );
 
-1090 
+1195 
 	`exô
 ( 1 );
 
-1093 if–!–
+1198 if–!–
 vn
  = 
 	`v™_node_gë
@@ -17481,17 +17991,17 @@ vn
 ¨gv
 [ 1 ] ) ) ) ) {
 
-1094 
+1199 
 	`Ârötf
 –
 °dîr
 , "doh: van_node_get\n" );
 
-1095 
+1200 
 	`exô
 ( 1 );
 
-1098 
+1203 
 	`¥ötf
 –"Nodê%òÆ»£à[ CTL-DÅÿexô ]\n", 
 	`©oi
@@ -17499,31 +18009,31 @@ vn
 ¨gv
 [ 1 ] ) );
 
-1100  
+1205  
 i
  != 9 ) {
 
-1101 
+1206 
 îr
 ;
 
-1102 
+1207 
 	`¥ötf
 ( "Command: " );
 
-1104 
+1209 
 	`fÊush
 (
 °dout
 );
 
-1105 
+1210 
 	`mem£t
 (
 buf
 ,0,80);
 
-1106 
+1211 
 îr
  = 
 	`ªad
@@ -17533,17 +18043,17 @@ STDIN_FILENO
 buf
 , 80);
 
-1107 if–
+1212 if–
 îr
  <0 ) { 
 	`¥ötf
 ("\n"); ; }
 
-1108 
+1213 
 buf
 [79] = 0;
 
-1110 
+1215 
 	`ssˇnf
 (
 buf
@@ -17551,27 +18061,27 @@ buf
 i
 );
 
-1112  
+1217  
 i
  ) {
 
-1116 
+1221 
 	`¥ötf
 ( "Interface: " );
 
-1117 
+1222 
 	`fÊush
 (
 °dout
 );
 
-1118 
+1223 
 	`mem£t
 (
 buf
 ,0,80);
 
-1119 
+1224 
 	`ªad
 (
 STDIN_FILENO
@@ -17579,11 +18089,11 @@ STDIN_FILENO
 buf
 , 80);
 
-1120 
+1225 
 buf
 [79] = 0;
 
-1122 
+1227 
 	`ssˇnf
 (
 buf
@@ -17591,7 +18101,7 @@ buf
 ö
 );
 
-1124 if––
+1229 if––
 Àn
  = 
 	`v™_node_ªcv
@@ -17605,17 +18115,17 @@ buf
 va
  ) ) > 0 ) {
 
-1125 
+1230 
 buf
 [ 
 Àn
  ] = 0;
 
-1126 
+1231 
 	`¥ötf
 ( "-- Received --\n"
 
-1131 
+1236 
 ö
 , 
 ty≥s
@@ -17629,7 +18139,7 @@ va_ty≥
 buf
  );
 
-1134 
+1239 
 	`¥ötf
 –"v™_ªcv_îr‹ (%d): %s\n", 
 Àn
@@ -17637,17 +18147,17 @@ buf
 	`°ªº‹
 ( -len ) );
 
-1141 
+1246 
 	`¥ötf
 ( "Interface: " );
 
-1142 
+1247 
 	`sˇnf
 –"%d", &
 ö
  );
 
-1146 
+1251 
 	`v™_node_gëif›t
 –
 vn
@@ -17661,17 +18171,17 @@ va
 va_ty≥
 ,
 
-1149 
+1254 
 	`¥ötf
 ( "Message: " );
 
-1150 
+1255 
 	`sˇnf
 –"%s", 
 buf
  );
 
-1151 
+1256 
 Àn
  = 
 	`v™_node_£nd
@@ -17687,15 +18197,15 @@ buf
 va
  );
 
-1152 if–
+1257 if–
 Àn
  > 0 )
 
-1153 
+1258 
 	`¥ötf
 ( "send success\n" );
 
-1155 
+1260 
 	`¥ötf
 –"v™_£nd_îr‹ (%d): %s\n", 
 Àn
@@ -17703,7 +18213,7 @@ va
 	`°ªº‹
 ( -len ) );
 
-1165 
+1270 
 	}
 }
 
