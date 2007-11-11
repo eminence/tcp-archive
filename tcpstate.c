@@ -89,7 +89,7 @@ int tcpm_event(tcp_machine_t* machine, tinput_t event, void* argt, void* args) {
   int result = (NULL == machine_step(machine->sm, event, argt, args));
 
   update_tcp_table(machine->sm->context);
-  nlog(MSG_LOG, "tcpm_event", "Socket %d now in state %s", tcpm_strstate(machine->sm->current->id));
+  nlog(MSG_LOG, "tcpm_event", "Socket %d now in state %s", ((tcp_socket_t*)machine->sm->context)->fd, tcpm_strstate(machine->sm->current->id));
 
   return result;
 }
