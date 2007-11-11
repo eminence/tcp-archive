@@ -89,6 +89,7 @@ int tcpm_event(tcp_machine_t* machine, tinput_t event, void* argt, void* args) {
   int result = (NULL == machine_step(machine->sm, event, argt, args));
 
   update_tcp_table(machine->sm->context);
+  nlog(MSG_LOG, "tcpm_event", "Socket %d now in state %s", tcpm_strstate(machine->sm->current->id));
 
   return result;
 }
@@ -117,5 +118,45 @@ int tcpm_packet_to_input(const char* packet) {
     default:
       nlog(MSG_ERROR, "tcpm_packet_to_input", "invalid flags: %d", get_flags(packet));
       return ON_INVALID;
+  }
+}
+
+const char* tcpm_strstate(int state) {
+  switch(state) {
+    case ST_CLOSED:
+      return "Closed";
+
+    case ST_SYN_SENT:
+      return "SYN sent";
+
+    case ST_SYN_RCVD:
+      return "SYN received";
+
+    case ST_LISTEN:
+      return "Listen";
+
+    case ST_ESTAB:
+      return "Established";
+
+    case ST_FIN_WAIT1:
+      return "FIN wait (1)";
+
+    case ST_FIN_WAIT2:
+      return "FIN wait (2)";
+
+    case ST_TIME_WAIT:
+      return "Time wait";
+
+    case ST_CLOSING:
+      return "Closing";
+
+    case ST_CLOSE_WAIT:
+      return "Close wait";
+
+    case ST_LAST_ACK:
+      return "Last ACK";
+
+    default:
+      return "Invalid State";
   }
 }

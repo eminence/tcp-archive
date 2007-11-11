@@ -47,6 +47,7 @@ tcp_machine_t* tcpm_new(struct tcp_socket__* context, uint8_t clone);
 void tcpm_destroy(tcp_machine_t* machine);
 int tcpm_event(tcp_machine_t* machine, tinput_t event, void* argt, void* args);
 int tcpm_packet_to_input(const char* packet);
+const char* tcpm_strstate(int state);
 
 #define tcpm_state(m)       ((m)->sm->current->id)
 #define tcpm_canbind(m)     (tcpm_state(m) == ST_CLOSED)
