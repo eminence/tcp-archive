@@ -1,9 +1,11 @@
+#include <stdlib.h>
+
 #include "seq.h"
 
 /* RECEVING FUNCTIONS */
 
 int isValidSeqNum(tcp_socket_t *sock, int num) {
-	return cbuf_btm_contains(sock->r_buf, sock->recv_next, num);
+	return cbuf_btm_contains(sock->r_buf, sock->recv_next, sock->recv_next + sock->recv_window_size, num);
 }
 
 /* do we have room to copy incoming data into our cbuffer? */
@@ -31,7 +33,7 @@ int amountOfDataToRead(tcp_socket_t *sock) {
 /* copy memory from our cbuffer into a user specified buffer */
 int getDataFromBuffer(tcp_socket_t *sock, char *buf, int max_size) {
 	assert(buf);
-	int amount = MIN(max_size, dataToRead(sock));
+	int amount = MIN(max_size, amountOfDataToRead(sock));
 
 	assert(amount > 0);
 
@@ -40,7 +42,9 @@ int getDataFromBuffer(tcp_socket_t *sock, char *buf, int max_size) {
 	free(memory);
 
 	sock->recv_read += amount;
+	sock->recv_window_size += amount;
 	assert(sock->recv_read <= sock->recv_next);
+
 	
 	return amount;
 
@@ -49,8 +53,14 @@ int getDataFromBuffer(tcp_socket_t *sock, char *buf, int max_size) {
 
 /*************************-=[ SENDING STUFFS ]=-********************/
 
+/* when we get a window announcement, pass the window into this function */
+void updateFromWindowAccounce(tcp_socket_t *sock, int window) {
+
+
+}
+
 /* do we have room in our cbuffer to accept new data to send from the user */
-int canAcceptDataToSend(tcp_socket_t *sock, size) {
+int canAcceptDataToSend(tcp_socket_t *sock, int size) {
 	return (sock->send_una + sock->send_window_size - sock->send_written) > 0;
 }
 
@@ -62,21 +72,22 @@ int getAmountAbleToSend(tcp_socket_t *sock) {
 }
 
 /* call this when we have gotten an ACK for a packet */
-int gotAckFor(tcp_socket_t *sock, int start, int len) {
+void gotAckFor(tcp_socket_t *sock, int start, int len) {
 	//assert(sock->send_una = start);  /* not true, because acks are consecutive */
 	sock->send_una += len;
 
-	assert(sock->send_una <= sock->send+next);
+	assert(sock->send_una <= sock->send_next);
 }
 
 /* take data from the user and copy it into our cbuffer */
 int copyDataFromUser(tcp_socket_t *sock, char *data, int size) {
 	assert(canAcceptDataToSend(sock, size));
 	assert(sock->send_written >= sock->send_next); 
-	assert(sock->send_written + size <= send_una + send_window);
+	assert(sock->send_written + size <= sock->send_una + sock->send_window_size);
 
 	cbuf_put_range(sock->s_buf, data, sock->send_written, size);
 	sock->send_written += size;
+	return 0;
 }
 
 /* true if we have data ready to send */
