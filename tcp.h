@@ -12,6 +12,7 @@ struct ip_node__;
 
 typedef struct tcp_socket__ {
 	struct tcp_machine__ *machine;
+	unsigned char can_handshake; /* set by v_accept() */
 	unsigned int fd;
 	uint32_t seq_num;
 	uint32_t ack_num;
@@ -25,6 +26,8 @@ typedef struct tcp_socket__ {
 	pthread_cond_t cond;
 	pthread_mutex_t lock;
 	int cond_status;
+
+	int new_fd;
 
 } tcp_socket_t;
 

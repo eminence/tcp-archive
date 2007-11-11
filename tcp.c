@@ -153,6 +153,7 @@ int v_socket() {
 	sock->fd = s;
 	sock->local_port = rand()%65535;
 	sock->local_node = this_node;
+	sock->can_handshake = 0;
 
 	tcp_table_new(this_node, s);	
 
@@ -209,6 +210,7 @@ int v_connect(int socket, int node, uint16_t port) {
 
 	sock->seq_num = 100; /* an arbitrary inital seq number. TODO make this random */ 
 	sock->ack_num = 0;
+	sock->can_handshake = 1;
 
   /* Update tuple table with FULL socket. */
   socktable_put(this_node->tuple_table, sock, FULL_SOCKET);
@@ -232,10 +234,13 @@ int v_accept(int socket, int *node) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
 
 	// TODO make sure we can call accept
-	// TODO block and wait for a new incoming connection
 
+	sock->can_handshake = 1;
 
-	return 0;
+	int status = wait_for_event(sock, TCP_NEWSOCKET);
+	
+	return sock->new_fd;
+
 }
 
 
