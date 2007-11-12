@@ -133,6 +133,8 @@ void do_recv_estab(tcp_socket_t* sock, char* packet) {
 				/* ack this packet*/
 				tcp_sendto(socket, NULL, 0, TCP_FLAG_ACK); /* XXX maybe write a sendAck() function? */
 
+        /* TODO copy data into cbuffer with copy datasometsomethiasfdA() */
+
 			} else {
 				nlog(MSG_WARNING, "do_recv_estab", "got data, but i have no room for it!");
 			}
