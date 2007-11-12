@@ -4,3 +4,6 @@ notify and sleep stuff
 add mutexes to all sockets; any time we touch a socket, lock mutex
 
 DO WE SET AND CHECK TCP CHECKSUMS????? (if not, we need to)
+
+
+move the socktable_put call from v_bind to v_listen
