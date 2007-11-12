@@ -10,28 +10,17 @@
 int do_connect(sid_t prev, sid_t next, void* context, void* rflags, void* packet) {
   tcp_socket_t* sock = (tcp_socket_t*)context;
   uint32_t incoming_seq_num = get_seqnum(ip_to_tcp((char*)packet)) ;
-    
+  
   nlog(MSG_LOG, "do_connect", "Setting client's recv_next and recv_read to %d", incoming_seq_num + 1);
 
   sock->recv_next = incoming_seq_num + 1;
   sock->recv_read = incoming_seq_num + 1;
 
-  return send_packet_with_flags(prev, next, context, rflags, NULL);
+  return send_packet_with_flags((tcp_socket_t*)context, *((uint8_t*)rflags));
 }
 
-int send_packet_with_flags(sid_t prev, sid_t next, void* context, void *arg, void *tran_arg) {
-	tcp_socket_t *sock = (tcp_socket_t*)context;
-	assert(sock);
-	assert(arg);
-	uint8_t flags = *(uint8_t*)arg;
-
-	nlog(MSG_LOG,"state:SPWF", "in send_packet_with_flags, with socket %d flags are %p", sock->fd, flags);
-
-  /* Use special case sequence number increase. */
-	tcp_sendto(sock, NULL, 0, flags);
-
-
-	return 0; // FIXME XXX TODO
+int do_send_flags(sid_t prev, sid_t next, void* context, void *arg, void *tran_arg) {
+  return send_packet_with_flags((tcp_socket_t*)context, *((uint8_t*)arg));
 }
 
 int do_listen(sid_t prev, sid_t next, void* context, void *arg, void *tran_arg) {

@@ -15,6 +15,16 @@
 
 static ip_node_t *this_node;
 
+int send_packet_with_flags(tcp_socket_t* sock, uint8_t flags) {
+	nlog(MSG_LOG,"spwf", "socket %d, flags are %p", sock->fd, flags);
+
+  /* Use special case sequence number increase. */
+	tcp_sendto(sock, NULL, 0, flags);
+
+
+	return 0; // FIXME XXX TODO
+}
+
 tcp_socket_t *get_socket_from_int(int s) {
 	assert(s >= 0);
 	assert(s < MAXSOCKETS);

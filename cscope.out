@@ -1,4 +1,4 @@
-cscope 15 /home/bdiamond/course/cs168/tcp               0000518321
+cscope 15 /home/bdiamond/course/cs168/tcp               0000518278
 	@cbuf_test.c
 
 1 
@@ -9653,7 +9653,7 @@ uöt32_t
 	`ù_to_t˝
 ((*)
 ∑ckë
-));
+)) ;
 
 14 
 	`∆og
@@ -9661,7 +9661,7 @@ uöt32_t
 MSG_LOG
 , "do_c⁄√˘", "Sëtög clõ¡'†ªcv_√xà™dÑecv_ªadÅÿ%d", 
 öcomög_£q_num
-);
+ + 1);
 
 16 
 sock
@@ -9669,7 +9669,7 @@ sock
 ªcv_√xt
  = 
 öcomög_£q_num
-;
+ + 1;
 
 17 
 sock
@@ -9677,28 +9677,26 @@ sock
 ªcv_ªad
  = 
 öcomög_£q_num
-;
+ + 1;
 
 19  
 	`£nd_∑ckë_wôh_Êags
-(
-¥ev
-, 
-√xt
-, 
+((
+t˝_sockë_t
+*)
 c⁄ãxt
-, 
+, *((
+uöt8_t
+*)
 rÊags
-, 
-NULL
-);
+));
 
 20 
 	}
 }
 
 22 
-	$£nd_∑ckë_wôh_Êags
+	$do_£nd_Êags
 (
 sid_t
  
@@ -9713,61 +9711,23 @@ c⁄ãxt
 å™_¨g
 ) {
 
-23 
+23  
+	`£nd_∑ckë_wôh_Êags
+((
 t˝_sockë_t
- *
-sock
- = (t˝_sockë_t*)
+*)
 c⁄ãxt
-;
+, *((
+uöt8_t
+*)
+¨g
+));
 
 24 
-	`as£π
-(
-sock
-);
-
-25 
-	`as£π
-(
-¨g
-);
-
-26 
-uöt8_t
- 
-Êags
- = *(uöt8_t*)
-¨g
-;
-
-28 
-	`∆og
-(
-MSG_LOG
-,"°©e:SPWF", "ö síd_∑ckë_wôh_Êags, wôh sockë %d fœg†¨ê%p", 
-sock
-->
-fd
-, 
-Êags
-);
-
-31 
-	`t˝_£ndto
-(
-sock
-, 
-NULL
-, 0, 
-Êags
-);
-
-35 
 	}
 }
 
-37 
+26 
 	$do_li°í
 (
 sid_t
@@ -9783,7 +9743,7 @@ c⁄ãxt
 å™_¨g
 ) {
 
-38 
+27 
 t˝_sockë_t
  *
 sock
@@ -9791,13 +9751,13 @@ sock
 c⁄ãxt
 ;
 
-39 
+28 
 	`as£π
 (
 sock
 );
 
-41 
+30 
 ù_node_t
  *
 node
@@ -9805,13 +9765,13 @@ node
 å™_¨g
 ;
 
-42 
+31 
 	`as£π
 (
 node
 );
 
-44 
+33 
 	`sockèbÀ_put
 (
 node
@@ -9823,11 +9783,11 @@ sock
 HALF_SOCKET
 );
 
-50 
+39 
 	}
 }
 
-53 
+42 
 	$Áû_wôh_ª£t
 (
 sid_t
@@ -9839,7 +9799,7 @@ c⁄ãxt
 ¨gs
 ) {
 
-54 
+43 
 t˝_sockë_t
  *
 sock
@@ -9847,19 +9807,19 @@ sock
 c⁄ãxt
 ;
 
-55 
+44 
 	`as£π
 (
 sock
 );
 
-57 
+46 
 	`∆og
 (
 MSG_LOG
 , "fail_with_reset", "failing socket %d. sendingá RSTánd moving backÅoÅhe closed state");
 
-59 
+48 
 	`t˝_£ndto
 (
 sock
@@ -9869,11 +9829,11 @@ NULL
 TCP_FLAG_RST
 );
 
-62 
+51 
 	}
 }
 
-64 
+53 
 	$has_°©us
 (
 w™t
@@ -9881,17 +9841,17 @@ w™t
 have
 ) {
 
-65  !!(
+54  !!(
 w™t
  & 
 have
 );
 
-66 
+55 
 	}
 }
 
-68 
+57 
 	$waô_f‹_evít
 (
 t˝_sockë_t
@@ -9901,7 +9861,7 @@ sock
 °©us_bôs
 ) {
 
-69 
+58 
 	`±hªad_muãx_lock
 (&
 sock
@@ -9909,7 +9869,7 @@ sock
 lock
 );
 
-71 
+60 
 	`∆og
 (
 MSG_LOG
@@ -9921,7 +9881,7 @@ sock
 c⁄d_°©us
 );
 
-73 !(
+62 !(
 	`has_°©us
 (
 °©us_bôs
@@ -9931,13 +9891,13 @@ sock
 c⁄d_°©us
 ))) {
 
-74 
+63 
 	`∆og
 (
 MSG_LOG
 ,"wait_for_event", "sleeping on cond var");
 
-75 
+64 
 	`±hªad_c⁄d_waô
 (&
 sock
@@ -9947,13 +9907,13 @@ c⁄d
 lock
 );
 
-76 
+65 
 	`∆og
 (
 MSG_LOG
 ,"wait_for_event", "cond var woke me up");
 
-79 
+68 
 	`±hªad_muãx_u∆ock
 (&
 sock
@@ -9961,7 +9921,7 @@ sock
 lock
 );
 
-80 
+69 
 to_ªtu∫
  = 
 sock
@@ -9969,21 +9929,21 @@ sock
 c⁄d_°©us
 ;
 
-81 
+70 
 sock
 ->
 c⁄d_°©us
  = 0;
 
-83  
+72  
 to_ªtu∫
 ;
 
-84 
+73 
 	}
 }
 
-86 
+75 
 	$nŸify
 (
 t˝_sockë_t
@@ -9993,13 +9953,13 @@ sock
 °©us
 ) {
 
-88 
+77 
 	`∆og
 (
 MSG_LOG
 ,"notify", "attemptingÅo get socketÜock");
 
-89 
+78 
 	`±hªad_muãx_lock
 (&
 sock
@@ -10007,7 +9967,7 @@ sock
 lock
 );
 
-90 
+79 
 sock
 ->
 c⁄d_°©us
@@ -10015,7 +9975,7 @@ c⁄d_°©us
 °©us
 ;
 
-91 
+80 
 	`∆og
 (
 MSG_LOG
@@ -10025,7 +9985,7 @@ sock
 fd
 );
 
-92 
+81 
 	`±hªad_c⁄d_sig«l
 (&
 sock
@@ -10033,7 +9993,7 @@ sock
 c⁄d
 );
 
-93 
+82 
 	`±hªad_muãx_u∆ock
 (&
 sock
@@ -10041,11 +10001,11 @@ sock
 lock
 );
 
-95 
+84 
 	}
 }
 
-97 
+86 
 	$ö_e°ab
 (
 sid_t
@@ -10059,7 +10019,7 @@ c⁄ãxt
 ¨gB
 ) {
 
-98 
+87 
 t˝_sockë_t
  *
 sock
@@ -10067,25 +10027,25 @@ sock
 c⁄ãxt
 ;
 
-99 
+88 
 	`as£π
 (
 sock
 );
 
-101 
+90 
 	`∆og
 (
 MSG_LOG
 ,"state:in_estab", "We'reÇow inÅheÉstablished state. AttemptedÅoÇotifyÅhe user");
 
-104 if(
+93 if(
 sock
 ->
 ∑ª¡
 ) {
 
-105 
+94 
 	`nŸify
 (
 sock
@@ -10095,7 +10055,7 @@ sock
 TCP_OK
 );
 
-107 
+96 
 	`nŸify
 (
 sock
@@ -10103,7 +10063,7 @@ sock
 TCP_OK
 );
 
-111 
+100 
 	}
 }
 
@@ -10150,7 +10110,7 @@ __STATEFUNC_H_
 ;
 
 13 
-£nd_∑ckë_wôh_Êags
+do_£nd_Êags
  (
 sid_t
  
@@ -10287,7 +10247,45 @@ c⁄ãxt
 	gthis_node
 ;
 
-18 
+18 
+	$£nd_∑ckë_wôh_Êags
+(
+t˝_sockë_t
+* 
+sock
+, 
+uöt8_t
+ 
+Êags
+) {
+
+19 
+	`∆og
+(
+MSG_LOG
+,"•wf", "sockë %d, fœg†¨ê%p", 
+sock
+->
+fd
+, 
+Êags
+);
+
+22 
+	`t˝_£ndto
+(
+sock
+, 
+NULL
+, 0, 
+Êags
+);
+
+26 
+	}
+}
+
+28 
 t˝_sockë_t
  *
 	$gë_sockë_‰om_öt
@@ -10295,13 +10293,13 @@ t˝_sockë_t
 s
 ) {
 
-19 
+29 
 	`as£π
 (
 s
  >= 0);
 
-20 
+30 
 	`as£π
 (
 s
@@ -10309,7 +10307,7 @@ s
 MAXSOCKETS
 );
 
-21 
+31 
 t˝_sockë_t
  *
 sock
@@ -10321,15 +10319,15 @@ sockë_èbÀ
 s
 ];
 
-26  
+36  
 sock
 ;
 
-27 
+37 
 	}
 }
 
-31 
+41 
 	$t˝_£ndto
 (
 t˝_sockë_t
@@ -10345,17 +10343,17 @@ uöt8_t
 Êags
 ) {
 
-32 
+42 
 	`as£π
 (
 sock
 );
 
-34 *
+44 *
 ∑ckë
 ;
 
-36 
+46 
 ∑ckë_size
  = 
 	`buûd_t˝_∑ckë
@@ -10371,7 +10369,7 @@ loˇl_p‹t
 ªmŸe_p‹t
  ,
 
-37 
+47 
 sock
 ->
 £q_num
@@ -10385,13 +10383,13 @@ ack_num
 ∑ckë
 );
 
-39 
+49 
 	`∆og
 (
 MSG_LOG
 ,"tcp_sendto", "now haveáÖacket of size %dÑeadyÅo be sentÅo dest_port %d",
 
-40 
+50 
 ∑ckë_size
 , 
 sock
@@ -10399,7 +10397,7 @@ sock
 ªmŸe_p‹t
 );
 
-43 
+53 
 uöt16_t
  
 dp‹t
@@ -10409,7 +10407,7 @@ dp‹t
 ∑ckë
 );
 
-44 
+54 
 	`∆og
 (
 MSG_LOG
@@ -10421,7 +10419,7 @@ sock
 ªmŸe_p‹t
 );
 
-49 
+59 
 ªtvÆ
  = 
 	`v™_drivî_£ndto
@@ -10439,23 +10437,23 @@ loˇl_node
 PROTO_TCP
 );
 
-51 
+61 
 	`‰ì
 (
 ∑ckë
 );
 
-53 i‡(
+63 i‡(
 ªtvÆ
  == -1) {
 
-54 
+64 
 	`∆og
 (
 MSG_ERROR
 ,"tcp_sendto", "van_driver_sendtoÑeturned -1! AÅcpÖacket just gotÜost!");
 
-59 
+69 
 sock
 ->
 £q_num
@@ -10467,25 +10465,25 @@ bufsize
 TCP_FLAG_SYN
 )
 
-60 + !!(
+70 + !!(
 Êags
  & 
 TCP_FLAG_FIN
 )
 
-61 + !!(
+71 + !!(
 Êags
  & 
 TCP_FLAG_RST
 );
 
-65 i‡(
+75 i‡(
 Êags
  !
 TCP_FLAG_ACK
 ) {
 
-66 
+76 
 sock
 ->
 œ°_∑ckë
@@ -10495,21 +10493,21 @@ sock
 NULL
 );
 
-68 
+78 
 sock
 ->
 œ°_∑ckë
  = 0;
 
-72  
+82  
 ªtvÆ
 ;
 
-73 
+83 
 	}
 }
 
-81 
+91 
 	$buûd_t˝_∑ckë
 (*
 d©a
@@ -10517,7 +10515,7 @@ d©a
 d©a_size
 ,
 
-82 
+92 
 uöt16_t
  
 sour˚_p‹t
@@ -10525,7 +10523,7 @@ sour˚_p‹t
 de°_p‹t
 ,
 
-83 
+93 
 uöt32_t
  
 £q_num
@@ -10533,7 +10531,7 @@ uöt32_t
 ack_num
 ,
 
-84 
+94 
 uöt8_t
  
 Êags
@@ -10545,7 +10543,7 @@ wödow
 hódî
 ) {
 
-86 
+96 
 tŸÆ_∑ckë_Àngth
  = 
 d©a_size
@@ -10553,7 +10551,7 @@ d©a_size
 TCP_HEADER_SIZE
 ;
 
-88 *
+98 *
 hódî
  = 
 	`mÆloc
@@ -10561,7 +10559,7 @@ hódî
 tŸÆ_∑ckë_Àngth
 );
 
-89 
+99 
 	`mem£t
 (*
 hódî
@@ -10569,13 +10567,13 @@ hódî
 tŸÆ_∑ckë_Àngth
 );
 
-91 
+101 
 	`∆og
 (
 MSG_LOG
 , "build_tcp_packet", "src_port = %d, dest_port = %d, seq_num = %d,áck_num = %d, flags = %s%s%s%s , window = %d,Üen = %d",
 
-92 
+102 
 sour˚_p‹t
 , 
 de°_p‹t
@@ -10599,7 +10597,7 @@ wödow
 d©a_size
 );
 
-94 
+104 
 	`£t_§˝‹t
 (*
 hódî
@@ -10607,7 +10605,7 @@ hódî
 sour˚_p‹t
 );
 
-95 
+105 
 	`£t_de°p‹t
 (*
 hódî
@@ -10615,7 +10613,7 @@ hódî
 de°_p‹t
 );
 
-96 
+106 
 	`£t_£qnum
 (*
 hódî
@@ -10623,7 +10621,7 @@ hódî
 £q_num
 );
 
-97 
+107 
 	`£t_acknum
 (*
 hódî
@@ -10631,7 +10629,7 @@ hódî
 ack_num
 );
 
-99 
+109 
 	`as£π
 (
 	`gë_£qnum
@@ -10641,7 +10639,7 @@ hódî
 £q_num
 );
 
-100 
+110 
 	`as£π
 (
 	`gë_acknum
@@ -10651,7 +10649,7 @@ hódî
 ack_num
 );
 
-102 
+112 
 	`£t_Êags
 (*
 hódî
@@ -10659,7 +10657,7 @@ hódî
 Êags
 );
 
-103 
+113 
 	`£t_wödow
 (*
 hódî
@@ -10667,7 +10665,7 @@ hódî
 wödow
 );
 
-105 
+115 
 uöt16_t
  
 de°_p‹t2
@@ -10677,7 +10675,7 @@ de°_p‹t2
 hódî
 );
 
-106 
+116 
 	`∆og
 (
 MSG_LOG
@@ -10687,7 +10685,7 @@ de°_p‹t2
 de°_p‹t
 );
 
-109 i‡(
+119 i‡(
 d©a
 Ë
 	`mem˝y
@@ -10699,7 +10697,7 @@ TCP_HEADER_SIZE
 d©a_size
 );
 
-111 
+121 
 	`£t_t˝checksum
 (*
 hódî
@@ -10709,17 +10707,17 @@ hódî
 	`t˝_to_ù
 (*header)));
 
-113  
+123  
 d©a_size
  + 
 TCP_HEADER_SIZE
 ;
 
-114 
+124 
 	}
 }
 
-116 
+126 
 uöt16_t
  
 	$ˇlcuœã_t˝_checksum
@@ -10727,11 +10725,11 @@ uöt16_t
 ∑ckë
 ) {
 
-118 
+128 
 	}
 }
 
-122 
+132 
 	$v_t˝_de°roy
 (
 ù_node_t
@@ -10739,7 +10737,7 @@ uöt16_t
 node
 ) {
 
-123 
+133 
 	`sockèbÀ_de°roy
 (
 node
@@ -10747,11 +10745,11 @@ node
 tu∂e_èbÀ
 );
 
-124 
+134 
 	}
 }
 
-128 
+138 
 	$v_t˝_öô
 (
 ù_node_t
@@ -10759,23 +10757,23 @@ tu∂e_èbÀ
 node
 ) {
 
-130 
+140 
 x
 ;
 
-131 
+141 
 this_node
  = 
 node
 ;
 
-132 
+142 
 x
  = 0; x < 
 MAXSOCKETS
 ; x++) {
 
-133 
+143 
 this_node
 ->
 sockë_èbÀ
@@ -10785,7 +10783,7 @@ x
 NULL
 ;
 
-137 
+147 
 node
 ->
 tu∂e_èbÀ
@@ -10795,7 +10793,7 @@ tu∂e_èbÀ
 sockèbÀ_t
 ));
 
-138 
+148 
 	`sockèbÀ_öô
 (
 node
@@ -10803,7 +10801,7 @@ node
 tu∂e_èbÀ
 );
 
-139 
+149 
 	`∆og
 (
 MSG_LOG
@@ -10813,21 +10811,21 @@ node
 tu∂e_èbÀ
 );
 
-140 
+150 
 	}
 }
 
-142 
+152 
 	$sys_sockë
 (
 ˛⁄e
 ) {
 
-143 
+153 
 s
  = -1;
 
-144 
+154 
 t˝_sockë_t
  *
 sock
@@ -10835,17 +10833,17 @@ sock
 NULL
 ;
 
-147 
+157 
 x
 ;
 
-148 
+158 
 x
  = 0; x < 
 MAXSOCKETS
 ; x++){
 
-149 i‡(
+159 i‡(
 this_node
 ->
 sockë_èbÀ
@@ -10857,11 +10855,11 @@ NULL
 s
  = x; ; }
 
-152 i‡(
+162 i‡(
 s
  == -1) {
 
-157 
+167 
 sock
  = 
 	`mÆloc
@@ -10869,13 +10867,13 @@ sock
 t˝_sockë_t
 ) );
 
-158 
+168 
 	`as£π
 (
 sock
 );
 
-159 
+169 
 this_node
 ->
 sockë_èbÀ
@@ -10885,7 +10883,7 @@ s
 sock
 ;
 
-161 
+171 
 sock
 ->
 machöe
@@ -10895,7 +10893,7 @@ machöe
 ˛⁄e
 );
 
-164 
+174 
 sock
 ->
 fd
@@ -10903,7 +10901,7 @@ fd
 s
 ;
 
-165 
+175 
 sock
 ->
 loˇl_p‹t
@@ -10911,13 +10909,13 @@ loˇl_p‹t
 	`ønd
 ()%65535;
 
-166 
+176 
 sock
 ->
 ªmŸe_p‹t
  = 0;
 
-167 
+177 
 sock
 ->
 loˇl_node
@@ -10925,31 +10923,31 @@ loˇl_node
 this_node
 ;
 
-168 
+178 
 sock
 ->
 ªmŸe_node
  = 0;
 
-169 
+179 
 sock
 ->
 £q_num
  = 0;
 
-170 
+180 
 sock
 ->
 ack_num
  = 0;
 
-171 
+181 
 sock
 ->
 ˇn_h™dshake
  = 0;
 
-172 
+182 
 sock
 ->
 ∑ª¡
@@ -10957,19 +10955,19 @@ sock
 NULL
 ;
 
-173 
+183 
 sock
 ->
 c⁄d_°©us
  = 0;
 
-174 
+184 
 sock
 ->
 œ°_∑ckë
  = 0;
 
-175 
+185 
 sock
 ->
 £nd_wödow_size
@@ -10977,7 +10975,7 @@ sock
 SEND_WINDOW_SIZE
 ;
 
-176 
+186 
 sock
 ->
 ªcv_wödow_size
@@ -10985,43 +10983,43 @@ sock
 SEND_WINDOW_SIZE
 ;
 
-178 
+188 
 sock
 ->
 £nd_u«
  = 0;
 
-179 
+189 
 sock
 ->
 £nd_√xt
  = 0;
 
-180 
+190 
 sock
 ->
 £nd_wrôãn
  = 0;
 
-181 
+191 
 sock
 ->
 ªmŸe_Êow_wödow
  = 0;
 
-183 
+193 
 sock
 ->
 ªcv_√xt
  = 0;
 
-184 
+194 
 sock
 ->
 ªcv_ªad
  = 0;
 
-186 
+196 
 sock
 ->
 r_buf
@@ -11031,7 +11029,7 @@ r_buf
 SEND_WINDOW_SIZE
 );
 
-187 
+197 
 sock
 ->
 s_buf
@@ -11041,7 +11039,7 @@ s_buf
 SEND_WINDOW_SIZE
 );
 
-189 
+199 
 	`t˝_èbÀ_√w
 (
 this_node
@@ -11049,7 +11047,7 @@ this_node
 s
 );
 
-191 
+201 
 	`±hªad_c⁄d_öô
 (&
 sock
@@ -11059,7 +11057,7 @@ c⁄d
 NULL
 );
 
-192 
+202 
 	`±hªad_muãx_öô
 (&
 sock
@@ -11069,27 +11067,27 @@ lock
 NULL
 );
 
-194  
+204  
 s
 ;
 
-195 
+205 
 	}
 }
 
-199 
+209 
 	$v_sockë
 () {
 
-200  
+210  
 	`sys_sockë
 (0);
 
-201 
+211 
 	}
 }
 
-205 
+215 
 	$v_böd
 (
 sockë
@@ -11101,7 +11099,7 @@ uöt16_t
 p‹t
 ) {
 
-206 
+216 
 t˝_sockë_t
  *
 sock
@@ -11111,13 +11109,13 @@ sock
 sockë
 );
 
-207 
+217 
 uöt16_t
  
 ﬁd_p‹t
 ;
 
-209 
+219 
 	`as£π
 (
 sock
@@ -11125,7 +11123,7 @@ sock
 machöe
 );
 
-210 i‡(
+220 i‡(
 	`t˝m_°©e
 (
 sock
@@ -11135,7 +11133,7 @@ machöe
 ST_CLOSED
 ) {
 
-211 
+221 
 sock
 ->
 loˇl_p‹t
@@ -11143,17 +11141,17 @@ loˇl_p‹t
 p‹t
 ;
 
-213 
+223 
 	`∆og
 (
 MSG_ERROR
 ,"v_bind","Someone called v_bind, but I'mÇot inÅhe CLOSED state!");
 
-218 
+228 
 	}
 }
 
-222 
+232 
 	$v_li°í
 (
 sockë
@@ -11161,7 +11159,7 @@ sockë
 backlog
  ) {
 
-223 
+233 
 t˝_sockë_t
  *
 sock
@@ -11171,7 +11169,7 @@ sock
 sockë
 );
 
-225 
+235 
 	`as£π
 (
 sock
@@ -11179,13 +11177,13 @@ sock
 machöe
 );
 
-227 
+237 
 sock
 ->
 £q_num
  = 1000;
 
-229 i‡(
+239 i‡(
 	`t˝m_evít
 (
 sock
@@ -11199,17 +11197,17 @@ this_node
 NULL
 )) {
 
-230 
+240 
 	`∆og
 (
 MSG_ERROR
 ,"socket:listen", "Uhh.Érror. Couldn'tÅransition states.Çoob");
 
-235 
+245 
 	}
 }
 
-240 
+250 
 	$v_c⁄√˘
 (
 sockë
@@ -11221,7 +11219,7 @@ uöt16_t
 p‹t
 ) {
 
-241 
+251 
 t˝_sockë_t
  *
 sock
@@ -11231,7 +11229,7 @@ sock
 sockë
 );
 
-246 
+256 
 sock
 ->
 ªmŸe_node
@@ -11239,7 +11237,7 @@ sock
 node
 ;
 
-247 
+257 
 sock
 ->
 ªmŸe_p‹t
@@ -11247,25 +11245,25 @@ sock
 p‹t
 ;
 
-249 
+259 
 sock
 ->
 £q_num
  = 100;
 
-250 
+260 
 sock
 ->
 ack_num
  = 0;
 
-251 
+261 
 sock
 ->
 ˇn_h™dshake
  = 1;
 
-253 
+263 
 sock
 ->
 £nd_u«
@@ -11273,7 +11271,7 @@ sock
 £q_num
 ;
 
-254 
+264 
 sock
 ->
 £nd_√xt
@@ -11281,7 +11279,7 @@ sock
 £q_num
 ;
 
-255 
+265 
 sock
 ->
 £nd_wrôãn
@@ -11289,7 +11287,7 @@ sock
 £q_num
 ;
 
-258 
+268 
 	`sockèbÀ_put
 (
 this_node
@@ -11301,7 +11299,7 @@ sock
 FULL_SOCKET
 );
 
-260 
+270 
 	`as£π
 (
 sock
@@ -11309,7 +11307,7 @@ sock
 machöe
 );
 
-261 i‡(
+271 i‡(
 	`t˝m_evít
 (
 sock
@@ -11321,13 +11319,13 @@ ON_ACTIVE_OPEN
 NULL
 , NULL)) {
 
-262 
+272 
 	`∆og
 (
 MSG_ERROR
 ,"socket:connect","Uhh.Érror. Couldn'tÅransition states.Çoob");
 
-266 
+276 
 °©us
  = 
 	`waô_f‹_evít
@@ -11339,23 +11337,23 @@ TCP_OK
 TCP_CONNECT_FAILED
 );
 
-268 i‡(
+278 i‡(
 °©us
  =
 TCP_OK
 )  0;
 
-270 
+280 
 	}
 }
 
-275 
+285 
 	$v_ac˚±
 (
 sockë
 ) {
 
-276 
+286 
 t˝_sockë_t
  *
 sock
@@ -11365,13 +11363,13 @@ sock
 sockë
 );
 
-280 
+290 
 sock
 ->
 ˇn_h™dshake
  = 1;
 
-281 
+291 
 °©us
  = 
 	`waô_f‹_evít
@@ -11383,29 +11381,29 @@ TCP_OK
 TCP_CONNECT_FAILED
 );
 
-282 
+292 
 sock
 ->
 ˇn_h™dshake
  = 0;
 
-286 if(
+296 if(
 °©us
  =
 TCP_OK
 ) {
 
-287  
+297  
 sock
 ->
 √w_fd
 ;
 
-292 
+302 
 	}
 }
 
-297 
+307 
 	$v_ªad
 (
 sockë
@@ -11415,7 +11413,7 @@ buf
 nbyã
 ) {
 
-298 
+308 
 t˝_sockë_t
  *
 sock
@@ -11425,11 +11423,11 @@ sock
 sockë
 );
 
-304 
+314 
 	}
 }
 
-308 
+318 
 	$v_wrôe
 (
 sockë
@@ -11439,7 +11437,7 @@ buf
 nbyãs
 ) {
 
-309 
+319 
 t˝_sockë_t
  *
 sock
@@ -11449,7 +11447,7 @@ sock
 sockë
 );
 
-311 
+321 
 ˇn_£nd
  = 
 	`gëAmou¡AbÀToAc˚±
@@ -11457,7 +11455,7 @@ sockë
 sock
 );
 
-312 
+322 
 wûl_£nd
  = 
 	`MIN
@@ -11467,7 +11465,7 @@ wûl_£nd
 nbyãs
 );
 
-314 
+324 
 	`∆og
 (
 MSG_LOG
@@ -11477,7 +11475,7 @@ MSG_LOG
 wûl_£nd
 );
 
-316 
+326 
 	`c›yD©aFromU£r
 (
 sock
@@ -11487,7 +11485,7 @@ buf
 wûl_£nd
 );
 
-318 
+328 
 ˇn_£nd
  = 
 	`gëAmou¡AbÀToAc˚±
@@ -11495,7 +11493,7 @@ wûl_£nd
 sock
 );
 
-319 
+329 
 	`∆og
 (
 MSG_LOG
@@ -11503,21 +11501,21 @@ MSG_LOG
 ˇn_£nd
 );
 
-321  
+331  
 wûl_£nd
 ;
 
-322 
+332 
 	}
 }
 
-326 
+336 
 	$v_˛o£
 (
 sockë
 ) {
 
-329 
+339 
 	}
 }
 
@@ -11843,6 +11841,18 @@ uöt16_t
 ˇlcuœã_t˝_checksum
 (* 
 ∑ckë
+);
+
+78 
+£nd_∑ckë_wôh_Êags
+(
+t˝_sockë_t
+* 
+sock
+, 
+uöt8_t
+ 
+Êags
 );
 
 	@tcppacket.h
@@ -12574,7 +12584,7 @@ sm
 , 
 ON_ACTIVE_OPEN
 , 
-£nd_∑ckë_wôh_Êags
+do_£nd_Êags
 , 
 	`Æloc_Êags
 (
@@ -12622,7 +12632,7 @@ NULL
 , 
 ON_RECV_SYN
 , 
-£nd_∑ckë_wôh_Êags
+do_£nd_Êags
 , 
 	`Æloc_Êags
 (
@@ -12672,7 +12682,7 @@ NULL
 , 
 ON_RECV_SYN
 , 
-£nd_∑ckë_wôh_Êags
+do_£nd_Êags
 , 
 	`Æloc_Êags
 (
@@ -12706,7 +12716,7 @@ NULL
 , 
 ON_CLOSE
 , 
-£nd_∑ckë_wôh_Êags
+do_£nd_Êags
 , 
 	`Æloc_Êags
 (
@@ -12724,7 +12734,7 @@ TCP_FLAG_FIN
 , 
 ON_RECV_FIN
 , 
-£nd_∑ckë_wôh_Êags
+do_£nd_Êags
 , 
 	`Æloc_Êags
 (
@@ -12742,7 +12752,7 @@ TCP_FLAG_ACK
 , 
 ON_RECV_FIN
 , 
-£nd_∑ckë_wôh_Êags
+do_£nd_Êags
 , 
 	`Æloc_Êags
 (
@@ -12760,7 +12770,7 @@ TCP_FLAG_ACK
 , 
 ON_RECV_FIN_ACK
 , 
-£nd_∑ckë_wôh_Êags
+do_£nd_Êags
 , 
 	`Æloc_Êags
 (
@@ -12792,7 +12802,7 @@ NULL
 , 
 ON_CLOSE
 , 
-£nd_∑ckë_wôh_Êags
+do_£nd_Êags
 , 
 	`Æloc_Êags
 (
@@ -12810,7 +12820,7 @@ TCP_FLAG_FIN
 , 
 ON_RECV_FIN
 , 
-£nd_∑ckë_wôh_Êags
+do_£nd_Êags
 , 
 	`Æloc_Êags
 (
@@ -13907,14 +13917,10 @@ MSG_WARNING
 
 171 
 	`£nd_∑ckë_wôh_Êags
-(0, 0, (*)
+((*)
 sock
 , 
-	`Æloc_Êags
-(
 TCP_FLAG_SYN
-), 
-NULL
 );
 
 173 } i‡(
@@ -13935,16 +13941,12 @@ MSG_WARNING
 
 176 
 	`£nd_∑ckë_wôh_Êags
-(0, 0, (*)
+((*)
 sock
 , 
-	`Æloc_Êags
-(
 TCP_FLAG_SYN
  | 
 TCP_FLAG_ACK
-), 
-NULL
 );
 
 179 

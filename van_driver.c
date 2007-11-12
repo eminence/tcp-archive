@@ -168,12 +168,12 @@ void *tcp_watchdog(void *arg) {
 				if (tcpm_state(sock->machine) == ST_SYN_SENT) {
 					/* we havn't gotten a SYNACK, so resend the SYN */
 					nlog(MSG_WARNING, "tcp_watchdog", "We're in SYN_SENT.  assuming packetloss, and retransmitting the SYN");
-					send_packet_with_flags(0, 0, (void*)sock, alloc_flags(TCP_FLAG_SYN), NULL); /* TODO i feel dirty doingn this.  BDiamond:  fix this pls kthx :) */
+					send_packet_with_flags((void*)sock, TCP_FLAG_SYN); 
 					
 				} else if (tcpm_state(sock->machine) == ST_SYN_RCVD) {
 					/* we haven't gotten an ACK, so resend the SYNACK */
 					nlog(MSG_WARNING, "tcp_watchdog", "We're in SYN_RCVD.  assuming packetloss, and retransmitting the SYNACK");
-					send_packet_with_flags(0, 0, (void*)sock, alloc_flags(TCP_FLAG_SYN | TCP_FLAG_ACK), NULL); /* TODO i feel dirty doingn this.  BDiamond:  fix this pls kthx :) */
+					send_packet_with_flags((void*)sock, TCP_FLAG_SYN | TCP_FLAG_ACK); 
 		
 				} else {
 					nlog(MSG_WARNING, "tcp_watchdog", "We're in state %s, but not sure what to do!  Disabling watchdog for now...", tcpm_strstate(tcpm_state(sock->machine)));
