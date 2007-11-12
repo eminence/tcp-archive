@@ -5,7 +5,19 @@
 #include "statefunc.h"
 #include "tcp.h"
 #include "socktable.h"
+#include "fancy_display.h"
 
+int do_connect(sid_t prev, sid_t next, void* context, void* rflags, void* packet) {
+  tcp_socket_t* sock = (tcp_socket_t*)context;
+  uint32_t incoming_seq_num = get_seqnum(ip_to_tcp((char*)packet)) ;
+    
+  nlog(MSG_LOG, "do_connect", "Setting client's recv_next and recv_read to %d", incoming_seq_num + 1);
+
+  sock->recv_next = incoming_seq_num + 1;
+  sock->recv_read = incoming_seq_num + 1;
+
+  return send_packet_with_flags(prev, next, context, rflags, NULL);
+}
 
 int send_packet_with_flags(sid_t prev, sid_t next, void* context, void *arg, void *tran_arg) {
 	tcp_socket_t *sock = (tcp_socket_t*)context;

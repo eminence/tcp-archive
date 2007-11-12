@@ -64,7 +64,7 @@ tcp_machine_t* tcpm_new(tcp_socket_t* context, uint8_t clone) {
   assert(0 == state_transition(st_closed,      st_listen,      ON_PASSIVE_OPEN,    do_listen,              NULL)); /* TODO init state. */
   assert(0 == state_transition(st_syn_sent,    st_closed,      ON_CLOSE,           NULL,                   NULL)); /* TODO free state. */
   assert(0 == state_transition(st_syn_sent,    st_syn_rcvd,    ON_RECV_SYN,        send_packet_with_flags, alloc_flags(TCP_FLAG_ACK)));
-  assert(0 == state_transition(st_syn_sent,    st_estab,       ON_RECV_SYN_ACK,    send_packet_with_flags, alloc_flags(TCP_FLAG_ACK)));
+  assert(0 == state_transition(st_syn_sent,    st_estab,       ON_RECV_SYN_ACK,    do_connect,             alloc_flags(TCP_FLAG_ACK)));
   assert(0 == state_transition(st_listen,      st_closed,      ON_CLOSE,           NULL,                   NULL)); /* TODO free state. */
   assert(0 == state_transition(st_listen,      st_syn_rcvd,    ON_RECV_SYN,        send_packet_with_flags, alloc_flags(TCP_FLAG_SYN | TCP_FLAG_ACK)));
   assert(0 == state_transition(st_syn_rcvd,    st_estab,       ON_RECV_ACK,        NULL,                   NULL));

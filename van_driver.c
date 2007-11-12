@@ -276,8 +276,6 @@ void *tcp_thread(void* arg) {
 				continue;
 			} 
 
-			/* TODO: THIS IS WRONG!! AFTER FINDING HALF SOCK, NEED TO SLEEP UNTIL ACCEPT IS CALLED (IF IT HASNT ALREADY BEEN CALLED.*/
-
 			/* Found half-socket. Ensure ready for accept. */
 			if(!sock->can_handshake) {
 				nlog(MSG_ERROR, "tcp_thread", "Found a half socket, but socket not in accept state. Discarding.");
@@ -285,10 +283,7 @@ void *tcp_thread(void* arg) {
 				free(packet);
 
 				continue;
-			} else {
-				// XXX we need to wait until accept is called here.
-
-			}
+			} 
 
 			/* Construct new full socket. */
 			sock->new_fd = sys_socket(1);
@@ -336,16 +331,8 @@ void *tcp_thread(void* arg) {
 
 			nlog(MSG_LOG, "tcp_thread", "Socket not in established state; stepping state machine.");
 
-			if (tcpm_state(sock->machine) == ST_SYN_SENT) {
-				/* XXX we need to run this when we get a SYNACK packet and we're in the SYN_SENT state
-				 * where is the best place to put this??? XXX*/
-				sock->recv_next = incoming_seq_num;
-				sock->recv_read = incoming_seq_num;
-
-			}
-
 			/* Step state machine (and perform needed action.) */
-			if(tcpm_event(sock->machine, tcpm_packet_to_input(ip_to_tcp(packet)), NULL, NULL)) {
+			if(tcpm_event(sock->machine, tcpm_packet_to_input(ip_to_tcp(packet)), packet, packet)) {
 				nlog(MSG_WARNING, "tcp_thread", "Invalid transition requested; fail!");
 				/* Rely on error function; teardown socket? */
 			}
