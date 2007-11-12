@@ -169,6 +169,22 @@ int main( int argc, char* argv[] ) {
 				//printf("Got data (%d): '%s'\n", retval, data);
 
 				//printf( "van_driver_recvfrom returned: %d\n", retval );
+				{
+					int socket = get_fd_from_menu();
+					if (socket == -1) {
+						display_msg("Please select/create a socket first!"); break;
+					} else {
+						int len = get_number("Number of bytes to read:");
+						char *data = malloc(len);
+						retval = v_read(socket, data, len);
+
+						display_msg("v_read() returned %d", retval);
+						display_msg("The %d bytes returned from read are: %s", retval, data);
+					}
+
+				}
+
+
 				display_msg("Function Not Yet Implemented");
 				break;
 
