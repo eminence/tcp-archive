@@ -15,20 +15,6 @@
 
 static ip_node_t *this_node;
 
-int send_packet_with_flags(tcp_socket_t* sock, uint8_t flags) {
-	nlog(MSG_LOG,"spwf", "socket %d, flags are %p", sock->fd, flags);
-
-  /* Use special case sequence number increase. */
-  if(flags & TCP_FLAG_FIN) {
-    
-  } else {
-    tcp_sendto(sock, NULL, 0, flags);
-  }
-
-	return 0; // FIXME XXX TODO
-}
-
-
 int queue_up_flags(tcp_socket_t *sock, uint8_t flags) {
 
 	int start = sock->send_written;
@@ -36,6 +22,19 @@ int queue_up_flags(tcp_socket_t *sock, uint8_t flags) {
 
 	sock->send_written++;
 	
+	return 0;
+}
+
+int send_packet_with_flags(tcp_socket_t* sock, uint8_t flags) {
+	nlog(MSG_LOG,"spwf", "socket %d, flags are %p", sock->fd, flags);
+
+  /* Send ACK raw; they don't live in seq. num space. */
+  if(flags == TCP_FLAG_ACK) {
+    tcp_sendto(sock, NULL, 0, TCP_FLAG_ACK);
+  } else {
+    queue_up_flags(sock, flags);
+  }
+
 	return 0;
 }
 

@@ -110,6 +110,10 @@ int set_if_state(ip_node_t *node, int iface, int link_state) {
 	return link_state;
 }
 
+void ackThisPacket(tcp_socket_t* sock) {
+	send_packet_with_flags(sock, TCP_FLAG_ACK);
+}
+
 /* Handle recv events in estab state. */
 void do_recv_tcp(tcp_socket_t* sock, char* packet) {
 	uint8_t flags = get_flags(ip_to_tcp(packet));
@@ -129,7 +133,7 @@ void do_recv_tcp(tcp_socket_t* sock, char* packet) {
 				if (seq_num != sock->recv_next) {
 					nlog(MSG_WARNING, "do_recv_tcp", "Ok, got a packet that is an ACK only (no data), except it has a seqnum of %d and i think it should have a seqnum of %d.  discarding!", seq_num, sock->recv_next);
 				} else {
-					processPacketForAck(sock, packet);
+					processPacketForAck(sock);
 				}
 
 				/* else, this packet might contain data, so can fit this in our receive buffer? */ 
@@ -144,10 +148,8 @@ void do_recv_tcp(tcp_socket_t* sock, char* packet) {
 
 				processPacketForAck(sock, packet); /* if this data packet also contains an ACK, process it */
 
-				ackThisPacket(sock, packet); /*  TODO WRITE THIS FUNCTION!  maybe it's just as easy at the code two lines below?? TODO */
+				ackThisPacket(sock, packet);
 
-				/* ack this packet*/
-				//	tcp_sendto(sock, NULL, 0, TCP_FLAG_ACK); /* XXX maybe write a sendAck() function? */
 				/* TODO copy data into cbuffer with copy datasometsomethiasfdA() */
 
 			} else {
