@@ -50,7 +50,6 @@ typedef struct tcp_socket__ {
 
 	time_t last_packet; /* set this to time(NULL) when you're expecting a timely reply. a clocktick thread will alert someone of something when something happens */
 	
-
 } tcp_socket_t;
 
 void v_tcp_init();

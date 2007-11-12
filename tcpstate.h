@@ -33,6 +33,7 @@ typedef enum {
   ON_RECV_SYN_ACK,
   ON_RECV_FIN_ACK,
   ON_INVALID,
+  ON_NONE
 } tinput_t;
 
 typedef struct tcp_machine__ {
@@ -52,6 +53,8 @@ const char* tcpm_strstate(int state);
 #define tcpm_state(m)       ((m)->sm->current->id)
 #define tcpm_canbind(m)     (tcpm_state(m) == ST_CLOSED)
 #define tcpm_estab(m)       (tcpm_state(m) == ST_ESTAB)
+#define tcpm_canrecv(m)     (tcpm_estab(m) || (tcpm_state(m) == ST_CLOSE_WAIT) || (tcpm_state(m) == ST_FIN_WAIT1) || (tcpm_state(m) == ST_FIN_WAIT2))
+#define tcpm_cansend(m)     (tcpm_estab(m) || tcpm_state(m) == ST_CLOSE_WAIT)
 #define tcpm_firstrecv(m)   (tcpm_state(m) == ST_LISTEN)
 #define tcpm_synsent(m)     (tcpm_state(m) == ST_SYN_SENT)
 

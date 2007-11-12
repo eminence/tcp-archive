@@ -136,8 +136,19 @@ int main( int argc, char* argv[] ) {
 					}
 				}
 				break;
-
-
+      case 'x': /* close */
+        {
+					int socket;
+					socket = get_fd_from_menu();
+					if (socket == -1) {
+						display_msg("Please select/create a socket first!"); break;
+					} else {
+						nlog(MSG_LOG,"socket","closing %d...", socket);
+						retval = v_close(socket);
+						display_msg("v_close() returned %d", retval);
+          }
+        }
+        break;
 			case 'a': /*accept*/
 				{
 					int socket = get_fd_from_menu();

@@ -328,6 +328,21 @@ int v_write(int socket, const unsigned char *buf, int nbytes) {
 /* close an open socket
  * returns 0 on success, or negative number on failure */
 int v_close(int socket) {
+	tcp_socket_t *sock = get_socket_from_int(socket);
 
+  /* Update tuple table with FULL socket. */
+  socktable_put(this_node->tuple_table, sock, FULL_SOCKET);
+
+	assert(sock->machine);
+	if (tcpm_event(sock->machine, ON_CLOSE, NULL, NULL)) {
+		nlog(MSG_ERROR,"socket:close","Couldn't close socket.  noob");
+		return -1;
+	}
+
+	int status = wait_for_event(sock, TCP_OK | TCP_CONNECT_FAILED);
+
+	if (status == TCP_OK) return 0;
+	else { return -1; }
+  
 	return 0;
 }

@@ -29,6 +29,7 @@
 #include "tcppacket.h"
 #include "tcp.h"
 #include "socktable.h"
+#include "seq.h"
 
 #include "fancy_display.h"
 
@@ -110,52 +111,51 @@ int set_if_state(ip_node_t *node, int iface, int link_state) {
 }
 
 /* Handle recv events in estab state. */
-void do_recv_estab(tcp_socket_t* sock, char* packet) {
+void do_recv_tcp(tcp_socket_t* sock, char* packet) {
+  uint8_t flags = get_flags(ip_to_tcp(packet));
+  uint32_t seq_num = get_seqnum(ip_to_tcp(packet));
+  uint32_t ack_num = get_acknum(ip_to_tcp(packet));
+  uint32_t data_size = get_data_len(packet);
 
-	uint8_t flags = get_flags(ip_to_tcp(packet));
-	uint32_t seq_num = get_seqnum(ip_to_tcp(packet));
-	uint32_t ack_num = get_acknum(ip_to_tcp(packet));
-	uint32_t data_size = get_data_len(packet);
+  /* is regular packet:  AKA, there are no flags set, except maybe ACK (because we can piggypack ACKs on data packets) */
+  if (((flags == 0)) || (flags & (TCP_FLAG_ACK | TCP_FLAG_FIN))) {
+    if (isValidSeqNum(sock, seq_num, data_size)) {
+      nlog(MSG_LOG,"do_recv_estab", "got a data packet of size %d", data_size );
 
-	/* is regular packet:  AKA, there are no flags set, except maybe ACK (because we can piggypack ACKs on data packets) */
-	if ( (data_size > 0) && ((flags == 0) || (flags == TCP_FLAG_ACK))) {
+      /* if we can fit this in our receive buffer: */
+      if (haveRoomToReceive(sock, data_size)) {
+        if (isNextSeqNum(sock, seq_num)) {
+          /* if this packet is the next one we're expecting, update our ack thingy (so we'll ack this packet a few lines below) */
+          nlog(MSG_LOG, "do_recv_estab", "this is the next sequence number we're expecting.  bumping sock->ack_num from %d to %d", sock->ack_num, seq_num + data_size);
+          sock->ack_num = seq_num + data_size;
 
-		if (isValidSeqNum(sock, seq_num, data_size)) {
+        } /* else [ dont update anything, which will cause us to ack again the last packet we want to send a ack for */
 
-			nlog(MSG_LOG,"do_recv_estab", "got a data packet of size %d", data_size );
-			/* if we can fit this in our receive buffer: */
-			if (haveRoomToReceive(sock, data_size)) {
+			  if(tcpm_event(sock->machine, tcpm_packet_to_input(ip_to_tcp(packet)), packet, packet)) {
+				  nlog(MSG_WARNING, "do_recv_tcp", "Couldn't transition machine (in estab state); fail!");
+				  /* Rely on error function; teardown socket? */
+        }
+        
+        if(ack_only(packet)) {
+          gotAckFor(sock, ack_num);	
+          nlog(MSG_LOG, "do_rev_estab", "send_una=%d  send_next=%d  send_written=%d  send_remote_flow_window=%d", sock->send_una, sock->send_next, sock->send_written, sock->remote_flow_window);
+        } else {
+          /* ack this packet*/
+          tcp_sendto(sock, NULL, 0, TCP_FLAG_ACK); /* XXX maybe write a sendAck() function? */
+          /* TODO copy data into cbuffer with copy datasometsomethiasfdA() */
+        }
 
-				if (isNextSeqNum(sock, seq_num)) {
-					/* if this packet is the next one we're expecting, update our ack thingy (so we'll ack this packet a few lines below) */
-					nlog(MSG_LOG, "do_recv_estab", "this is the next sequence number we're expecting.  bumping sock->ack_num from %d to %d", sock->ack_num, seq_num + data_size);
-					sock->ack_num = seq_num + data_size;
+      } else {
+        nlog(MSG_WARNING, "do_recv_estab", "got data, but i have no room for it!");
+      }
+ 
+    } else {
+      nlog(MSG_LOG, "do_recv_estab", "got a data packet, but the SEQ number was off!  ignore this packet!");
+    }
 
-				} /* else { dont update anything, which will cause us to ack again the last packet we want to send a ack for */
-
-				/* ack this packet*/
-				tcp_sendto(sock, NULL, 0, TCP_FLAG_ACK); /* XXX maybe write a sendAck() function? */
-
-
-        /* TODO copy data into cbuffer with copy datasometsomethiasfdA() */
-
-			} else {
-				nlog(MSG_WARNING, "do_recv_estab", "got data, but i have no room for it!");
-			}
-
-			} else {
-				nlog(MSG_LOG, "do_recv_estab", "got a data packet, but the SEQ number was off!  ignore this packet!");
-		}
-
-		} else if (ack_only(packet))  {
-			int old_send_una = sock->send_una;
-			gotAckFor(sock, ack_num);	
-			nlog(MSG_LOG, "do_rev_estab", "send_una=%d  send_next=%d  send_written=%d  send_remote_flow_window=%d", sock->send_una, sock->send_next, sock->send_written, sock->remote_flow_window);
-
-		} else {
-		// TODO, this might be a FIN or RST or something important we need to handle:
-
-		}
+  } else if(flags & TCP_FLAG_RST) {
+    assert(0 && "Should never get a RST in estab handler.");
+  }
 }
 
 /* tcp wathdog thread */
@@ -188,17 +188,9 @@ void *tcp_watchdog(void *arg) {
 					nlog(MSG_WARNING, "tcp_watchdog", "We're in state %s, but not sure what to do!  Disabling watchdog for now...", tcpm_strstate(tcpm_state(sock->machine)));
 					sock->last_packet = 0;
 				}
-
-
 			}
-
-
 		}
-
-
-
 	}
-
 }
 
 /* tcp send thread */
@@ -318,15 +310,17 @@ void *tcp_thread(void* arg) {
 			socktable_put(node->tuple_table, sock, FULL_SOCKET);
 		}
 
-
 		/* IMPORTANT.  we need this line.  should it go here, though? */
 		sock->remote_flow_window = get_window(ip_to_tcp(packet));
 
-
 		/* If we're in the established state, perform primary communication; else, handshake*/
-		if(tcpm_estab(sock->machine)) {
-			nlog(MSG_LOG, "tcp_thread", "connection established! using sliding window protocol."); /* TODO */
-			do_recv_estab(sock, packet);
+    if(flags & TCP_FLAG_RST) {
+      /* Bail out by signaling user and closing stuff up. */
+      nlog(MSG_WARNING, "tcp_thread", "FUCK FUCK FUCK -- got a RESET");
+
+ 		} if(tcpm_canrecv(sock->machine)) {
+			nlog(MSG_LOG, "tcp_thread", "connection established: dispatching to primary handler."); /* TODO */
+			do_recv_tcp(sock, packet);
 
 		} else {
 			/* Validate sequence numbers. */ //TODO use sentinel
