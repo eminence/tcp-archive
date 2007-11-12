@@ -148,7 +148,7 @@ void do_recv_tcp(tcp_socket_t* sock, char* packet) {
 
 				processPacketForAck(sock, packet); /* if this data packet also contains an ACK, process it */
 
-				ackThisPacket(sock, packet);
+				ackThisPacket(sock);
 
 				/* TODO copy data into cbuffer with copy datasometsomethiasfdA() */
 
