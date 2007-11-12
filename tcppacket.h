@@ -62,6 +62,6 @@
 #define get_data_len(p)   (get_total_len(p) - (HEADER_SIZE + TCP_HEADER_SIZE))
 #define ip_to_tcp(p)      ((p) + HEADER_SIZE)
 #define tcp_to_ip(p)      ((p) - HEADER_SIZE)
-#define ack_only(p)       ((get_flags(p)==TCP_FLAG_ACK) && (get_data_len(p)==0))
+#define ack_only(p)       ((get_flags(ip_to_tcp(p))==TCP_FLAG_ACK) && (get_data_len(p)==0))
 
 #endif

@@ -26,6 +26,7 @@
 #include "rtable.h"
 #include "van_driver.h"
 #include "ippacket.h"
+#include "tcppacket.h"
 #include "tcp.h"
 #include "socktable.h"
 
@@ -117,7 +118,7 @@ void do_recv_estab(tcp_socket_t* sock, char* packet) {
 	uint32_t data_size = get_data_len(packet);
 
 	/* is regular packet:  AKA, there are no flags set, except maybe ACK (because we can piggypack ACKs on data packets) */
-	if ((flags == 0) || (flags == TCP_FLAG_ACK)) {
+	if ( (data_size > 0) && ((flags == 0) || (flags == TCP_FLAG_ACK))) {
 
 		if (isValidSeqNum(sock, seq_num, data_size)) {
 
@@ -127,11 +128,14 @@ void do_recv_estab(tcp_socket_t* sock, char* packet) {
 
 				if (isNextSeqNum(sock, seq_num)) {
 					/* if this packet is the next one we're expecting, update our ack thingy (so we'll ack this packet a few lines below) */
+					nlog(MSG_LOG, "do_recv_estab", "this is the next sequence number we're expecting.  bumping sock->ack_num from %d to %d", sock->ack_num, seq_num + data_size);
 					sock->ack_num = seq_num + data_size;
+
 				} /* else { dont update anything, which will cause us to ack again the last packet we want to send a ack for */
 
 				/* ack this packet*/
-				tcp_sendto(socket, NULL, 0, TCP_FLAG_ACK); /* XXX maybe write a sendAck() function? */
+				tcp_sendto(sock, NULL, 0, TCP_FLAG_ACK); /* XXX maybe write a sendAck() function? */
+
 
         /* TODO copy data into cbuffer with copy datasometsomethiasfdA() */
 
@@ -143,10 +147,15 @@ void do_recv_estab(tcp_socket_t* sock, char* packet) {
 				nlog(MSG_LOG, "do_recv_estab", "got a data packet, but the SEQ number was off!  ignore this packet!");
 		}
 
-	} else {
+		} else if (ack_only(packet))  {
+			int old_send_una = sock->send_una;
+			gotAckFor(sock, ack_num);	
+			nlog(MSG_LOG, "do_rev_estab", "send_una=%d  send_next=%d  send_written=%d  send_remote_flow_window=%d", sock->send_una, sock->send_next, sock->send_written, sock->remote_flow_window);
+
+		} else {
 		// TODO, this might be a FIN or RST or something important we need to handle:
 
-	}
+		}
 }
 
 /* tcp wathdog thread */
@@ -299,12 +308,12 @@ void *tcp_thread(void* arg) {
 			sock->remote_port = src_port;
 			sock->remote_node = src;
 			sock->seq_num = 1000;
-			sock->send_una = sock->seq_num;
-			sock->send_next = sock->seq_num;
-			sock->send_written = sock->seq_num;
+			sock->send_una = sock->seq_num + 1;
+			sock->send_next = sock->seq_num + 1;
+			sock->send_written = sock->seq_num + 1;
 
-			sock->recv_next = incoming_seq_num;
-			sock->recv_read = incoming_seq_num;
+			sock->recv_next = incoming_seq_num + 1;
+			sock->recv_read = incoming_seq_num + 1;
 
 			socktable_put(node->tuple_table, sock, FULL_SOCKET);
 		}

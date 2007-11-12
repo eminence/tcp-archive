@@ -16,6 +16,11 @@ int do_connect(sid_t prev, sid_t next, void* context, void* rflags, void* packet
   sock->recv_next = incoming_seq_num + 1;
   sock->recv_read = incoming_seq_num + 1;
 
+  /* manually bump up pointers, to represent the SYN that we sent, and that got ACKd */
+  sock->send_next++;
+  sock->send_written++;
+  sock->send_una++;
+
   return send_packet_with_flags((tcp_socket_t*)context, *((uint8_t*)rflags));
 }
 

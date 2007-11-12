@@ -6,6 +6,8 @@
 
 int isValidSeqNum(tcp_socket_t *sock, int num, int length) {
 	/* if BOTH num and (num + length) is in the range that we're willing to receive */
+	
+	nlog(MSG_LOG, "isValidSeqNum", "sock->recv_next=%d, sock->recv_window_size=%d, num=%d, length=%d", sock->recv_next, sock->recv_window_size, num, length);
 
 	return cbuf_btm_contains(sock->r_buf, sock->recv_next, sock->recv_next + sock->recv_window_size, num) &&
 		cbuf_btm_contains(sock->r_buf, sock->recv_next, sock->recv_next + sock->recv_window_size, num+length);
@@ -29,6 +31,7 @@ int haveRoomToReceive(tcp_socket_t *sock, int size) {
  *	int size - size of the data we're acking
  * */
 void ackData(tcp_socket_t *sock, int size) {
+	nlog(MSG_LOG, "ackData", "bumping recv_num from %d to %d", sock->recv_next, sock->recv_next + size);
 	sock->recv_next += size;
 	sock->seq_num += size;
 }
@@ -103,9 +106,10 @@ int getAmountAbleToSend(tcp_socket_t *sock) {
 }
 
 /* call this when we have gotten an ACK for a packet */
-void gotAckFor(tcp_socket_t *sock, int start, int len) {
-	//assert(sock->send_una = start);  /* not true, because acks are consecutive */
-	sock->send_una += len;
+void gotAckFor(tcp_socket_t *sock, int num /*, int len*/) {
+	//assert(sock->send_una = start);  /* not true, because acks are consecutive. uhh what?  need to think about this some more */
+	nlog(MSG_LOG, "gocAckFor", "moving send_una from %d to %d", sock->send_una, num);
+	sock->send_una = num;
 
 	assert(sock->send_una <= sock->send_next);
 }
@@ -140,7 +144,9 @@ int dataFromBufferToNetwork(tcp_socket_t *sock, char *data, int size) {
 	char * memory = cbuf_get_range(sock->s_buf, sock->send_next, amount);
 	memcpy(data, memory, amount);
 	free(memory);
+	nlog(MSG_LOG, "dataFromBufferToNetwork", "bumping send_next from %d to %d", sock->send_next, sock->send_next + size);
 	sock->send_next += size;
+
 
 	return amount;
 }

@@ -49,10 +49,6 @@ int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) 
 	nlog(MSG_LOG,"tcp_sendto", "now have a packet of size %d ready to be sent to dest_port %d", 
 			packet_size, sock->remote_port);
 
-
-	uint16_t dport = get_destport(packet);
-	nlog(MSG_LOG,"tcp_sendto", "from build_tcp_packet, dport=%d (should be %d)", dport, sock->remote_port);
-
 	// put our tcp packet in an IP packet. woot!
 	//int ip_packet_size = buildPacket(sock->local_node, packet, packet_size, sock->remote_node, &ippacket, PROTO_TCP);
 
@@ -69,6 +65,7 @@ int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) 
 	sock->seq_num += bufsize + !!(flags & TCP_FLAG_SYN)
 		+ !!(flags & TCP_FLAG_FIN)
 		+ !!(flags & TCP_FLAG_RST);
+
 
 	/* as long as the packet is not a pure ACK (where pure ACK == only ACK, and no payload), then
 	 * we'll be expecting a reply for this packet */
@@ -111,9 +108,6 @@ int build_tcp_packet(char *data, int data_size,
 
 	set_flags(*header, flags);
 	set_window(*header, window);
-
-	uint16_t dest_port2 = get_destport(*header);
-	nlog(MSG_LOG, "build_tcp_packet", "dest_port readback: %d (should be %d)", dest_port2, dest_port);
 
 	// memcpy the data into the packet, if there is any
 	if (data) memcpy(*header+TCP_HEADER_SIZE,data,data_size);
@@ -193,8 +187,8 @@ int sys_socket(int clone) {
 	sock->recv_next = 0;
 	sock->recv_read = 0;
 
-	sock->r_buf = cbuf_new(SEND_WINDOW_SIZE);
-	sock->s_buf = cbuf_new(SEND_WINDOW_SIZE);
+	sock->r_buf = cbuf_new(SEND_WINDOW_SIZE*2);
+	sock->s_buf = cbuf_new(SEND_WINDOW_SIZE*2);
 	
 	tcp_table_new(this_node, s);	
 
