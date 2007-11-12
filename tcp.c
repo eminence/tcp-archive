@@ -28,7 +28,8 @@ int send_packet_with_flags(tcp_socket_t* sock, uint8_t flags) {
 	return 0; // FIXME XXX TODO
 }
 
-int send_flags(tcp_socket_t *sock, uint8_t flags) {
+
+int queue_up_flags(tcp_socket_t *sock, uint8_t flags) {
 
 	int start = sock->send_written;
 	cbuf_put_flag(sock->s_buf, start, flags);

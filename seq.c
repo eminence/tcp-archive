@@ -98,11 +98,79 @@ int getAmountAbleToAccept(tcp_socket_t *sock) {
 
 }
 
+
+/* reteurn true if the next thing to send is a flag */
+int sendFlagNext(tcp_socket_t *sock) {
+
+	void *d;
+
+	int toreturn;
+
+	int retval = cbuf_get_range(sock->s_buf, sock->send_next, 1, &d);
+	if (retval < 0) {
+		/* this is a flag */
+		//toreturn = *(int*)d;  /* these are the flags */
+		toreturn = 1;
+
+	} else {
+		toreturn = 0;
+	}
+
+	free(d); /*hazzzxxxxxxx*/
+	
+	return toreturn;
+}
+
+
+/* get the flag to send next */
+int getFlagToSend(tcp_socket_t *sock) {
+
+	assert(sendFlagNext(sock));
+
+	void *d;
+
+	int toreturn;
+
+	int retval = cbuf_get_range(sock->s_buf, sock->send_next, 1, &d);
+	if (retval < 0) {
+		/* this is a flag */
+		toreturn = *(int*)d;  /* these are the flags */
+	} else {
+		assert(retval < 0);
+	}
+
+	free(d); /*hazzzxxxxxxx*/
+
+	return toreturn;
+
+}
+
 /* return the amount of data we have in our cbuff that we can send out in a tcp packet */
 int getAmountAbleToSend(tcp_socket_t *sock) {
-	return MIN(  /* make sure we have data actually written before we try to send it */
-			sock->send_written - sock->send_next,
-			sock->remote_flow_window - sock->send_next);
+	int m = MIN(  /* make sure we have data actually written before we try to send it */
+				sock->send_written - sock->send_next,
+				sock->remote_flow_window - sock->send_next);
+	
+	if (m == 0) return 0; /* skip all this crap and just return zero */
+
+	void *d;
+
+	int toreturn;
+
+	int retval = cbuf_get_range(sock->s_buf, sock->send_next, m, &d);
+	if (retval < 0) {
+		/* this is a flag */
+		//toreturn = *(int*)d;  /* these are the flags */
+		toreturn = 1;
+
+	} else {
+		toreturn = retval;
+	}
+
+	free(d); /*hazzzxxxxxxx*/
+
+	return retval;
+
 }
 
 int isDupAck(tcp_socket_t *sock, int num) {
@@ -152,6 +220,7 @@ int dataFromBufferToNetwork(tcp_socket_t *sock, char *data, int size) {
 	free(memory);
 	nlog(MSG_LOG, "dataFromBufferToNetwork", "bumping send_next from %d to %d", sock->send_next, sock->send_next + size);
 	sock->send_next += size;
+	assert(sock->send_next <= sock->send_written);
 
 
 	return amount;
