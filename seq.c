@@ -82,7 +82,7 @@ int dataFromNetworkToBuffer(tcp_socket_t *sock, char *data, int size) {
 /*************************-=[ SENDING STUFFS ]=-********************/
 
 /* when we get a window announcement, pass the window into this function */
-void updateFromWindowAccounce(tcp_socket_t *sock, int window) {
+void updateFromWindowAnnounce(tcp_socket_t *sock, int window) {
 	sock->remote_flow_window = sock->send_next + window;
 		/* XXX we might want to use send_una instead of send_next */
 }
@@ -105,11 +105,17 @@ int getAmountAbleToSend(tcp_socket_t *sock) {
 			sock->remote_flow_window - sock->send_next);
 }
 
+int isDupAck(tcp_socket_t *sock, int num) {
+
+	return (num == sock->last_ack);
+}
+
 /* call this when we have gotten an ACK for a packet */
 void gotAckFor(tcp_socket_t *sock, int num /*, int len*/) {
 	//assert(sock->send_una = start);  /* not true, because acks are consecutive. uhh what?  need to think about this some more */
 	nlog(MSG_LOG, "gocAckFor", "moving send_una from %d to %d", sock->send_una, num);
 	sock->send_una = num;
+	sock->last_ack = num;
 
 	assert(sock->send_una <= sock->send_next);
 }
