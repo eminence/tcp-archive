@@ -46,8 +46,10 @@ int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) 
 
 	char *packet;
 
+	//int packet_size = build_tcp_packet(data_buf, bufsize, sock->local_port, sock->remote_port ,
+	//		sock->seq_num, /*ack*/ sock->ack_num, flags, sock->send_window_size, &packet);
 	int packet_size = build_tcp_packet(data_buf, bufsize, sock->local_port, sock->remote_port ,
-			sock->seq_num, /*ack*/ sock->ack_num, flags, sock->send_window_size, &packet);
+			sock->send_next, /*ack*/ sock->recv_next, flags, sock->send_window_size, &packet);
 
 	nlog(MSG_LOG,"tcp_sendto", "now have a packet of size %d ready to be sent to dest_port %d", 
 			packet_size, sock->remote_port);
