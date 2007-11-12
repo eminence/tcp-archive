@@ -207,7 +207,7 @@ int get_text(char *msg, char* return_, int len) {
 		if (buff[i] != ' ') { start = i; break; }	
 	}
 	for (i = 251; i >= 0; i--) { /* strip trailing space characters */
-		if (buff[i] != ' '){ end = i; break; }	
+		if (buff[i] != ' '){ end = i+1; break; }	
 	}
 	memset(return_,0,len);
 	memcpy(return_, buff+start, end-start);

@@ -183,6 +183,9 @@ int sys_socket(int clone) {
 	sock->recv_next = 0;
 	sock->recv_read = 0;
 
+	sock->r_buf = cbuf_new(SEND_WINDOW_SIZE);
+	sock->s_buf = cbuf_new(SEND_WINDOW_SIZE);
+	
 	tcp_table_new(this_node, s);	
 
 	pthread_cond_init(&sock->cond, NULL);
