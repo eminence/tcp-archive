@@ -28,6 +28,16 @@ int send_packet_with_flags(tcp_socket_t* sock, uint8_t flags) {
 	return 0; // FIXME XXX TODO
 }
 
+int send_flags(tcp_socket_t *sock, uint8_t flags) {
+
+	int start = sock->send_written;
+	cbuf_put_flag(sock->s_buf, start, flags);
+
+	sock->send_written++;
+	
+	return 0;
+}
+
 tcp_socket_t *get_socket_from_int(int s) {
 	assert(s >= 0);
 	assert(s < MAXSOCKETS);
