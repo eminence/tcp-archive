@@ -50,17 +50,28 @@ int getDataFromBuffer(tcp_socket_t *sock, char *buf, int max_size) {
 	int amount = MIN(max_size, amountOfDataToRead(sock));
 
 	assert(amount > 0);
+	char *d;
+	int toreturn;
 
-	char *memory = cbuf_get_range(sock->r_buf, sock->recv_read, amount);
-	memcpy(buf, memory, amount);
-	free(memory);
+	int retval = cbuf_get_range(sock->r_buf, sock->recv_read, amount, &d);
+	if (retval < 0) {
+		/* this is a flag */
+		//toreturn = *(int*)d;  /* these are the flags */
+		toreturn = 0;
 
-	sock->recv_read += amount;
-	sock->recv_window_size += amount;
-	assert(sock->recv_read <= sock->recv_next);
+	} else {
+		memcpy(buf, d, retval);
+
+		sock->recv_read += amount;
+		sock->recv_window_size += amount;
+		assert(sock->recv_read <= sock->recv_next);
+		toreturn = amount;
+	}
+
+	free(d); /*hazzzxxxxxxx*/
 
 	
-	return amount;
+	return toreturn;
 
 }
 
@@ -239,16 +250,27 @@ void unackData(tcp_socket_t *sock, int size) {
 int dataFromBufferToNetwork(tcp_socket_t *sock, char *data, int size) {
 	
 	int amount = getAmountAbleToSend(sock);
+	int toreturn;
+	char *d;
 
-	char * memory = cbuf_get_range(sock->s_buf, sock->send_next, amount);
-	memcpy(data, memory, amount);
-	free(memory);
-	nlog(MSG_LOG, "dataFromBufferToNetwork", "bumping send_next from %d to %d", sock->send_next, sock->send_next + size);
-	sock->send_next += size;
-	assert(sock->send_next <= sock->send_written);
+	int retval = cbuf_get_range(sock->s_buf, sock->send_next, amount, &d);
+	if (retval < 0) {
+		/* this is a flag */
+		//toreturn = *(int*)d;  /* these are the flags */
+		toreturn = 0;
 
+	} else {
+		memcpy(data, d, retval);
 
-	return amount;
+		nlog(MSG_LOG, "dataFromBufferToNetwork", "bumping send_next from %d to %d", sock->send_next, sock->send_next + size);
+		sock->send_next += size;
+		assert(sock->send_next <= sock->send_written);
+		toreturn = amount;
+	}
+
+	free(d);
+
+	return toreturn;
 }
 
 
