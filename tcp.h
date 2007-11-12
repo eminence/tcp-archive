@@ -18,7 +18,9 @@ typedef struct tcp_socket__ {
 	unsigned char can_handshake; /* set by v_accept() */
 	unsigned int fd;
 	uint32_t seq_num; /* this is the value we will use for our next output packet */
-	uint32_t ack_num;
+	uint32_t ack_num; /* this is the value we will use for our next output packet */
+
+	uint32_t last_ack; /* this is the number of the last ACKNUM we've received */
 
 	/* Socket identifiers. */
 	struct ip_node__ *local_node;
