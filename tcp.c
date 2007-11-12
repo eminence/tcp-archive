@@ -19,8 +19,11 @@ int send_packet_with_flags(tcp_socket_t* sock, uint8_t flags) {
 	nlog(MSG_LOG,"spwf", "socket %d, flags are %p", sock->fd, flags);
 
   /* Use special case sequence number increase. */
-	tcp_sendto(sock, NULL, 0, flags);
-
+  if(flags & TCP_FLAG_FIN) {
+    
+  } else {
+    tcp_sendto(sock, NULL, 0, flags);
+  }
 
 	return 0; // FIXME XXX TODO
 }

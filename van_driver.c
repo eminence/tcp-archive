@@ -127,8 +127,7 @@ void do_recv_tcp(tcp_socket_t* sock, char* packet) {
         if (isNextSeqNum(sock, seq_num)) {
           /* if this packet is the next one we're expecting, update our ack thingy (so we'll ack this packet a few lines below) */
           nlog(MSG_LOG, "do_recv_estab", "this is the next sequence number we're expecting.  bumping sock->ack_num from %d to %d", sock->ack_num, seq_num + data_size);
-          sock->ack_num = seq_num + data_size;
-
+          sock->ack_num = seq_num + data_size + !!(TCP_FLAG_FIN);
         } /* else [ dont update anything, which will cause us to ack again the last packet we want to send a ack for */
 
 			  if(tcpm_event(sock->machine, tcpm_packet_to_input(ip_to_tcp(packet)), packet, packet)) {

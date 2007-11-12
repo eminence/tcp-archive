@@ -69,7 +69,7 @@ tcp_machine_t* tcpm_new(tcp_socket_t* context, uint8_t clone) {
   assert(0 == state_transition(st_listen,      st_syn_rcvd,    ON_RECV_SYN,        do_send_flags,          alloc_flags(TCP_FLAG_SYN | TCP_FLAG_ACK)));
   assert(0 == state_transition(st_syn_rcvd,    st_estab,       ON_RECV_ACK,        NULL,                   NULL));
   assert(0 == state_transition(st_estab,       st_fin_wait_1,  ON_CLOSE,           do_send_flags,          alloc_flags(TCP_FLAG_FIN)));
-  assert(0 == state_transition(st_estab,       st_close_wait,  ON_RECV_FIN,        do_send_flags,          NULL)); /* XXX do_recv_tcp sends ack. */
+  assert(0 == state_transition(st_estab,       st_close_wait,  ON_RECV_FIN,        NULL,                   NULL)); /* XXX do_recv_tcp sends ack. */
   assert(0 == state_transition(st_estab,       st_estab,       ON_NONE,            NULL,                   NULL));
   assert(0 == state_transition(st_estab,       st_estab,       ON_RECV_ACK,        NULL,                   NULL));
   assert(0 == state_transition(st_fin_wait_1,  st_closing,     ON_RECV_FIN,        do_send_flags,          alloc_flags(TCP_FLAG_ACK)));
