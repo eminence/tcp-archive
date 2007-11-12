@@ -178,8 +178,33 @@ int isDupAck(tcp_socket_t *sock, int num) {
 	return (num == sock->last_ack);
 }
 
+
+
+/* process  this packet for ACK stufffs */
+void processPacketForAck(tcp_socket_t *sock, char*packet) {
+
+	int flags = get_flags(ip_to_tcp(packet));
+	if ((flags & TCP_FLAG_ACK) == TCP_FLAG_ACK) {
+		int ack_num = get_acknum(ip_to_tcp(packet));
+		if (ack_num > sock->send_una) {
+			nlog(MSG_LOG, "processPacketForAck", "This packet has acknum=%d, which moves forward our send_una pointer (which was at %d)", ack_num, sock->send_una);
+			sock->send_una = ack_num;
+		} else {
+			if (ack_num == sock->last_ack) {
+				nlog(MSG_LOG, "processPacketForAck", "This packet is a duplicate ack.  we should move send_next back to send_una");
+				sock->send_next = sock->send_una;
+			}
+		}
+		sock->last_ack = ack_num;
+	}
+
+}
+
 /* call this when we have gotten an ACK for a packet */
 void gotAckFor(tcp_socket_t *sock, int num /*, int len*/) {
+	int dontUseThisFunction = 0;
+	assert(dontUseThisFunction);
+
 	//assert(sock->send_una = start);  /* not true, because acks are consecutive. uhh what?  need to think about this some more */
 	nlog(MSG_LOG, "gocAckFor", "moving send_una from %d to %d", sock->send_una, num);
 	sock->send_una = num;

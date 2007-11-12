@@ -122,27 +122,33 @@ void do_recv_tcp(tcp_socket_t* sock, char* packet) {
 		if (isValidSeqNum(sock, seq_num, data_size)) {
 			nlog(MSG_LOG,"do_recv_estab", "got a data packet of size %d", data_size );
 
-			/* if we can fit this in our receive buffer: */
-			if (haveRoomToReceive(sock, data_size)) {
-				if (isNextSeqNum(sock, seq_num)) {
-					/* if this packet is the next one we're expecting, update our ack thingy (so we'll ack this packet a few lines below) */
-					nlog(MSG_LOG, "do_recv_estab", "this is the next sequence number we're expecting.  bumping sock->ack_num from %d to %d", sock->ack_num, seq_num + data_size);
-					sock->ack_num = seq_num + data_size + !!(TCP_FLAG_FIN);
-				} /* else [ dont update anything, which will cause us to ack again the last packet we want to send a ack for */
+			if (ack_only(packet)) {
+				/* this is packet is only an ACK, then we can skip the haveRoomToRreceive test.  note: we still need to validate it's sequence number, i think */
+
+				/* TODO, how should we verify the sequence number?  it should be recv_next, i think */
+				if (seq_num != sock->recv_next) {
+					nlog(MSG_WARNING, "do_recv_tcp", "Ok, got a packet that is an ACK only (no data), except it has a seqnum of %d and i think it should have a seqnum of %d.  discarding!", seq_num, sock->recv_next);
+				} else {
+					processPacketForAck(sock, packet);
+				}
+
+				/* else, this packet might contain data, so can fit this in our receive buffer? */ 
+			} else if (haveRoomToReceive(sock, data_size)) { 
 
 				if(tcpm_event(sock->machine, tcpm_packet_to_input(ip_to_tcp(packet)), packet, packet)) {
 					nlog(MSG_WARNING, "do_recv_tcp", "Couldn't transition machine (in estab state); fail!");
 					/* Rely on error function; teardown socket? */
 				}
 
-				if(ack_only(packet)) {
-					gotAckFor(sock, ack_num);	
-					nlog(MSG_LOG, "do_rev_estab", "send_una=%d  send_next=%d  send_written=%d  send_remote_flow_window=%d", sock->send_una, sock->send_next, sock->send_written, sock->remote_flow_window);
-				} else {
-					/* ack this packet*/
-					tcp_sendto(sock, NULL, 0, TCP_FLAG_ACK); /* XXX maybe write a sendAck() function? */
-					/* TODO copy data into cbuffer with copy datasometsomethiasfdA() */
-				}
+				nlog(MSG_LOG, "do_rev_estab", "send_una=%d  send_next=%d  send_written=%d  send_remote_flow_window=%d", sock->send_una, sock->send_next, sock->send_written, sock->remote_flow_window);
+
+				processPacketForAck(sock, packet); /* if this data packet also contains an ACK, process it */
+
+				ackThisPacket(sock, packet); /*  TODO WRITE THIS FUNCTION!  maybe it's just as easy at the code two lines below?? TODO */
+
+				/* ack this packet*/
+				//	tcp_sendto(sock, NULL, 0, TCP_FLAG_ACK); /* XXX maybe write a sendAck() function? */
+				/* TODO copy data into cbuffer with copy datasometsomethiasfdA() */
 
 			} else {
 				nlog(MSG_WARNING, "do_recv_estab", "got data, but i have no room for it!");
