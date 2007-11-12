@@ -24,6 +24,7 @@ int amountOfDataToRead(tcp_socket_t *sock);
 int getDataFromBuffer(tcp_socket_t *sock, char *buf, int max_size);
 int amountWeCanReceive(tcp_socket_t *sock);
 int dataFromNetworkToBuffer(tcp_socket_t *sock, char *data, int size);
+void updateFromWindowAnnounce(tcp_socket_t *sock, int window);
 
 int canAcceptDataToSend(tcp_socket_t *sock, int size);
 int getAmountAbleToSend(tcp_socket_t *sock);
