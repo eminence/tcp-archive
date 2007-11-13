@@ -144,7 +144,6 @@ int getFlagToSend(tcp_socket_t *sock) {
 	void *d;
 
 	int toreturn;
-
 	int retval = cbuf_get_range(sock->s_buf, sock->send_next, 1, &d);
 	if (retval < 0) {
 		/* this is a flag */
@@ -170,6 +169,8 @@ int getAmountAbleToSend(tcp_socket_t *sock) {
 	void *d;
 
 	int toreturn;
+
+	if (sock->send_next == sock->send_written) return 0;
 
 	int retval = cbuf_get_range(sock->s_buf, sock->send_next, m, &d);
 	if (retval < 0) {
