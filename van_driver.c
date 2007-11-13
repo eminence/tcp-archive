@@ -112,6 +112,7 @@ int set_if_state(ip_node_t *node, int iface, int link_state) {
 
 void ackThisPacket(tcp_socket_t* sock) {
 	send_packet_with_flags(sock, TCP_FLAG_ACK);
+	sock->recv_next++;
 }
 
 /* Handle recv events in estab state. */
