@@ -326,7 +326,8 @@ void *tcp_thread(void* arg) {
 		}
 
 		/* IMPORTANT.  we need this line.  should it go here, though? */
-		sock->remote_flow_window = get_window(ip_to_tcp(packet));
+		sock->remote_flow_window = sock->send_next + get_window(ip_to_tcp(packet));
+		
 
 		/* If we're in the established state, perform primary communication; else, handshake*/
     if(flags & TCP_FLAG_RST) {

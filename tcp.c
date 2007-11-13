@@ -197,7 +197,7 @@ int sys_socket(int clone) {
 	sock->send_una = 0;
 	sock->send_next = 0;
 	sock->send_written = 0;
-	sock->remote_flow_window = 0;
+	sock->remote_flow_window = sock->send_next + SEND_WINDOW_SIZE; /* a reasonable default? je pense que oui */
 
 	sock->recv_next = 0;
 	sock->recv_read = 0;

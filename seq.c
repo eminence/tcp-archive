@@ -110,7 +110,7 @@ int getAmountAbleToAccept(tcp_socket_t *sock) {
 }
 
 
-/* reteurn true if the next thing to send is a flag */
+/* return true if the next thing to send is a flag */
 int sendFlagNext(tcp_socket_t *sock) {
 
 	void *d;
@@ -163,7 +163,9 @@ int getAmountAbleToSend(tcp_socket_t *sock) {
 	int m = MIN(  /* make sure we have data actually written before we try to send it */
 				sock->send_written - sock->send_next,
 				sock->remote_flow_window - sock->send_next);
-	
+
+	assert(m >= 0);
+
 	if (m == 0) return 0; /* skip all this crap and just return zero */
 
 	void *d;
