@@ -223,7 +223,9 @@ void *tcp_send_thread(void* arg) {
 				/* we have a flag waiting to be sent */
 				int flags = getFlagToSend(sock);
 				nlog(MSG_LOG, "tcp_send_thread", "It appears the next thing to send is a flag(%p), calling send_packet_with_flags()", flags);
-				send_packet_with_flags(sock, flags);
+				//send_packet_with_flags(sock, flags);
+				sock->send_next++;
+				tcp_sendto(sock, NULL, 0, flags);
 
 			} else if ((amount = getAmountAbleToSend(sock)) > 0) {
 				/* we have regular data to send */
