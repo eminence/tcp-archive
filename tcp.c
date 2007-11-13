@@ -16,6 +16,7 @@
 static ip_node_t *this_node;
 
 int queue_up_flags(tcp_socket_t *sock, uint8_t flags) {
+	nlog(MSG_LOG, "queue_up_flags", "queueing flags for send: %p", flags);
 
 	int start = sock->send_written;
 	cbuf_put_flag(sock->s_buf, start, flags);

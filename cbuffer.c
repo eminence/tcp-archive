@@ -25,10 +25,10 @@ void cbuf_destroy(cbuf_t* buf) {
   free(buf);
 }
 
-void __cbuf_put(cbuf_t* buf, int index, char value, uint8_t type) {
+void __cbuf_put(cbuf_t* buf, int index, char value, uint8_t type, int unsafe) {
   assert(0 <= index);
   
-  assert(type & (CBUF_DATA | CBUF_FLAG));
+  assert(unsafe || (type & (CBUF_DATA | CBUF_FLAG)));
 
   buf->data[__cbuf_type(cbuf_mod(buf, index))] = type;
   buf->data[__cbuf_data(cbuf_mod(buf, index))] = value;
@@ -36,7 +36,7 @@ void __cbuf_put(cbuf_t* buf, int index, char value, uint8_t type) {
   nlog(MSG_LOG, "cbuf_put", "set index %d to value %p with type %c", index, value, type == CBUF_DATA ? 'D' : 'F');
 }
 
-char __cbuf_get(cbuf_t* buf, int index, uint8_t* type) {
+char __cbuf_get(cbuf_t* buf, int index, uint8_t* type, int unsafe) {
   char data;
 
   assert(0 <= index);
@@ -47,7 +47,7 @@ char __cbuf_get(cbuf_t* buf, int index, uint8_t* type) {
   data = buf->data[__cbuf_data(cbuf_mod(buf, index))];
 
   assert(type);
-  assert(*type & (CBUF_DATA | CBUF_FLAG));
+  assert(unsafe || (*type & (CBUF_DATA | CBUF_FLAG)));
   
   nlog(MSG_LOG, "cbuf_get", "data at index %d has value %p and type %c", index, data, *type == CBUF_DATA ? 'D' : 'F');
 
@@ -62,14 +62,14 @@ int cbuf_put_range(cbuf_t* buf, char* buffer, int start, int len) {
   assert(len <= cbuf_size(buf));
 
   cbuf_r_iterate_indices(buf, start, len, i) {
-    __cbuf_put(buf, i, buffer[cnt++], CBUF_DATA);
+    __cbuf_put(buf, i, buffer[cnt++], CBUF_DATA, 0);
   } cbuf_r_iterate_indices_end();
 
   return 0;
 }
 
 int cbuf_put_flag(cbuf_t* buf, int start, uint8_t flags) {
-   __cbuf_put(buf, start, (char)flags, CBUF_FLAG);
+   __cbuf_put(buf, start, (char)flags, CBUF_FLAG, 0);
 
    return 0;
 }
