@@ -1,0 +1,11 @@
+close almost works?
+--This line, and those below, will be ignored--
+
+M    van_driver.c
+M    cscope.out
+M    ip_driver.c
+M    tcp.c
+M    tcpstate.c
+M    URGENT_REMINDERS
+M    tcp.h
+M    tcpstate.h

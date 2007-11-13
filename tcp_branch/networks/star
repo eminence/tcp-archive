@@ -1,0 +1,19 @@
+# network arranged in line with no drops or garbles
+
+link p2p 0.0 0.0 2.0 0.1 4096 localhost 10000
+link p2p 0.0 0.0 2.0 0.1 4096 localhost 10001
+link p2p 0.0 0.0 2.0 0.1 4096 localhost 10002
+
+node  # node 0
+if p2p 0 4096 a  # connects to node 1 on interface 0
+
+node  # node 1
+if p2p 0 4096 p  # connects to node 0 on interface 0  
+if p2p 1 4096 p  # connects to node 2 on interface 1
+if p2p 2 4096 p  # connects to node 3 on interface 2
+
+node  # node 2
+if p2p 1 4096 a  # connects to node 1 on interface 0
+
+node  # node 3
+if p2p 2 4096 a  # connects to node 1 on interface 0

@@ -1,0 +1,23 @@
+# link definitions
+# link <type> <drop> <garble> <delay base [secs]> <delay delta [msecs]> <mtu>
+link  wireless 0.0 0.0 0.0 0.0 1024
+
+# node definitions
+# if wireless <if> <drop> <x_coord> <y_coord> <radius>
+node
+    if wireless 0 1024 500 400 50
+
+node
+    if wireless 0 1024 500 450 50
+
+node
+    if wireless 0 1024 500 350 50
+
+node
+    if wireless 0 1024 500 300 50
+
+node
+    if wireless 0 1024 500 500 50
+
+node
+    if wireless 0 1024 500 550 50

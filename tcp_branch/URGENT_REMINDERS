@@ -1,0 +1,24 @@
+notify and sleep stuff
+  - always wake on error and return -1 
+
+add mutexes to all sockets; any time we touch a socket, lock mutex
+
+DO WE SET AND CHECK TCP CHECKSUMS????? (if not, we need to)
+
+CONNECTIONS AND SHIT HAVE TO TIMEOUT!
+
+don't allow write or read in not estab state
+
+move the socktable_put call from v_bind to v_listen
+
+TIMEWAIT -- add kill_me field -1 is safe, 0 kill, >0 dec watchdog
+
+
+
+============ POST REFACTORING ===================
+
+ Closing a listening socket currently locks shit up; close waits for OK, we never send.
+
+  -- Also, we never added mutexes
+
+  Also, CLOSE never works in any case because we never notify.

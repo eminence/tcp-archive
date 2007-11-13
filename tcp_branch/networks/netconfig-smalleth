@@ -1,0 +1,34 @@
+# link definitions
+# link <type> <drop> <garble> <delay base [secs]> <delay delta [msecs]> <mtu>
+# node definitions
+
+link  eth 0.0 0.0 0.2 0.1 4096
+link  loop 0.0 0.0 0.0 0.0 1024
+
+node
+    if loop 0 1024
+   if eth 0 4096    # 200.0.0.1
+
+node
+    if loop 0 1024
+   if eth 0 4096    # 200.0.0.2
+
+node
+    if loop 0 1024
+   if eth 0 4096    # 200.0.0.3
+
+node
+    if loop 0 1024
+    if eth 0 4096   # 200.0.0.4
+
+node
+    if loop 0 1024
+    if eth 0 4096   # 200.0.0.5
+
+node
+    if loop 0 1024
+    if eth 0 4096   # 200.0.0.6
+
+node
+    if loop 0 1024
+    if eth 0 4096   # 200.0.0.7
