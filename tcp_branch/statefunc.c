@@ -7,8 +7,19 @@
 #include "socktable.h"
 #include "fancy_display.h"
 
+void notify(tcp_socket_t *sock, int status) {
+
+	nlog(MSG_LOG,"notify", "attempting to get socket lock");
+	pthread_mutex_lock(&sock->lock);
+	sock->cond_status = status;
+	nlog(MSG_LOG,"notify", "calling pthread_cond_signal (for socket %d)", sock->fd);
+	pthread_cond_signal(&sock->cond);
+	pthread_mutex_unlock(&sock->lock);
+
+}
+
 int do_close(sid_t prev, sid_t next, void* context, void* argA, void* argB) {
-	notify(sock, TCP_OK);
+	notify((tcp_socket_t*)context, TCP_OK);
 
 	return 0;
 }
@@ -85,17 +96,6 @@ int wait_for_event(tcp_socket_t *sock, int status_bits) {
 	sock->cond_status = 0;
 
 	return to_return;
-}
-
-void notify(tcp_socket_t *sock, int status) {
-
-	nlog(MSG_LOG,"notify", "attempting to get socket lock");
-	pthread_mutex_lock(&sock->lock);
-	sock->cond_status = status;
-	nlog(MSG_LOG,"notify", "calling pthread_cond_signal (for socket %d)", sock->fd);
-	pthread_cond_signal(&sock->cond);
-	pthread_mutex_unlock(&sock->lock);
-
 }
 
 void in_estab(sid_t s, void *context, void *argA, void *argB) {

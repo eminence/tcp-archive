@@ -22,3 +22,18 @@ TIMEWAIT -- add kill_me field -1 is safe, 0 kill, >0 dec watchdog
   -- Also, we never added mutexes
 
   Also, CLOSE never works in any case because we never notify.
+
+  {{achin}} race condition in ncurses (you said something about a separate mutices -- one for nlog one for all else)
+
+
+  MAKE SURE In the user code that we disallow state transitions that are currently illegal.
+
+
+
+
+
+  P S          CLOSE IS WRONG!!!!!!!!!!! SHOULD WAKE UP AFTER INITIAL FIN SENT   SO USER CAN RECV!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+                 ONCE OTHER USER CLOSES, READ SHOULD RETURN -1, INDICATING FULL CLOSE.

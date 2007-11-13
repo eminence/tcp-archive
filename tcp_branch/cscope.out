@@ -1,4 +1,4 @@
-cscope 15 /home/bdiamond/course/cs168/tcp_branch               0000526511
+cscope 15 /home/bdiamond/course/cs168/tcp/tcp_branch               0000526718
 	@cbuf_test.c
 
 1 
@@ -10699,7 +10699,99 @@ id
 	~"çncy_di¥Ïy.h
 "
 
-10 
+10 
+	$nÙify
+(
+tý_sock‘_t
+ *
+sock
+, 
+¡©us
+) {
+
+12 
+	`Æog
+(
+MSG_LOG
+,"notify", "attemptingo get socket†ock");
+
+13 
+	`±h»ad_mu‹x_lock
+(&
+sock
+->
+lock
+);
+
+14 
+sock
+->
+cÚd_¡©us
+ = 
+¡©us
+;
+
+15 
+	`Æog
+(
+MSG_LOG
+,"nÙify", "ÿÎšg…th»ad_cÚd_sigÇÈ(fÜ sock‘ %d)", 
+sock
+->
+fd
+);
+
+16 
+	`±h»ad_cÚd_sigÇl
+(&
+sock
+->
+cÚd
+);
+
+17 
+	`±h»ad_mu‹x_uÆock
+(&
+sock
+->
+lock
+);
+
+19 
+	}
+}
+
+21 
+	$do_þo£
+(
+sid_t
+ 
+´ev
+, sid_ˆ
+Ãxt
+, * 
+cÚ‹xt
+, * 
+¬gA
+, * 
+¬gB
+) {
+
+22 
+	`nÙify
+((
+tý_sock‘_t
+*)
+cÚ‹xt
+, 
+TCP_OK
+);
+
+25 
+	}
+}
+
+27 
 	$do_cÚÃù
 (
 sid_t
@@ -10715,7 +10807,7 @@ ræags
 ·ck‘
 ) {
 
-11 
+28 
 tý_sock‘_t
 * 
 sock
@@ -10723,7 +10815,7 @@ sock
 cÚ‹xt
 ;
 
-12 
+29 
 ušt32_t
  
 šcomšg_£q_num
@@ -10735,7 +10827,7 @@ ušt32_t
 ·ck‘
 )) ;
 
-14 
+31 
 	`Æog
 (
 MSG_LOG
@@ -10747,7 +10839,7 @@ sock
 »cv_Ãxt
 );
 
-20 
+37 
 sock
 ->
 »cv_Ãxt
@@ -10755,7 +10847,7 @@ sock
 šcomšg_£q_num
 ;
 
-21 
+38 
 sock
 ->
 »cv_»ad
@@ -10763,7 +10855,7 @@ sock
 šcomšg_£q_num
 ;
 
-28  
+45  
 	`£nd_·ck‘_w™h_æags
 ((
 tý_sock‘_t
@@ -10775,11 +10867,11 @@ ušt8_t
 ræags
 ), 0);
 
-29 
+46 
 	}
 }
 
-31 
+48 
 	$do_£nd_æags
 (
 sid_t
@@ -10795,7 +10887,7 @@ cÚ‹xt
 Œª_¬g
 ) {
 
-32  
+49  
 	`£nd_·ck‘_w™h_æags
 ((
 tý_sock‘_t
@@ -10807,11 +10899,11 @@ ušt8_t
 ¬g
 ), 0);
 
-33 
+50 
 	}
 }
 
-35 
+52 
 	$do_li¡’
 (
 sid_t
@@ -10827,7 +10919,7 @@ cÚ‹xt
 Œª_¬g
 ) {
 
-36 
+53 
 tý_sock‘_t
  *
 sock
@@ -10835,13 +10927,13 @@ sock
 cÚ‹xt
 ;
 
-37 
+54 
 	`as£¹
 (
 sock
 );
 
-39 
+56 
 _node_t
  *
 node
@@ -10849,13 +10941,13 @@ node
 Œª_¬g
 ;
 
-40 
+57 
 	`as£¹
 (
 node
 );
 
-42 
+59 
 	`sockbË_put
 (
 node
@@ -10867,11 +10959,11 @@ sock
 HALF_SOCKET
 );
 
-48 
+65 
 	}
 }
 
-51 
+68 
 	$çž_w™h_»£t
 (
 sid_t
@@ -10883,7 +10975,7 @@ cÚ‹xt
 ¬gs
 ) {
 
-52 
+69 
 tý_sock‘_t
  *
 sock
@@ -10891,19 +10983,19 @@ sock
 cÚ‹xt
 ;
 
-53 
+70 
 	`as£¹
 (
 sock
 );
 
-55 
+72 
 	`Æog
 (
 MSG_LOG
 , "fail_with_reset", "failing socket %d. sending‡ RST‡nd moving backohe closed state");
 
-57 
+74 
 	`tý_£ndto
 (
 sock
@@ -10913,11 +11005,11 @@ NULL
 TCP_FLAG_RST
 );
 
-60 
+77 
 	}
 }
 
-62 
+79 
 	$has_¡©us
 (
 wªt
@@ -10925,17 +11017,17 @@ wªt
 have
 ) {
 
-63  !!(
+80  !!(
 wªt
  & 
 have
 );
 
-64 
+81 
 	}
 }
 
-66 
+83 
 	$wa™_fÜ_ev’t
 (
 tý_sock‘_t
@@ -10945,7 +11037,7 @@ sock
 ¡©us_b™s
 ) {
 
-67 
+84 
 	`±h»ad_mu‹x_lock
 (&
 sock
@@ -10953,7 +11045,7 @@ sock
 lock
 );
 
-69 
+86 
 	`Æog
 (
 MSG_LOG
@@ -10965,7 +11057,7 @@ sock
 cÚd_¡©us
 );
 
-71 !(
+88 !(
 	`has_¡©us
 (
 ¡©us_b™s
@@ -10975,13 +11067,13 @@ sock
 cÚd_¡©us
 ))) {
 
-72 
+89 
 	`Æog
 (
 MSG_LOG
 ,"wait_for_event", "sleeping on cond var");
 
-73 
+90 
 	`±h»ad_cÚd_wa™
 (&
 sock
@@ -10991,13 +11083,13 @@ cÚd
 lock
 );
 
-74 
+91 
 	`Æog
 (
 MSG_LOG
 ,"wait_for_event", "cond var woke me up");
 
-77 
+94 
 	`±h»ad_mu‹x_uÆock
 (&
 sock
@@ -11005,7 +11097,7 @@ sock
 lock
 );
 
-78 
+95 
 to_»tuº
  = 
 sock
@@ -11013,83 +11105,21 @@ sock
 cÚd_¡©us
 ;
 
-79 
+96 
 sock
 ->
 cÚd_¡©us
  = 0;
 
-81  
+98  
 to_»tuº
 ;
 
-82 
+99 
 	}
 }
 
-84 
-	$nÙify
-(
-tý_sock‘_t
- *
-sock
-, 
-¡©us
-) {
-
-86 
-	`Æog
-(
-MSG_LOG
-,"notify", "attemptingo get socket†ock");
-
-87 
-	`±h»ad_mu‹x_lock
-(&
-sock
-->
-lock
-);
-
-88 
-sock
-->
-cÚd_¡©us
- = 
-¡©us
-;
-
-89 
-	`Æog
-(
-MSG_LOG
-,"nÙify", "ÿÎšg…th»ad_cÚd_sigÇÈ(fÜ sock‘ %d)", 
-sock
-->
-fd
-);
-
-90 
-	`±h»ad_cÚd_sigÇl
-(&
-sock
-->
-cÚd
-);
-
-91 
-	`±h»ad_mu‹x_uÆock
-(&
-sock
-->
-lock
-);
-
-93 
-	}
-}
-
-95 
+101 
 	$š_e¡ab
 (
 sid_t
@@ -11103,7 +11133,7 @@ cÚ‹xt
 ¬gB
 ) {
 
-96 
+102 
 tý_sock‘_t
  *
 sock
@@ -11111,25 +11141,25 @@ sock
 cÚ‹xt
 ;
 
-97 
+103 
 	`as£¹
 (
 sock
 );
 
-99 
+105 
 	`Æog
 (
 MSG_LOG
 ,"state:in_estab", "We're‚ow inheƒstablished state. Attemptedo‚otifyhe user");
 
-102 if(
+108 if(
 sock
 ->
 ·»Á
 ) {
 
-103 
+109 
 	`nÙify
 (
 sock
@@ -11139,7 +11169,7 @@ sock
 TCP_OK
 );
 
-105 
+111 
 	`nÙify
 (
 sock
@@ -11147,7 +11177,7 @@ sock
 TCP_OK
 );
 
-109 
+115 
 	}
 }
 
@@ -11269,6 +11299,22 @@ cÚ‹xt
 ¬g
 , * 
 Œª_¬g
+);
+
+19 
+do_þo£
+(
+sid_t
+ 
+´ev
+, sid_ˆ
+Ãxt
+, * 
+cÚ‹xt
+, * 
+¬gA
+, * 
+¬gB
 );
 
 	@tcp.c
@@ -12711,8 +12757,6 @@ MSG_ERROR
 sock
 , 
 TCP_OK
- | 
-TCP_CONNECT_FAILED
 );
 
 376 ià(
@@ -13926,8 +13970,10 @@ TCP_FLAG_ACK
 , 
 ON_CLOSE
 , 
+do_þo£
+, 
 NULL
-, NULL));
+));
 
 69 
 	`as£¹
@@ -14134,8 +14180,10 @@ NULL
 , 
 ON_TIMEOUT
 , 
+do_þo£
+, 
 NULL
-, NULL));
+));
 
 82 
 	`as£¹
@@ -14148,8 +14196,10 @@ NULL
 , 
 ON_RECV_ACK
 , 
+do_þo£
+, 
 NULL
-, NULL));
+));
 
 84  
 machše
