@@ -7,6 +7,12 @@
 #include "socktable.h"
 #include "fancy_display.h"
 
+int do_close(sid_t prev, sid_t next, void* context, void* argA, void* argB) {
+	notify(sock, TCP_OK);
+
+	return 0;
+}
+
 int do_connect(sid_t prev, sid_t next, void* context, void* rflags, void* packet) {
   tcp_socket_t* sock = (tcp_socket_t*)context;
   uint32_t incoming_seq_num = get_seqnum(ip_to_tcp((char*)packet)) ;
@@ -107,3 +113,4 @@ void in_estab(sid_t s, void *context, void *argA, void *argB) {
 
 	return;
 }
+

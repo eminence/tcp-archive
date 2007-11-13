@@ -65,7 +65,7 @@ tcp_machine_t* tcpm_new(tcp_socket_t* context, uint8_t clone) {
   assert(0 == state_transition(st_syn_sent,    st_closed,      ON_CLOSE,           NULL,                   NULL)); /* XXX free state. */
   assert(0 == state_transition(st_syn_sent,    st_syn_rcvd,    ON_RECV_SYN,        do_send_flags,          alloc_flags(TCP_FLAG_ACK)));
   assert(0 == state_transition(st_syn_sent,    st_estab,       ON_RECV_SYN_ACK,    do_connect,             alloc_flags(TCP_FLAG_ACK)));
-  assert(0 == state_transition(st_listen,      st_closed,      ON_CLOSE,           NULL,                   NULL)); /* XXX free state. */
+  assert(0 == state_transition(st_listen,      st_closed,      ON_CLOSE,           do_close,               NULL)); /* XXX free state. */
   assert(0 == state_transition(st_listen,      st_syn_rcvd,    ON_RECV_SYN,        do_send_flags,          alloc_flags(TCP_FLAG_SYN | TCP_FLAG_ACK)));
   assert(0 == state_transition(st_syn_rcvd,    st_estab,       ON_RECV_ACK,        NULL,                   NULL));
   assert(0 == state_transition(st_estab,       st_fin_wait_1,  ON_CLOSE,           do_send_flags,          alloc_flags(TCP_FLAG_FIN)));
@@ -78,8 +78,8 @@ tcp_machine_t* tcpm_new(tcp_socket_t* context, uint8_t clone) {
   assert(0 == state_transition(st_close_wait,  st_last_ack,    ON_CLOSE,           do_send_flags,          alloc_flags(TCP_FLAG_FIN)));
   assert(0 == state_transition(st_fin_wait_2,  st_time_wait,   ON_RECV_FIN,        do_send_flags,          alloc_flags(TCP_FLAG_ACK)));
   assert(0 == state_transition(st_closing,     st_time_wait,   ON_RECV_ACK,        NULL,                   NULL));
-  assert(0 == state_transition(st_time_wait,   st_closed,      ON_TIMEOUT,         NULL,                   NULL));
-  assert(0 == state_transition(st_last_ack,    st_closed,		ON_RECV_ACK,        NULL,						  NULL));
+  assert(0 == state_transition(st_time_wait,   st_closed,      ON_TIMEOUT,         do_close,               NULL));
+  assert(0 == state_transition(st_last_ack,    st_closed,		ON_RECV_ACK,        do_close,					  NULL));
 
   return machine;
 }

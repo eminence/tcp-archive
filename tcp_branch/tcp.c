@@ -371,7 +371,7 @@ int v_close(int socket) {
 		return -1;
 	}
 
-	int status = wait_for_event(sock, TCP_OK | TCP_CONNECT_FAILED);
+	int status = wait_for_event(sock, TCP_OK);
 
 	if (status == TCP_OK) return 0;
 	else { return -1; }
