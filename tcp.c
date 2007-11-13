@@ -26,14 +26,15 @@ int queue_up_flags(tcp_socket_t *sock, uint8_t flags) {
 	return 0;
 }
 
-int send_packet_with_flags(tcp_socket_t* sock, uint8_t flags) {
+int send_packet_with_flags(tcp_socket_t* sock, uint8_t flags, int ack_len) {
 	nlog(MSG_LOG,"spwf", "socket %d, flags are %p", sock->fd, flags);
 
   /* Send ACK raw; they don't live in seq. num space. */
   if(flags == TCP_FLAG_ACK) {
+	 sock->recv_next += (ack_len + 1); 					// ACK one or bytes recv'd
     tcp_sendto(sock, NULL, 0, TCP_FLAG_ACK);
   } else {
-    queue_up_flags(sock, flags);
+    queue_up_flags(sock, flags);							// other flag combinations have size 1 byte
   }
 
 	return 0;

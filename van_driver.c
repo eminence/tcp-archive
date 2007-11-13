@@ -110,9 +110,8 @@ int set_if_state(ip_node_t *node, int iface, int link_state) {
 	return link_state;
 }
 
-void ackThisPacket(tcp_socket_t* sock) {
-	send_packet_with_flags(sock, TCP_FLAG_ACK);
-	sock->recv_next++;
+void ackThisPacket(tcp_socket_t* sock, int len) {
+	send_packet_with_flags(sock, TCP_FLAG_ACK, len);
 }
 
 /* Handle recv events in estab state. */
@@ -134,7 +133,7 @@ void do_recv_tcp(tcp_socket_t* sock, char* packet) {
 				if (seq_num != sock->recv_next) {
 					nlog(MSG_WARNING, "do_recv_tcp", "Ok, got a packet that is an ACK only (no data), except it has a seqnum of %d and i think it should have a seqnum of %d.  discarding!", seq_num, sock->recv_next);
 				} else {
-					processPacketForAck(sock);
+					processPacketForAck(sock, packet);
 				}
 
 				/* else, this packet might contain data, so can fit this in our receive buffer? */ 
@@ -148,10 +147,9 @@ void do_recv_tcp(tcp_socket_t* sock, char* packet) {
 				nlog(MSG_LOG, "do_rev_estab", "send_una=%d  send_next=%d  send_written=%d  send_remote_flow_window=%d", sock->send_una, sock->send_next, sock->send_written, sock->remote_flow_window);
 
 				processPacketForAck(sock, packet); /* if this data packet also contains an ACK, process it */
+				ackThisPacket(sock, data_size);
 
-				ackThisPacket(sock);
-
-				/* TODO copy data into cbuffer with copy datasometsomethiasfdA() */
+				/* TODO copy data into cbuffer with copy datasometsomethiasfdA() IF NOT SPECIAL*/
 
 			} else {
 				nlog(MSG_WARNING, "do_recv_estab", "got data, but i have no room for it!");
@@ -185,12 +183,12 @@ void *tcp_watchdog(void *arg) {
 				if (tcpm_state(sock->machine) == ST_SYN_SENT) {
 					/* we havn't gotten a SYNACK, so resend the SYN */
 					nlog(MSG_WARNING, "tcp_watchdog", "We're in SYN_SENT.  assuming packetloss, and retransmitting the SYN");
-					send_packet_with_flags((void*)sock, TCP_FLAG_SYN); 
+					send_packet_with_flags((void*)sock, TCP_FLAG_SYN, 0); 
 					
 				} else if (tcpm_state(sock->machine) == ST_SYN_RCVD) {
 					/* we haven't gotten an ACK, so resend the SYNACK */
 					nlog(MSG_WARNING, "tcp_watchdog", "We're in SYN_RCVD.  assuming packetloss, and retransmitting the SYNACK");
-					send_packet_with_flags((void*)sock, TCP_FLAG_SYN | TCP_FLAG_ACK); 
+					send_packet_with_flags((void*)sock, TCP_FLAG_SYN | TCP_FLAG_ACK, 0); 
 		
 				} else {
 					nlog(MSG_WARNING, "tcp_watchdog", "We're in state %s, but not sure what to do!  Disabling watchdog for now...", tcpm_strstate(tcpm_state(sock->machine)));
@@ -223,7 +221,8 @@ void *tcp_send_thread(void* arg) {
 				/* we have a flag waiting to be sent */
 				int flags = getFlagToSend(sock);
 				nlog(MSG_LOG, "tcp_send_thread", "It appears the next thing to send is a flag(%p), calling send_packet_with_flags()", flags);
-				//send_packet_with_flags(sock, flags);
+				
+				//send_packet_with_flags(sock, flags, 0);
 				sock->send_next++;
 				tcp_sendto(sock, NULL, 0, flags);
 

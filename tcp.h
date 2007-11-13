@@ -76,6 +76,6 @@ int build_tcp_packet(char *data, int data_size,
 int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags);
 tcp_socket_t *get_socket_from_int(int s);
 uint16_t calculate_tcp_checksum(char* packet);
-int send_packet_with_flags(tcp_socket_t* sock, uint8_t flags);
+int send_packet_with_flags(tcp_socket_t* sock, uint8_t flags, int ack_size); /* ack_size unused for fin/syn */
 
 #endif

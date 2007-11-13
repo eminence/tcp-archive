@@ -231,7 +231,7 @@ void gotAckFor(tcp_socket_t *sock, int num /*, int len*/) {
 }
 
 /* take data from the user and copy it into our cbuffer */
-int copyDataFromUser(tcp_socket_t *sock, char *data, int size) {
+int copyDataFromUser(tcp_socket_t *sock, const char *data, int size) {
 	assert(canAcceptDataToSend(sock, size));
 	assert(sock->send_written >= sock->send_next); 
 	assert(sock->send_written + size <= sock->send_una + sock->send_window_size);
