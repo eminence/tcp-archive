@@ -117,6 +117,9 @@ int sendFlagNext(tcp_socket_t *sock) {
 
 	int toreturn;
 
+	/* if there is nothing to be sent, return 0 */
+	if (sock->send_written == sock->send_next) return 0;
+
 	int retval = cbuf_get_range(sock->s_buf, sock->send_next, 1, &d);
 	if (retval < 0) {
 		/* this is a flag */
