@@ -49,6 +49,7 @@ typedef enum {
 	MSG_LOG,
 	MSG_WARNING,
 	MSG_ERROR,
+	MSG_XXX,
 } msg_type;
 
 #define MENU_COLOR 2
@@ -60,6 +61,8 @@ typedef enum {
 
 #define LINK_DOWN_COLOR 14
 #define LINK_UP_COLOR 15
+
+#define IMPORTANT_COLOR 16
 
 #define USE_CURSES 1
 #define NO_USE_CURSES 0

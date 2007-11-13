@@ -515,6 +515,7 @@ int init_display(int use_curses) {
 			init_pair(MSG_WARNING_COLOR, COLOR_YELLOW, COLOR_BLACK);
 			init_pair(LINK_DOWN_COLOR, COLOR_RED, COLOR_BLACK);
 			init_pair(LINK_UP_COLOR, COLOR_GREEN, COLOR_BLACK);
+			init_pair(IMPORTANT_COLOR, COLOR_BLACK, COLOR_YELLOW);
 
 		}
 
@@ -686,6 +687,7 @@ void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *t
 		if (msg == MSG_LOG) color = COLOR_PAIR(MSG_LOG_COLOR);
 		if (msg == MSG_WARNING) color = COLOR_PAIR(MSG_WARNING_COLOR);
 		if (msg == MSG_ERROR) color = COLOR_PAIR(MSG_ERROR_COLOR);
+		if (msg == MSG_XXX) color = COLOR_PAIR(IMPORTANT_COLOR);
 
 		wscrl(output.log_win,output.logwin_scroll);
 
