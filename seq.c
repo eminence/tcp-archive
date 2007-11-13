@@ -268,7 +268,7 @@ int dataFromBufferToNetwork(tcp_socket_t *sock, char *data, int size) {
 		nlog(MSG_LOG, "dataFromBufferToNetwork", "bumping send_next from %d to %d", sock->send_next, sock->send_next + size);
 		sock->send_next += size;
 		assert(sock->send_next <= sock->send_written);
-		toreturn = amount;
+		toreturn = retval;
 	}
 
 	free(d);

@@ -315,11 +315,21 @@ int v_accept(int socket) {
  * return num types read or negative number on failure or 0 on EOF */
 int v_read(int socket, unsigned char *buf, int nbyte) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
-	
-	// TODO make sure we're in the established state;
-	// TODO read data
 
-	return 0;
+	/* XXX NOTE! XXX v_read is NON BLOCKING! WOOT! */
+	
+	int amount;
+
+	if ((amount=amountOfDataToRead(sock)) == 0) return 0;
+	else {
+
+		int retval = getDataFromBuffer(sock, buf, amount);
+		return retval;
+
+	}
+
+	// TODO make sure we're in the established state;
+
 }
 
 /* write on an open socket
