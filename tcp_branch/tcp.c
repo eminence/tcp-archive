@@ -16,6 +16,45 @@
 
 static ip_node_t *this_node;
 
+/* calculate something that looks like a TCP checksum 
+ *
+ * loosely copied from http://www.netfor2.com/tcpsum.htm
+ * */
+uint16_t tcp_sum_calc(char *buf, int len) {
+	uint16_t padd = 0;
+	uint16_t word16;
+	uint32_t sum;
+	int i;
+
+	// if size is odd, add padding byte
+	if (len%2 == 1) {
+		padd = 1;
+	}
+
+	sum = 0;
+
+	// make 16 bit words out of every tow adjacent 8 bit words and
+	// calculate the sum of all 16 bit words
+	for (i = 0; i<len;i=i+2) {
+
+		if ((i=len-1) && (padd)) {
+			word16 = ((buf[i]<<8)&0xFF00)+(0&0xff);
+		} else {
+			word16 = ((buf[i]<<8)&0xFF00)+(buf[i+1]&0xff);
+		}
+		sum = sum + (uint32_t)word16;
+	}
+
+	while (sum >> 16)
+		sum = (sum & 0xFFFF) + (sum >> 16);
+
+	sum = ~sum;
+
+	return (uint16_t)sum;
+
+}
+
+
 tcp_socket_t* get_tmp_socket(uint16_t local_port, int remote_node, uint16_t remote_port, uint16_t send_window_size) {
 	tcp_socket_t* sock = malloc(sizeof(tcp_socket_t));
 
@@ -226,8 +265,9 @@ int build_tcp_packet(char *data, int data_size,
 }
 
 uint16_t calculate_tcp_checksum(char* packet) {
-	
-  return 0;
+
+	set_tcpchecksum(packet, 0);
+	return tcp_sum_calc(packet, get_total_len(tcp_to_ip(packet)));
 }
 
 /* destroy global tcp structures.

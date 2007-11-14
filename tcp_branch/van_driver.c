@@ -197,6 +197,8 @@ void *tcp_watchdog(void *arg) {
 		tcp_socket_t *sock = node->socket_table[i];
 		update_tcp_table(sock);
 
+		if (tcpm_state(sock->machine) == ST_CLOSED) { sock->last_packet = 0; /* turn off, incase we forgot to do so later */ }
+
 		if (tcpm_state(sock->machine) == ST_TIME_WAIT) {
 		  if (time(NULL) - sock->time_wait_time > 4) {
 			 tcpm_event(sock->machine, ON_TIMEOUT, NULL, NULL);

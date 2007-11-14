@@ -151,6 +151,7 @@ void in_closed(sid_t s, void *context, void *argA, void *reason) {
 		case RESTART_ABORT:
 			// Closed on error (RST,...)
 			nlog(MSG_LOG, "in_closed", "state machine entered Closed state: Abort");
+			sock->last_packet = 0;
 			notify(sock, TCP_ERROR); // cause associated sock call to fail
 			break;
 	}
