@@ -80,6 +80,6 @@ tcp_socket_t *get_socket_from_int(int s);
 uint16_t calculate_tcp_checksum(char* packet);
 int send_packet_with_flags(tcp_socket_t* sock, uint8_t flags, int ack_size); /* ack_size unused for fin/syn */
 int tcp_sendto_raw(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags, uint32_t seq, uint32_t ack);
-int send_dumb_packet(tcp_socket_t *sock, char*packet, int AckOrRST);
+int send_dumb_packet(tcp_socket_t *sock, char*packet, uint8_t AckOrRST);
 
 #endif
