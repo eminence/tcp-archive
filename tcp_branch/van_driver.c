@@ -324,8 +324,13 @@ void *tcp_thread(void* arg) {
 
 		/* Found half-socket. Ensure ready for accept. */
 		if(!sock->can_handshake) {
+		  tcp_socket_t* tmp_sock = get_tmp_socket(dest_port, src, src_port, SEND_WINDOW_SIZE);
 		  nlog(MSG_ERROR, "tcp_thread", "Found a half socket, but socket not in accept state. Discarding.");
+
 		  assert(packet);
+		  send_dumb_packet(tmp_sock, packet, TCP_FLAG_RST);
+
+		  free(tmp_sock);
 		  free(packet);
 
 		  continue;
