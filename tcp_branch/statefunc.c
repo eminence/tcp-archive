@@ -100,16 +100,25 @@ int wait_for_event(tcp_socket_t *sock, int status_bits) {
 
 void in_estab(sid_t s, void *context, void *argA, void *argB) {
 	tcp_socket_t *sock = (tcp_socket_t*)context;
+	sid_t prev_state = (sid_t)argB;
 	assert(sock);
 
-	nlog(MSG_LOG,"state:in_estab", "We're now in the established state.  Attempted to notify the user");
-  
-  /* If argB set, wake up old (parent) socket instead of current socket. */
-  if(sock->parent) {
-    notify(sock->parent, TCP_OK);
-  } else {
-  	notify(sock, TCP_OK);
-  }
+	/* TODO
+	 * only notify the user if we've only just entered estab
+	 * (i.e. don't notify the user if we previously were already in estab */
+
+	if (prev_state != s) {
+
+		nlog(MSG_LOG,"state:in_estab", "We're now in the established state.  Attempted to notify the user");
+
+		/* If argB set, wake up old (parent) socket instead of current socket. */
+		if(sock->parent) {
+			notify(sock->parent, TCP_OK);
+		} else {
+			notify(sock, TCP_OK);
+		}
+
+	}
 
 	return;
 }

@@ -142,7 +142,7 @@ void do_recv_tcp(tcp_socket_t* sock, char* packet) {
 		}
 
 		/* We can do this even though we might toss the packet because data packets don't affect state (and these are the only droppable packets.) */
-		if(tcpm_event(sock->machine, tcpm_packet_to_input(ip_to_tcp(packet)), packet, packet)) {
+		if(tcpm_event(sock->machine, tcpm_packet_to_input(ip_to_tcp(packet)), packet, tcpm_state(sock->machine))) {
 		  nlog(MSG_WARNING, "do_recv_tcp", "Couldn't transition machine (in estab state); fail!");
 		  /* Rely on error function; teardown socket? */
 		}

@@ -100,8 +100,8 @@ int tcpm_event(tcp_machine_t* machine, tinput_t event, void* argt, void* args) {
 int tcpm_packet_to_input(const char* packet) {
   /* State machine does not handle non-empty packets. */
   if(get_data_len(tcp_to_ip(packet)) != 0) {
-    nlog(MSG_ERROR, "tcpm_packet_to_input", "packet length must be zero (got %d)", get_data_len(tcp_to_ip(packet)));
-    return ON_INVALID;
+    //nlog(MSG_ERROR, "tcpm_packet_to_input", "packet length must be zero (got %d)", get_data_len(tcp_to_ip(packet)));
+    return ON_NONE;
   }
   
   /* Directly convert each symbol. */

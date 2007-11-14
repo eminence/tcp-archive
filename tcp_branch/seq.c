@@ -213,8 +213,9 @@ void processPacketForAck(tcp_socket_t *sock, char*packet) {
 			sock->send_una = ack_num;
 		} else {
 			if (ack_num == sock->last_ack) {
-				nlog(MSG_LOG, "processPacketForAck", "This packet is a duplicate ack.  we should move send_next back to send_una");
-				sock->send_next = sock->send_una;
+				/* commenting out the next 2 lines as a TEMPORARY fix */
+				//nlog(MSG_LOG, "processPacketForAck", "This packet is a duplicate ack.  we should move send_next back to send_una");
+				//sock->send_next = sock->send_una;
 			}
 		}
 		sock->last_ack = ack_num;
