@@ -141,7 +141,7 @@ int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) 
 	//int packet_size = build_tcp_packet(data_buf, bufsize, sock->local_port, sock->remote_port ,
 	//		sock->seq_num, /*ack*/ sock->ack_num, flags, sock->send_window_size, &packet);
 	int packet_size = build_tcp_packet(data_buf, bufsize, sock->local_port, sock->remote_port ,
-			sock->send_next, /*ack*/ sock->recv_next, flags, sock->send_window_size, &packet);
+			sock->send_next, /*ack*/ sock->recv_next, flags, sock->recv_read + sock->recv_window_size - sock->recv_next, &packet);
 
 	nlog(MSG_LOG,"tcp_sendto", "now have a packet of size %d ready to be sent to dest_port %d", 
 			packet_size, sock->remote_port);
@@ -286,8 +286,8 @@ int sys_socket(int clone) {
 	sock->recv_next = 0;
 	sock->recv_read = 0;
 
-	sock->r_buf = cbuf_new(SEND_WINDOW_SIZE*2);
-	sock->s_buf = cbuf_new(SEND_WINDOW_SIZE*2);
+	sock->r_buf = cbuf_new(SEND_WINDOW_SIZE*2  + 2);
+	sock->s_buf = cbuf_new(SEND_WINDOW_SIZE*2  + 2);
 	
 	tcp_table_new(this_node, s);	
 
@@ -401,12 +401,15 @@ int v_read(int socket, unsigned char *buf, int nbyte) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
 
 	/* XXX NOTE! XXX v_read is NON BLOCKING! WOOT! */
-	
+
+	if (nbyte == 0) return 0;
+
 	int amount;
 
 	if ((amount=amountOfDataToRead(sock)) == 0) return 0;
 	else {
 
+		memset(buf, 0, nbyte); /* memset... always a good decision */
 		int retval = getDataFromBuffer(sock, buf, amount);
 		return retval;
 

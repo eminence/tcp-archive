@@ -50,6 +50,7 @@ int do_connect(sid_t prev, sid_t next, void* context, void* rflags, void* packet
 
   sock->recv_next += incoming_seq_num;
   sock->recv_read = incoming_seq_num; //**** (recv_read is the next byte to read so it should stay the same)
+  //sock->send_window_size = sock->recv_read + sock->recv_window_size - sock->recv_next;
 
   /* manually bump up pointers, to represent the SYN that we sent, and that got ACKd */
   //sock->send_next++;

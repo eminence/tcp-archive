@@ -12,10 +12,10 @@ int isOldSeqNum(tcp_socket_t *sock, int num, int size, char* packet) {
 
 int isValidSeqNum(tcp_socket_t *sock, int num, int length, char* packet) {
 	/* if BOTH num and (num + length) is in the range that we're willing to receive */
-	nlog(MSG_LOG, "isValidSeqNum", "sock->recv_next=%d, sock->recv_window_size=%d, num=%d, length=%d", sock->recv_next, sock->recv_window_size, num, length);
+	nlog(MSG_LOG, "isValidSeqNum", "sock->recv_next=%d, sock->recv_window_end=%d, num=%d, length=%d", sock->recv_next, sock->recv_read + sock->recv_window_size, num, length);
 
-	return cbuf_btm_contains(sock->r_buf, sock->recv_next, sock->recv_next + sock->recv_window_size, num) &&
-		cbuf_btm_contains(sock->r_buf, sock->recv_next, sock->recv_next + sock->recv_window_size, num+length);
+	return cbuf_btm_contains(sock->r_buf, sock->recv_next, sock->recv_read + sock->recv_window_size, num) &&
+		cbuf_btm_contains(sock->r_buf, sock->recv_next, sock->recv_read + sock->recv_window_size, num+length);
 
 }
 
@@ -28,7 +28,7 @@ int isNextSeqNum(tcp_socket_t *sock, int num) {
 
 /* do we have room to copy incoming data into our cbuffer? */
 int haveRoomToReceive(tcp_socket_t *sock, int size) {
-	return sock->recv_window_size >= size;
+	return (sock->recv_read + sock->recv_window_size - sock->recv_next) >= size;
 }
 
 /* call this when you send out an ACK packet, to update pointers 
@@ -41,7 +41,8 @@ int haveRoomToReceive(tcp_socket_t *sock, int size) {
 void ackData(tcp_socket_t *sock, int size) {
 	nlog(MSG_WARNING, "ackData", "bumping recv_next from %d to %d", sock->recv_next, sock->recv_next + size);
 	sock->recv_next += size;
-	sock->seq_num += size; // XXX seq_num is obsolete and meaningless
+	sock->send_window_size = sock->recv_read + sock->recv_window_size - sock->recv_next;
+	//sock->seq_num += size; // XXX seq_num is obsolete and meaningless
 }
 
 
@@ -77,7 +78,7 @@ int getDataFromBuffer(tcp_socket_t *sock, char *buf, int max_size) {
 		memcpy(buf, d, retval);
 
 		sock->recv_read += amount;
-		sock->recv_window_size += amount;
+		//sock->recv_window_size += amount;
 		assert(sock->recv_read <= sock->recv_next);
 		toreturn = amount;
 	}
@@ -91,12 +92,12 @@ int getDataFromBuffer(tcp_socket_t *sock, char *buf, int max_size) {
 
 /* return the amount of data we can write to in our cbuffer */
 int amountWeCanReceive(tcp_socket_t *sock) {
-	return sock->recv_window_size;
+	return sock->recv_read + sock->recv_window_size - sock->recv_next;
 }
 
 /* copy data from network into our cbuffer */
 int dataFromNetworkToBuffer(tcp_socket_t *sock, char *data, int size) {
-	assert (size <= sock->recv_window_size);
+	assert (size <= (sock->recv_read + sock->recv_window_size - sock->recv_next));
 	
 	cbuf_put_range(sock->r_buf, data, sock->recv_next, size);
 

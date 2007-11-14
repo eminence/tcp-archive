@@ -125,10 +125,10 @@ void do_recv_tcp(tcp_socket_t* sock, char* packet) {
 	/* Check sequence number */
 	if (isValidSeqNum(sock, seq_num, data_size, packet)) {
 		nlog(MSG_LOG,"do_recv_estab", "got a data packet of size %d", data_size );
-	
-		/* IMPORTANT.  we need this line.  should it go here, though? */
-		sock->remote_flow_window = sock->send_next + get_window(ip_to_tcp(packet));
 
+		/* IMPORTANT.  we need this line.  should it go here, though? */
+		updateFromWindowAnnounce(sock, get_window(ip_to_tcp(packet)));
+	
 		nlog(MSG_LOG, "do_rev_estab", "send_una=%d  send_next=%d  send_written=%d  send_remote_flow_window=%d", sock->send_una, sock->send_next, sock->send_written, sock->remote_flow_window);
 	
 		/* if this data packet also contains an ACK, move forward unack pointer to reflect newly ACK'd data -- XXX NOTE: this catches 0-byte ACKs in the can_recv states */
@@ -166,6 +166,7 @@ void do_recv_tcp(tcp_socket_t* sock, char* packet) {
 		}
 
 	} else if(isOldSeqNum(sock, seq_num, data_size, packet)) {
+		updateFromWindowAnnounce(sock, get_window(ip_to_tcp(packet)));
 		if (tcpm_state(sock->machine) != ST_SYN_RCVD) {
 			/* if we're in SYN_REVD, don't send this repeated ack, because it should be a repeated SYNACK.  
 			 * since we're in syn_revc, we've already sent at least one SYNACK, so let the watchgot timer deal with things as usual
@@ -205,7 +206,10 @@ void *tcp_watchdog(void *arg) {
 		if ((sock->last_packet > 0) && (time(NULL) - sock->last_packet > 4/*XXX*/)) {
 		  nlog(MSG_WARNING, "tcp_watchdog", "Watchdog timer on socket %d.  Doing something about it...", sock->fd);
 
-		  sock->send_next--;
+		  /* sock->send_next--;*/
+		  /* move send_next back to send_una to re-send any/all unacked data */
+		  sock->send_next = sock->send_una;
+		  sock->last_packet = 0;
 		}
 	 }
   }
