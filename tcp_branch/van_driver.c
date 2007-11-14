@@ -166,8 +166,14 @@ void do_recv_tcp(tcp_socket_t* sock, char* packet) {
 		}
 
 	} else if(isOldSeqNum(sock, seq_num, data_size, packet)) {
-	  nlog(MSG_WARNING, "do_recv_estab", "got old sequence number: repeating ACK");
-	  send_dumb_packet(sock, packet, TCP_FLAG_ACK);
+		if (tcpm_state(sock->machine) != ST_SYN_RCVD) {
+			/* if we're in SYN_REVD, don't send this repeated ack, because it should be a repeated SYNACK.  
+			 * since we're in syn_revc, we've already sent at least one SYNACK, so let the watchgot timer deal with things as usual
+			 * if it happens that our first SYNACK didn't make it thought
+			 */
+			nlog(MSG_WARNING, "do_recv_estab", "got old sequence number: repeating ACK");
+			send_dumb_packet(sock, packet, TCP_FLAG_ACK);
+		}
 
 	} else {
 	  nlog(MSG_LOG, "do_recv_estab", "got a data packet, but the SEQ number was off! Sending reset");
