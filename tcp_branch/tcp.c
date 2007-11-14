@@ -72,9 +72,9 @@ int send_dumb_packet(tcp_socket_t *sock, char*packet, uint8_t AckOrRST) {
 	uint8_t flags = get_flags(ip_to_tcp(packet));
 
 	if (AckOrRST == TCP_FLAG_ACK) 
-		tcp_sendto_raw(socket, NULL, 0, TCP_FLAG_ACK, ack, sock->recv_next);
+		tcp_sendto_raw(sock, NULL, 0, TCP_FLAG_ACK, ack, sock->recv_next);
 	if (AckOrRST == TCP_FLAG_RST)
-		tcp_sendto_raw(socket, NULL, 0, TCP_FLAG_RST, ack, sock->recv_next);
+		tcp_sendto_raw(sock, NULL, 0, TCP_FLAG_RST, ack, sock->recv_next);
 
 
 	return 0;
@@ -215,6 +215,7 @@ int build_tcp_packet(char *data, int data_size,
 }
 
 uint16_t calculate_tcp_checksum(char* packet) {
+	
   return 0;
 }
 

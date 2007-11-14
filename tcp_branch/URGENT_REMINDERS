@@ -1,5 +1,5 @@
-notify and sleep stuff
-  - always wake on error and return -1 
+[DONE] notify and sleep stuff
+[DONE]- always wake on error and return -1 
 
 add mutexes to all sockets; any time we touch a socket, lock mutex
 
@@ -52,3 +52,13 @@ TIMEWAIT -- add kill_me field -1 is safe, 0 kill, >0 dec watchdog
 
 
 	if we step from established to established (i.e. we receive a data packet), do NOT try to "notify the user"
+
+
+
+
+
+
+
+
+
+	IF A CONNECTION DOES NOT EXIST, THEN A RESET IS SENT IN RESPONSE TO ANY INCOMING SEGMENT EXCEPT ANOTHER SEGMENT; IN PARTICULAR, SYNS ADDRESSED TO NON-EXISTING CONNECTIONS ARE RESET BY THIS MEANS.

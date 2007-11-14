@@ -74,13 +74,14 @@ int do_listen(sid_t prev, sid_t next, void* context, void *arg, void *tran_arg) 
 }
 
 
-void fail_with_reset(sid_t id, void* context, void* args) {
+void fail_with_reset(sid_t id, void* context, void* packet) {
 	tcp_socket_t *sock = (tcp_socket_t*)context;
 	assert(sock);
 
-	nlog(MSG_LOG, "fail_with_reset", "failing socket %d.  sending a RST and moving back to the closed state");
+	nlog(MSG_LOG, "fail_with_reset", "failing socket %d.  sending a RST and moving back to the closed state ");
 
-	tcp_sendto(sock, NULL, 0, TCP_FLAG_RST);
+	// TODO: send reset with correct sequence number from packet (args)
+	send_dumb_packet(sock, (char*)packet, TCP_FLAG_RST);
 
 	return; 
 }
@@ -96,7 +97,7 @@ void in_timewait(sid_t s, void *context, void *argA, void *argB) {
 }
 void in_estab(sid_t s, void *context, void *argA, void *argB) {
 	tcp_socket_t *sock = (tcp_socket_t*)context;
-	sid_t prev_state = (sid_t)argB;
+	sid_t prev_state = tcpm_state(sock->machine);
 	assert(sock);
 
 	/* TODO

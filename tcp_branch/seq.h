@@ -16,6 +16,7 @@
 
 #define MIN(a,b)	(a < b ? a: b)
 
+int isOldSeqNum(tcp_socket_t *sock, int num, int size, char* packet);
 int isValidSeqNum(tcp_socket_t *sock, int num, int size, char* packet);
 int isNextSeqNum(tcp_socket_t *sock, int num);
 int haveRoomToReceive(tcp_socket_t *sock, int size);

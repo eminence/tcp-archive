@@ -5,6 +5,11 @@
 
 /* RECEVING FUNCTIONS */
 
+
+int isOldSeqNum(tcp_socket_t *sock, int num, int size, char* packet) {
+	return cbuf_lt(sock->r_buf, num, sock->recv_next); // return true if seqnum preceeds our current sequence number
+}
+
 int isValidSeqNum(tcp_socket_t *sock, int num, int length, char* packet) {
 	/* if BOTH num and (num + length) is in the range that we're willing to receive */
 	nlog(MSG_LOG, "isValidSeqNum", "sock->recv_next=%d, sock->recv_window_size=%d, num=%d, length=%d", sock->recv_next, sock->recv_window_size, num, length);
