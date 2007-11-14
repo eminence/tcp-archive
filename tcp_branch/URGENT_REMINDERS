@@ -37,3 +37,7 @@ TIMEWAIT -- add kill_me field -1 is safe, 0 kill, >0 dec watchdog
 
 
                  ONCE OTHER USER CLOSES, READ SHOULD RETURN -1, INDICATING FULL CLOSE.
+
+
+
+	if we step from established to established (i.e. we receive a data packet), do NOT try to "notify the user"
