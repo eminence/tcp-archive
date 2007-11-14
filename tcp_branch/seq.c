@@ -106,7 +106,7 @@ int getDataFromBuffer(tcp_socket_t *sock, char *buf, int max_size) {
 		assert(sock->recv_read <= sock->recv_next);
 		toreturn = retval;
 		
-		nlog(MSG_LOG, "getDataFromBuffer", "read %d characters, finished", toreturn);
+		nlog(MSG_LOG, "getDataFromBuffer", "read %d characters, finished: %s", toreturn, buf);
 	}
 
 	free(d); /*hazzzxxxxxxx*/

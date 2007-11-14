@@ -178,8 +178,10 @@ int main( int argc, char* argv[] ) {
 						display_msg("Please select/create a socket first!"); break;
 					} else {
 						int len = get_number("Number of bytes to read:");
-						char *data = malloc(len);
+						char *data = malloc(len+1);
 						retval = v_read(socket, data, len);
+
+						data[retval] = '\0';
 
 						display_msg("v_read() returned %d", retval);
 						display_msg("The %d bytes returned from read are: %s", retval, data);
