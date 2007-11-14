@@ -118,6 +118,7 @@ int tcp_sendto_raw(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t fla
 
 	if (retval == -1) {
 		nlog(MSG_ERROR,"tcp_sendto", "van_driver_sendto returned -1! A tcp packet just got lost!");
+		tcpm_reset(sock);
 		return -1;
 	}
 
@@ -304,6 +305,7 @@ int sys_socket(int clone) {
 	sock->send_window_size = SEND_WINDOW_SIZE;
 	sock->recv_window_size = SEND_WINDOW_SIZE;
 	sock->time_wait_time = 0;
+	sock->ufunc_timeout = 0;
 
 	sock->send_una = 0;
 	sock->send_next = 0;
@@ -393,7 +395,12 @@ int v_connect(int socket, int node, uint16_t port) {
 		return -1;
 	}
 
+	sock->ufunc_timeout = time(NULL);
 	int status = wait_for_event(sock, TCP_OK | TCP_ERROR | TCP_TIMEOUT);
+	sock->ufunc_timeout = 0;
+
+	if (status == TCP_TIMEOUT) 
+		nlog(MSG_WARNING, "v_connect", "Connection Timed Out");
 
 	if (status == TCP_OK) return 0;
 	else { return -1; }
@@ -429,6 +436,7 @@ int v_read(int socket, unsigned char *buf, int nbyte) {
 
 	/* XXX NOTE! XXX v_read is NON BLOCKING! WOOT! */
 
+	memset(buf, 0, nbyte); /* memset... always a good decision */
 	if (nbyte == 0) return 0;
 
 	/* XXX let's rely more on getDataFromBuffer -- to fast forward past control flags */
@@ -437,7 +445,6 @@ int v_read(int socket, unsigned char *buf, int nbyte) {
 	//if ((amount=amountOfDataToRead(sock)) == 0) return 0;
 	//else {
 
-		memset(buf, 0, nbyte); /* memset... always a good decision */
 		int retval = getDataFromBuffer(sock, buf, nbyte); //nbyte was amount before
 		return retval;
 

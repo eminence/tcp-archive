@@ -9,6 +9,8 @@
 
 #define LOCALBUFSIZE 4096
 
+#define CONNECT_TIMEOUT_TIME 30
+
 /* Forward declaration */
 struct tcp_machine__;
 struct ip_node__;

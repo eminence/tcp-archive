@@ -30,6 +30,7 @@
 #include "tcp.h"
 #include "socktable.h"
 #include "seq.h"
+#include "notify.h"
 
 #include "fancy_display.h"
 
@@ -212,6 +213,14 @@ void *tcp_watchdog(void *arg) {
 		  sock->send_next = sock->send_una;
 		  sock->last_packet = 0;
 		}
+
+		if ((  (time(NULL) - sock->ufunc_timeout) > CONNECT_TIMEOUT_TIME) && (tcpm_state(sock->machine) == ST_SYN_SENT)) {
+			nlog(MSG_WARNING, "watchdog", "connect timeout.  resetting");
+			tcpm_reset(sock->machine);
+			notify(sock, TCP_TIMEOUT);
+		
+		}
+
 	 }
   }
 }
