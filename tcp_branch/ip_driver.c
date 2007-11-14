@@ -157,6 +157,7 @@ int main( int argc, char* argv[] ) {
 					if (socket == -1) {
 						display_msg("Please select/create a socket first!"); break;
 					} else {
+						display_msg("about to call v_accept().  Note: this will block\n Press any key to continue");
 						retval = v_accept(socket);
 						display_msg("v_accept() returned %d", retval);
 					}

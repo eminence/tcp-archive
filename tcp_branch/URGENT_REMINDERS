@@ -2,7 +2,7 @@
 *	[DONE]		always wake on error and return -1 
 *					add mutexes to all sockets; any time we touch a socket, lock mutex
 *	[DONE]		DO WE SET AND CHECK TCP CHECKSUMS????? (if not, we need to)
-*					blocking user ops HAVE TO TIMEOUT! (use tcpm reset)
+*	[DONE]		blocking user ops HAVE TO TIMEOUT! (use tcpm reset)
 *					don't allow write or read in not estab state MAKE SURE In the user code that we disallow state transitions that are currently illegal.
 *	[DONE] 		TIMEWAIT -- add kill_me field -1 is safe, 0 kill, >0 dec watchdog
 

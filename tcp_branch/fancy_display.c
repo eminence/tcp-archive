@@ -98,7 +98,6 @@ void display_msg(char *msg, ...) {
 	wbkgd(my_form_win, COLOR_PAIR(DEFAULT_COLOR));
 
 	/* Print a border around the main window and print a title */
-	box(my_form_win, 0, 0);
 	wmove(my_form_win, 1, 1);
 	vwprintw(my_form_win,msg,args);
 	//wprintw(my_form_win, 1, 0, cols + 4, "My Form", COLOR_PAIR(1));
@@ -107,6 +106,7 @@ void display_msg(char *msg, ...) {
 	wmove(my_form_win,0,0);
 	update_panels(); doupdate();
 
+	box(my_form_win, 0, 0);
 	/* Loop through to get user requests */
 	pthread_mutex_unlock(&output.lock); //xhax
 	wgetch(my_form_win);
