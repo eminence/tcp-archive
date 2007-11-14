@@ -6,6 +6,9 @@
 #include <stdint.h>
 
 #define MAX_FANOUT  16
+#define RESTART_OK		0x01	// Restart was not due to a problem
+#define RESTART_ABORT	0x02	// Restart was due to a problem (RST,...)
+#define RESTART_INIT		0x04	// Restart was actually a start (i.e., first time)
 
 /*
  * Data types.
@@ -42,6 +45,7 @@ typedef struct {
 
 machine_t* machine_new(state_t* start, void* context);
 void machine_destroy(machine_t* machine);
+void machine_reset(machine_t* machine, uint8_t reason);
 state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args);
 
 state_t* state_new(sid_t id, void (*action)(sid_t, void*, void*, void*), void (*error)(sid_t, void*, void*), void* argd);

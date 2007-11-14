@@ -74,6 +74,7 @@ int build_tcp_packet(char *data, int data_size,
 		uint8_t flags, uint16_t window, char **header);
 
 
+tcp_socket_t* get_tmp_socket(uint16_t local_port, int remote_node, uint16_t remote_port, uint16_t send_window_size);
 int queue_eof(tcp_socket_t *sock);
 int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags);
 tcp_socket_t *get_socket_from_int(int s);

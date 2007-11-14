@@ -10,13 +10,15 @@ machine_t* machine_new(state_t* start, void* context) {
 
   /* Out of memory. */
   if(!(machine = malloc(sizeof(machine_t)))) {
+  	 assert(0 && "Out of memory.");
     return NULL;
   }
   
   machine->context = context;
-  machine->current = start;
   machine->root = start;
-  machine->prev = start;
+
+  // set up initial state
+  machine_reset(machine, RESTART_INIT);
 
   return machine;
 }
@@ -40,6 +42,16 @@ void machine_destroy(machine_t* machine) {
   free(machine);
 }
 
+void machine_reset(machine_t* machine, uint8_t reason) {
+	machine->current = machine->root;
+	machine->prev = machine->root;
+	
+	/* Invoke state action, if provided. */
+  	if(machine->current->action) {
+   	machine->current->action(machine->current->id, machine->context, machine->current->argd, reason);
+  	}
+}
+
 state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args) {
   transition_t* tr;
 
@@ -57,7 +69,7 @@ state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args)
     }
 
     nlog(MSG_ERROR, "machine_step", "invalid input (%d); returning to root state.", input);
-    machine->current = machine->root;
+	 machine_reset(machine, RESTART_ABORT);
 
     return NULL;
   }
@@ -72,7 +84,7 @@ state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args)
       }
     
       nlog(MSG_ERROR, "machine_step", "Transition function returned 0; returning to root state");
-      machine->current = machine->root;
+		machine_reset(machine, RESTART_ABORT);
 
       return NULL;
     }
@@ -86,11 +98,11 @@ state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args)
 
   /* Invoke state action, if provided. */
   if(machine->current->action) {
-    machine->current->action(machine->current->id, machine->context, machine->current->argd, args);
+  	 // IF we are returning to the root state, do not pass state argument; instead, notify that restart is occuring naturally.
+    machine->current->action(machine->current->id, machine->context, machine->current == machine->root ? RESTART_OK : machine->current->argd, args);
   }
  
   /* Alert GUI of transition. */
-
 
   return machine->current;
 }

@@ -1,64 +1,19 @@
-[DONE] notify and sleep stuff
-[DONE]- always wake on error and return -1 
-
-add mutexes to all sockets; any time we touch a socket, lock mutex
-
-DO WE SET AND CHECK TCP CHECKSUMS????? (if not, we need to)
-
-CONNECTIONS AND SHIT HAVE TO TIMEOUT!
-
-don't allow write or read in not estab state
-
-move the socktable_put call from v_bind to v_listen
-
-TIMEWAIT -- add kill_me field -1 is safe, 0 kill, >0 dec watchdog
-
-
+*	[DONE]		notify and sleep stuff
+*	[DONE]		always wake on error and return -1 
+*					add mutexes to all sockets; any time we touch a socket, lock mutex
+*					DO WE SET AND CHECK TCP CHECKSUMS????? (if not, we need to)
+*					blocking user ops HAVE TO TIMEOUT! (use tcpm reset)
+*					don't allow write or read in not estab state MAKE SURE In the user code that we disallow state transitions that are currently illegal.
+*	[DONE] 		TIMEWAIT -- add kill_me field -1 is safe, 0 kill, >0 dec watchdog
 
 ============ POST REFACTORING ===================
 
- Closing a listening socket currently locks shit up; close waits for OK, we never send.
-
-  -- Also, we never added mutexes
-
-  Also, CLOSE never works in any case because we never notify.
-
-  {{achin}} race condition in ncurses (you said something about a separate mutices -- one for nlog one for all else)
-
-
-  MAKE SURE In the user code that we disallow state transitions that are currently illegal.
-
-
-
-
-
-  P S          CLOSE IS WRONG!!!!!!!!!!! SHOULD WAKE UP AFTER INITIAL FIN SENT   SO USER CAN RECV!!!!!!!!!!!!!!!!!!!!!!!
-
-
-
-                 ONCE OTHER USER CLOSES, READ SHOULD RETURN -1, INDICATING FULL CLOSE.
-
-
-
-
-
-
-
-
- ************ WHEN SOCKET IS RESET (BY CLOSE, BY ERROR...) MUST __REINIT STATUS! AND SEQ! AND POINTERS? ----- CAN WE REUSE A SOCKET THAT HAS BEEN CLOSED???            IF SO WE REALLY NEED TO CLEAN UP BETTER? OTHERWISE, WE CAN JUST FORGET IT.
-
-== SENDING RESET AND FAIL FOR "LISTEN" ROOT STATE MACHINES DOESN'T GO TO CLOSE-- GOES TO LISTEN!
-
-
-
-	if we step from established to established (i.e. we receive a data packet), do NOT try to "notify the user"
-
-
-
-
-
-
-
-
-
-	IF A CONNECTION DOES NOT EXIST, THEN A RESET IS SENT IN RESPONSE TO ANY INCOMING SEGMENT EXCEPT ANOTHER SEGMENT; IN PARTICULAR, SYNS ADDRESSED TO NON-EXISTING CONNECTIONS ARE RESET BY THIS MEANS.
+*	[DONE] 		Closing a listening socket currently locks shit up; close waits for OK, we never send.
+*	[DONE]  		Also, CLOSE never works in any case because we never notify.
+*				  	{{achin}} race condition in ncurses (you said something about a separate mutices -- one for nlog one for all else)
+*	[DONE]		CLOSE IS WRONG!! SHOULD WAKE UP AFTER INITIAL FIN SENT   SO USER CAN RECV!!! ONCE OTHER USER CLOSES, READ SHOULD RETURN -1, INDICATING FULL CLOSE.
+*					WHEN SOCKET IS RESET (BY CLOSE, BY ERROR...) MUST __REINIT STATUS! AND SEQ! AND POINTERS?
+*	[DONE]		SENDING RESET AND FAIL FOR "LISTEN" ROOT STATE MACHINES DOESN'T GO TO CLOSE-- GOES TO LISTEN!
+*	[DONE]		if we step from established to established (i.e. we receive a data packet), do NOT try to "notify the user"
+*	[DONE]		IF A CONNECTION DOES NOT EXIST, THEN A RESET IS SENT IN RESPONSE TO ANY INCOMING SEGMENT EXCEPT 
+*					Listen -> Close (by means of 'x') currently locks up

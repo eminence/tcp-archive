@@ -4,10 +4,10 @@
 #include "tcp.h"
 #include "state.h"
 
-#define CLOSE_ERROR	0x01	// Close is communicated as error return
-#define CLOSE_EOF		0x02	// Close is communicated as EOF
-#define CLOSE_OK		0x04	// Close is communicated as success
-#define CLOSE_NIL		0x08  // Close requires no communication
+#define CLOSE_ERROR		0x01	// Close is communicated as error return
+#define CLOSE_EOF			0x02	// Close is communicated as EOF
+#define CLOSE_OK			0x04	// Close is communicated as success
+#define CLOSE_NIL			0x08  // Close requires no communication
 
 struct tcp_socket__;
 

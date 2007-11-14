@@ -16,6 +16,18 @@
 
 static ip_node_t *this_node;
 
+tcp_socket_t* get_tmp_socket(uint16_t local_port, int remote_node, uint16_t remote_port, uint16_t send_window_size) {
+	tcp_socket_t* sock = malloc(sizeof(tcp_socket_t));
+
+	sock->local_node = this_node;
+	sock->local_port = local_port;
+	sock->remote_node = remote_node;
+	sock->remote_port = remote_port;
+	sock->send_window_size = send_window_size;
+
+	return sock;
+}
+
 int queue_eof(tcp_socket_t *sock) {
   /* WARNING: increasing ack number. This should be fine because we SHOULD NOT be in a recv state
 	* (we just received a FIN). However, if there are bugs later, remember to look at this code.
@@ -117,17 +129,15 @@ int tcp_sendto_raw(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t fla
 
 	/* as long as the packet is not a pure ACK (where pure ACK == only ACK, and no payload), then
 	 * we'll be expecting a reply for this packet */
-	if (flags != TCP_FLAG_ACK) {
-		if (sock->last_packet == 0) sock->last_packet = time(NULL); /* dont change timer if it's already set */
+	if (!((flags == TCP_FLAG_ACK) && (bufsize == 0))) {
+		if(!sock->last_packet)
+			sock->last_packet = time(NULL);
 	} else {
 		sock->last_packet = 0;
-
 	}
 
 	return retval;
 }
-
-
 
 /* master tcp sender function
  */
@@ -167,7 +177,8 @@ int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) 
 	/* as long as the packet is not a pure ACK (where pure ACK == only ACK, and no payload), then
 	 * we'll be expecting a reply for this packet */
 	if (!((flags == TCP_FLAG_ACK) && (bufsize == 0))) {
-		sock->last_packet = time(NULL);
+		if(!sock->last_packet)
+			sock->last_packet = time(NULL);
 	} else {
 		sock->last_packet = 0;
 

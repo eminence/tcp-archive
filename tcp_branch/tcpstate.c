@@ -67,7 +67,7 @@ tcp_machine_t* tcpm_new(tcp_socket_t* context, uint8_t clone) {
   assert(0 == state_transition(st_syn_sent,    st_closed,      ON_CLOSE,           NULL,                   NULL)); /* XXX free state. */
   assert(0 == state_transition(st_syn_sent,    st_syn_rcvd,    ON_RECV_SYN,        do_send_flags,          alloc_byte(TCP_FLAG_ACK)));
   assert(0 == state_transition(st_syn_sent,    st_estab,       ON_RECV_SYN_ACK,    do_connect,             alloc_byte(TCP_FLAG_ACK)));
-  assert(0 == state_transition(st_listen,      st_closed,      ON_CLOSE,           do_close,               alloc_byte(CLOSE_NIL))); /* no notify for close- just works. */
+  assert(0 == state_transition(st_listen,      st_closed,      ON_CLOSE,           do_close,               alloc_byte(CLOSE_OK))); /* notify close call THAT CLOSED in listen state. */
   assert(0 == state_transition(st_listen,      st_syn_rcvd,    ON_RECV_SYN,        do_send_flags,          alloc_byte(TCP_FLAG_SYN | TCP_FLAG_ACK)));
   assert(0 == state_transition(st_syn_rcvd,    st_estab,       ON_RECV_ACK,        NULL,                   NULL));
   assert(0 == state_transition(st_estab,       st_fin_wait_1,  ON_CLOSE,           do_send_flags,          alloc_byte(TCP_FLAG_FIN)));
@@ -88,6 +88,10 @@ tcp_machine_t* tcpm_new(tcp_socket_t* context, uint8_t clone) {
 
 void tcpm_destroy(tcp_machine_t* machine) {
   machine_destroy(machine->sm);
+}
+
+void tcpm_reset(tcp_machine_t* machine) {
+	machine_reset(machine->sm, RESTART_ABORT);
 }
 
 int tcpm_event(tcp_machine_t* machine, tinput_t event, void* argt, void* args) {

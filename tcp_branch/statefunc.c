@@ -133,10 +133,27 @@ void in_closewait(sid_t s, void *context, void *argA, void *argB) {
 }
 
 /* Called when we enter close state (but not the first time through... yet. */
-void in_closed(sid_t s, void *context, void *argA, void *argB) {
+void in_closed(sid_t s, void *context, void *argA, void *reason) {
 	tcp_socket_t* sock = (tcp_socket_t*)context;
 
-	/* Reinit sock. */
-	sock->last_packet = 0;
+	switch((int)reason) {
+		case RESTART_INIT:
+			// initialize socket
+			nlog(MSG_LOG, "in_closed", "state machine entered Closed state: Init");
+			break;
+
+		case RESTART_OK:
+			// Re-initialize socket
+			nlog(MSG_LOG, "in_closed", "state machine entered Closed state: OK");
+			sock->last_packet = 0;
+			break;
+
+		case RESTART_ABORT:
+			// Closed on error (RST,...)
+			nlog(MSG_LOG, "in_closed", "state machine entered Closed state: Abort");
+			notify(sock, TCP_ERROR); // cause associated sock call to fail
+			break;
+	}
+	
 	// TODO fill this up (allow this function to initialize sock by calling on new machine? and free data maybe? or something? */
 }

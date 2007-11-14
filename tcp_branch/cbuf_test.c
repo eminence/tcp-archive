@@ -11,7 +11,7 @@ int main() {
   char* str;
   uint8_t t;
 
-  cbuf_t* buffer = cbuf_new(10);
+  cbuf_t* buffer = cbuf_new(2*4096+2);
 
   for(i=0; i < 10; i++) {
 	 __cbuf_put(buffer, i, 'a'+i, CBUF_DATA);
@@ -62,7 +62,10 @@ int main() {
 
   free(str);
 
-  //printf("100 <= 101 < 4196\t%d\n", cbuf_btm_contains(buffer, 100, 4196, 101));
+  printf("106 < 4207 \t %d\n", cbuf_lt(buffer, 106, 4207));
+  printf("110 < 4207 \t %d\n", cbuf_lt(buffer, 106, 4207));
+  printf("106 <= 106 < 4207\t%d\n", cbuf_btm_contains(buffer, 106, 4207, 106));
+  printf("106 <= 106 < 4207\t%d\n", cbuf_btm_contains(buffer, 106, 4207, 110));
   // printf("5 <= 3 <= 1\t%d\n", cbuf_incl_contains(buffer, 5, 1, 3));
   //printf("5 <= 1 <= 3\t%d\n", cbuf_incl_contains(buffer, 5, 3, 1));
   //printf("4 <= 3 <= 4\t%d\n", cbuf_incl_contains(buffer, 4, 4, 3));

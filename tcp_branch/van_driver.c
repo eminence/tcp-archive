@@ -308,9 +308,13 @@ void *tcp_thread(void* arg) {
 
 		/* Pwnz0r. */
 		if (sock == NULL) {
+		  tcp_socket_t* tmp_sock = get_tmp_socket(dest_port, src, src_port, SEND_WINDOW_SIZE);
+
 		  nlog(MSG_ERROR,"tcp_thread", "Ok, not a half socket either.  Discarding.");
 		  /* TODO TODO SEND A RESET, as there is not valid thingy here. */
-		  //send_dumb_packet(sock, packet, TCP_FLAG_RST);
+		  
+		  send_dumb_packet(tmp_sock, packet, TCP_FLAG_RST);
+		  free(tmp_sock);
 
 		  assert(packet);
 		  free(packet);
@@ -356,10 +360,15 @@ void *tcp_thread(void* arg) {
 
 	 if(flags & TCP_FLAG_RST) {
 		/* Bail out by signaling user and closing stuff up. */
-		nlog(MSG_WARNING, "tcp_thread", "FUCK FUCK FUCK -- got a RESET");
+		nlog(MSG_WARNING, "tcp_thread", "got a RESET; bailing out");
+		tcpm_reset(sock->machine);
+
+		free(packet);
+		continue;
 	 }
 
 	 do_recv_tcp(sock, packet);
+	 free(packet);
   }
 }
 
