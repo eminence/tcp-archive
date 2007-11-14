@@ -33,7 +33,7 @@ void __cbuf_put(cbuf_t* buf, int index, char value, uint8_t type) {
   buf->data[__cbuf_type(cbuf_mod(buf, index))] = type;
   buf->data[__cbuf_data(cbuf_mod(buf, index))] = value;
 
-  nlog(MSG_LOG, "cbuf_put", "set index %d to value %p with type %c", index, value, type == CBUF_DATA ? 'D' : 'F');
+  //nlog(MSG_LOG, "cbuf_put", "set index %d to value %p with type %c", index, value, type == CBUF_DATA ? 'D' : 'F');
 }
 
 char __cbuf_get(cbuf_t* buf, int index, uint8_t* type) {
@@ -49,7 +49,7 @@ char __cbuf_get(cbuf_t* buf, int index, uint8_t* type) {
   assert(type);
   //assert(*type & (CBUF_DATA | CBUF_FLAG));
   
-  nlog(MSG_LOG, "cbuf_get", "data at index %d has value %p and type %c", index, data, *type == CBUF_DATA ? 'D' : 'F');
+  //nlog(MSG_LOG, "cbuf_get", "data at index %d has value %p and type %c", index, data, *type == CBUF_DATA ? 'D' : 'F');
 
   return data;
 }
