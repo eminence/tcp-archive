@@ -125,3 +125,12 @@ void in_estab(sid_t s, void *context, void *argA, void *argB) {
 void in_closewait(sid_t s, void *context, void *argA, void *argB) {
 	queue_eof(context);
 }
+
+/* Called when we enter close state (but not the first time through... yet. */
+void in_closed(sid_t s, void *context, void *argA, void *argB) {
+	tcp_socket_t* sock = (tcp_socket_t*)context;
+
+	/* Reinit sock. */
+	sock->last_packet = 0;
+	// TODO fill this up (allow this function to initialize sock by calling on new machine? and free data maybe? or something? */
+}

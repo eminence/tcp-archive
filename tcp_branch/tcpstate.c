@@ -26,7 +26,7 @@ void* alloc_byte(uint8_t ibyte) {
 /* Core functionality. */
 tcp_machine_t* tcpm_new(tcp_socket_t* context, uint8_t clone) {
   tcp_machine_t *machine        = malloc(sizeof(tcp_machine_t));
-  state_t       *st_closed      = state_new(ST_CLOSED,      NULL, 		NULL,             NULL),
+  state_t       *st_closed      = state_new(ST_CLOSED,      in_closed,	NULL,             NULL),
                 *st_syn_sent    = state_new(ST_SYN_SENT,    NULL, 		fail_with_reset,  NULL),
                 *st_syn_rcvd    = state_new(ST_SYN_RCVD,    NULL, 		fail_with_reset,  NULL),
                 *st_listen      = state_new(ST_LISTEN,      NULL, 		NULL,             NULL),
@@ -39,10 +39,11 @@ tcp_machine_t* tcpm_new(tcp_socket_t* context, uint8_t clone) {
                 *st_last_ack    = state_new(ST_LAST_ACK,    NULL, 		NULL,             NULL);
   
   /* Initialize state machine. */
+  machine->sm = machine_new(st_closed, context);
+
+  /* We cloned this machine; thus, jump into Listen state. */
   if(clone) {
-    machine->sm = machine_new(st_listen, context);
-  } else {
-    machine->sm = machine_new(st_closed, context);
+    machine->sm->current = st_listen;
   }
 
   /* Out of memory: just explode. */
