@@ -215,7 +215,10 @@ int isDupAck(tcp_socket_t *sock, int num) {
 
 
 /* process  this packet for ACK stufffs 
- * move una forward cause we just ACKd some SHIZNIT
+ * move una forward cause our data was just ACKd
+ * disable timer
+ *
+ * THIS FUNCTION DEALS WITH WHEN *OUR* PACKETS GET ACKNOWLEDGED
  */
 void processPacketForAck(tcp_socket_t *sock, char*packet) {
 
@@ -225,6 +228,8 @@ void processPacketForAck(tcp_socket_t *sock, char*packet) {
 		if (ack_num > sock->send_una) {
 			nlog(MSG_LOG, "processPacketForAck", "This packet has acknum=%d, which moves forward our send_una pointer (which was at %d)", ack_num, sock->send_una);
 			sock->send_una = ack_num;
+		  	sock->last_packet = 0;
+
 		} else {
 			if (ack_num == sock->last_ack) {
 				/* commenting out the next 2 lines as a TEMPORARY fix */

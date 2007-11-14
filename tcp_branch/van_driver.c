@@ -196,12 +196,10 @@ void *tcp_watchdog(void *arg) {
 		  }
 		}
 
-
 		if ((sock->last_packet > 0) && (time(NULL) - sock->last_packet > 4/*XXX*/)) {
 		  nlog(MSG_WARNING, "tcp_watchdog", "Watchdog timer on socket %d.  Doing something about it...", sock->fd);
 
 		  sock->send_next--;
-
 		}
 	 }
   }
