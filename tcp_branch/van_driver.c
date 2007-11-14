@@ -388,6 +388,8 @@ void *link_state_thread (void *arg) {
   nifs = van_node_nifs(node->van_node);
 
   nlog(MSG_LOG,"linkstate","Now monitoring the link state for %d interfaces...", nifs);
+	
+  fprintf(stderr, "\n\n\nIN LINK STATE THREAD 2.0\n\n\n\n");
 
   while (1) {
 	 pthread_testcancel();
@@ -959,25 +961,30 @@ ip_node_t *van_driver_init(char *fname, int num) {
   // start up RIP threads
 
   node->link_state_thread = malloc(sizeof(pthread_t));
-  pthread_create(node->link_state_thread, 0, link_state_thread, (void*)node);
+  if (pthread_create(node->link_state_thread, 0, link_state_thread, (void*)node) != 0) 
+	  nlog(MSG_WARNING,"init", "Could not create the link state thread!");
 
   node->rip_monitor_thread = malloc(sizeof(pthread_t));
-  pthread_create(node->rip_monitor_thread, 0, rip_monitor, (void*)node);
+  if (pthread_create(node->rip_monitor_thread, 0, rip_monitor, (void*)node) != 0) 
+	  nlog(MSG_WARNING,"init", "Could not create the rip monitor thread!");
+  
 
   node->rip_thread = malloc(sizeof(pthread_t));
   pthread_create(node->rip_thread, 0, rip, (void*)node);
-  node->tcp_watchdog = malloc(sizeof(pthread_t));
-  pthread_create(node->tcp_watchdog, 0, tcp_watchdog, (void*)node);
 
   // init TCP stufffs:
   v_tcp_init(node);
 
+  node->tcp_watchdog = malloc(sizeof(pthread_t));
+  pthread_create(node->tcp_watchdog, 0, tcp_watchdog, (void*)node);
 
   node->tcp_thread = malloc(sizeof(pthread_t));
-  pthread_create(node->tcp_thread, 0, tcp_thread, (void*)node);
+  if (pthread_create(node->tcp_thread, 0, tcp_thread, (void*)node) != 0) 
+	  nlog(MSG_WARNING, "init", "Could not create the tcp thread!");
 
   node->tcp_send_thread = malloc(sizeof(pthread_t));
-  pthread_create(node->tcp_send_thread, 0, tcp_send_thread, (void*)node);
+  if (pthread_create(node->tcp_send_thread, 0, tcp_send_thread, (void*)node) != 0)
+	  printf("Can't create tcp send thread!\n");
 
   nlog (MSG_LOG,"init","Node %d running", vn->vn_num);	
   nlog_set_menu("[node %d]  1:Send data   2:Receive Data   3:Toggle Link State   q:Quit", vn->vn_num);

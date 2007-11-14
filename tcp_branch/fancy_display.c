@@ -55,14 +55,15 @@ void scroll_logwin(int i) {
 }
 
 void nlog_set_menu(const char *msg, ...) {
-
 	pthread_mutex_lock(&output.lock);
+
 	va_list args;
 	va_start(args, msg);
 	wmove(output.menu_win,0,0);
 	vwprintw(output.menu_win, msg, args);
 	update_panels(); doupdate();
 	va_end(args);
+
 	pthread_mutex_unlock(&output.lock);
 }
 
@@ -70,6 +71,7 @@ void nlog_set_menu(const char *msg, ...) {
 
 void display_msg(char *msg, ...) {
 	pthread_mutex_lock(&output.lock);
+
 	va_list args;
 	//int l = strlen(msg);
 	WINDOW *my_form_win;
@@ -106,13 +108,16 @@ void display_msg(char *msg, ...) {
 	update_panels(); doupdate();
 
 	/* Loop through to get user requests */
+	pthread_mutex_unlock(&output.lock); //xhax
 	wgetch(my_form_win);
+	pthread_mutex_lock(&output.lock); //xhax
 
 	/* Un post form and free the memory */
 	del_panel(my_form_pan);
 	delwin(my_form_win);
 	update_panels(); doupdate();
 	va_end(args);
+
 	pthread_mutex_unlock(&output.lock);
 }
 
@@ -166,8 +171,16 @@ int get_text(char *msg, char* return_, int len) {
 	update_panels(); doupdate();
 
 	/* Loop through to get user requests */
-	while((ch = wgetch(my_form_win)) != '`')
-	{	switch(ch)
+
+
+	pthread_mutex_unlock(&output.lock); //xhax
+	ch = wgetch(my_form_win);
+	pthread_mutex_lock(&output.lock); //xhax
+
+	while(ch != '`')
+	{	
+		
+		switch(ch)
 		{
 			case KEY_LEFT:
 				form_driver(my_form, REQ_LEFT_CHAR);
@@ -194,6 +207,11 @@ int get_text(char *msg, char* return_, int len) {
 				//form_driver(my_form, REQ_);
 				break;
 		}
+
+		pthread_mutex_unlock(&output.lock); //xhax
+		ch = wgetch(my_form_win);
+		pthread_mutex_lock(&output.lock); //xhax
+
 	}
 
 	buff = field_buffer(field[0],0);
@@ -251,6 +269,7 @@ void test_tcp_menu_update() {
 
 	redrawwin(output.menu_win);
 	update_panels(); doupdate();
+
 	pthread_mutex_unlock(&output.lock);
 
 }
@@ -258,6 +277,7 @@ void test_tcp_menu_update() {
 void tcp_table_new(ip_node_t *node, int fd) {
 
 	pthread_mutex_lock(&output.lock);
+
 	output.tcp_menu_num_items++;
 	int i, retval;
 	ITEM **new_items;
@@ -288,6 +308,7 @@ void tcp_table_new(ip_node_t *node, int fd) {
 	output.tcp_items = new_items;
 	post_menu(output.tcp_menu);
 	update_panels(); doupdate();
+
 	pthread_mutex_unlock(&output.lock);
 }
 
@@ -380,8 +401,13 @@ int get_number(char *msg) {
 	post_form(my_form);
 	update_panels(); doupdate();
 
+
+	pthread_mutex_unlock(&output.lock); //xhax
+	ch = wgetch(my_form_win);
+	pthread_mutex_lock(&output.lock); //xhax
+
 	/* Loop through to get user requests */
-	while((ch = wgetch(my_form_win)) != '`')
+	while(ch != '`')
 	{	switch(ch)
 		{
 			case KEY_LEFT:
@@ -409,6 +435,10 @@ int get_number(char *msg) {
 				form_driver(my_form, REQ_END_LINE);
 				break;
 		}
+		
+		pthread_mutex_unlock(&output.lock); //xhax
+		ch = wgetch(my_form_win);
+		pthread_mutex_lock(&output.lock); //xhax
 	}
 
 	buff = field_buffer(field[0],0);
@@ -423,13 +453,16 @@ int get_number(char *msg) {
 	del_panel(my_form_pan);
 	delwin(my_form_win);
 	update_panels(); doupdate();
+
 	pthread_mutex_unlock(&output.lock);
 
 	return num;
 }
 
 void switch_to_tab(int t) {
+
 	pthread_mutex_lock(&output.lock);
+
 	unsigned int max_size = 0;
 		int total_tabs = 0;
 		while (output.tabs[total_tabs] != NULL) {
@@ -473,16 +506,16 @@ void switch_to_tab(int t) {
 		}
 
 		output.toptab = t;
+
 	pthread_mutex_unlock(&output.lock);
 }
 
 int init_display(int use_curses) {
 
 	pthread_mutexattr_init(&output.lock_attr);
-
 	pthread_mutexattr_settype(&output.lock_attr, PTHREAD_MUTEX_RECURSIVE_NP);
 
-	pthread_mutex_init(&output.lock,&output.lock_attr);
+	pthread_mutex_init(&output.lock, &output.lock_attr);
 	pthread_mutex_lock(&output.lock);
 
 	output.use_curses = use_curses;
@@ -607,6 +640,7 @@ int init_display(int use_curses) {
 	}
 
 	pthread_mutex_unlock(&output.lock);
+
 	return 0;
 }
 
@@ -619,8 +653,9 @@ int get_fd_from_menu() {
 
 void handle_tcp_menu_input(int c) {
 	pthread_mutex_lock(&output.lock);
+
 	if (output.toptab != 1) {
-	pthread_mutex_unlock(&output.lock);
+		pthread_mutex_unlock(&output.lock);
 		return; /* ignore if we're not on the tcp tab */
 	}
 	switch (c) {
@@ -640,23 +675,29 @@ void handle_tcp_menu_input(int c) {
 			break;
 	}
 	update_panels(); doupdate();
+
 	pthread_mutex_unlock(&output.lock);
+
 	return;
 }
 
 void show_route_table() {
 	pthread_mutex_lock(&output.lock);
+
 	top_panel(output.rtable_pan);
 	switch_to_tab(0);
 	update_panels(); doupdate();
+
 	pthread_mutex_unlock(&output.lock);
 }
 
 void show_tcp_table() {
 	pthread_mutex_lock(&output.lock);
+
 	top_panel(output.tcp_pan);
 	switch_to_tab(1);
 	update_panels(); doupdate();
+
 	pthread_mutex_unlock(&output.lock);
 }
 
@@ -671,32 +712,43 @@ void clear_rtable_display() {
 	}
 	*/
 	pthread_mutex_lock(&output.lock);
+
 	werase(output.rtable_win);
 	wmove(output.rtable_win,0 ,1);
 
 	update_panels(); doupdate();
+
 	pthread_mutex_unlock(&output.lock);
 }
 
 void rtable_print( char *text, ...) {
 	pthread_mutex_lock(&output.lock);
+
 	va_list args;
 	va_start(args, text);
 	vwprintw(output.rtable_win, text, args);
 	wprintw(output.rtable_win,"\n");
 	update_panels(); doupdate();
 	va_end(args);
+
 	pthread_mutex_unlock(&output.lock);
 }
+
 int get_key() {
-	pthread_mutex_lock(&output.lock);
-	return wgetch(stdscr);
-	pthread_mutex_unlock(&output.lock);
+	int c;
+
+	//pthread_mutex_lock(&output.lock); //xhax
+	c = wgetch(stdscr);
+	//pthread_mutex_unlock(&output.lock); //xhax
+
+	return c;
 }
 
 
 void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *text, ...) {
+
 	pthread_mutex_lock(&output.lock);
+
 	int c = output.use_curses;
 	WINDOW *log = output.log_win;
 	va_list args;

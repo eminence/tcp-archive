@@ -33,7 +33,9 @@ int main( int argc, char* argv[] ) {
 
 	printf("Starting up...\n");
 	printf("Init display driver...\n");
+
 	init_display(USE_CURSES);
+
 	nlog(MSG_LOG, "init", "Display driver started");
 	nlog(MSG_LOG, "init", "Starting van driver...");
 	node = van_driver_init(netconf, nodenum);
