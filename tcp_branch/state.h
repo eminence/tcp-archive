@@ -32,6 +32,7 @@ typedef struct {
 typedef struct {
   void* context;
   state_t* current;
+  state_t* prev;
   state_t* root;
 } machine_t;
 

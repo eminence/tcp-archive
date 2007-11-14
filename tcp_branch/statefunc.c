@@ -82,6 +82,7 @@ void fail_with_reset(sid_t id, void* context, void* packet) {
 
 	// TODO: send reset with correct sequence number from packet (args)
 	send_dumb_packet(sock, (char*)packet, TCP_FLAG_RST);
+	sock->last_packet = 0;
 
 	return; 
 }
@@ -97,7 +98,7 @@ void in_timewait(sid_t s, void *context, void *argA, void *argB) {
 }
 void in_estab(sid_t s, void *context, void *argA, void *argB) {
 	tcp_socket_t *sock = (tcp_socket_t*)context;
-	sid_t prev_state = tcpm_state(sock->machine);
+	sid_t prev_state = tcpm_prevstate(sock->machine);
 	assert(sock);
 
 	/* TODO

@@ -239,7 +239,7 @@ void *tcp_send_thread(void* arg) {
 		  int data_returned = dataFromBufferToNetwork(sock, data, amount); // XXX this DOES NOT increase our sequence number!
 		  assert(data_returned == amount);
 
-		  tcp_sendto(sock, data, amount, TCP_FLAG_ACK);
+		  tcp_sendto(sock, data, amount, 0);
 
 		  // increase sequence number AFTER sending packet
 		  nlog(MSG_LOG, "tcp_send_thread", "bumping send_next from %d to %d", sock->send_next, sock->send_next + data_returned);

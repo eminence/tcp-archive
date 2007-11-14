@@ -16,6 +16,7 @@ machine_t* machine_new(state_t* start, void* context) {
   machine->context = context;
   machine->current = start;
   machine->root = start;
+  machine->prev = start;
 
   return machine;
 }
@@ -80,6 +81,7 @@ state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args)
   nlog(MSG_LOG, "machine_step", "Input %d: step from %d to %d", input, machine->current->id, tr->next->id);
 
   /* Update machine state. */
+  machine->prev = machine->current;
   machine->current = tr->next;
 
   /* Invoke state action, if provided. */

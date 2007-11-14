@@ -68,7 +68,7 @@ tcp_socket_t *get_socket_from_int(int s) {
 int send_dumb_packet(tcp_socket_t *sock, char*packet, uint8_t AckOrRST) {
 
 	uint32_t seq = get_seqnum(ip_to_tcp(packet));
-	uint32_t ack = get_seqnum(ip_to_tcp(packet));
+	uint32_t ack = get_acknum(ip_to_tcp(packet));
 	uint8_t flags = get_flags(ip_to_tcp(packet));
 
 	if (AckOrRST == TCP_FLAG_ACK) 
@@ -118,7 +118,7 @@ int tcp_sendto_raw(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t fla
 	/* as long as the packet is not a pure ACK (where pure ACK == only ACK, and no payload), then
 	 * we'll be expecting a reply for this packet */
 	if (flags != TCP_FLAG_ACK) {
-		sock->last_packet = time(NULL);
+		if (sock->last_packet == 0) sock->last_packet = time(NULL); /* dont change timer if it's already set */
 	} else {
 		sock->last_packet = 0;
 
@@ -166,7 +166,7 @@ int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) 
 
 	/* as long as the packet is not a pure ACK (where pure ACK == only ACK, and no payload), then
 	 * we'll be expecting a reply for this packet */
-	if (flags != TCP_FLAG_ACK) {
+	if (!((flags == TCP_FLAG_ACK) && (bufsize == 0))) {
 		sock->last_packet = time(NULL);
 	} else {
 		sock->last_packet = 0;

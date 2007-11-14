@@ -51,6 +51,7 @@ int tcpm_packet_to_input(const char* packet);
 const char* tcpm_strstate(int state);
 
 #define tcpm_state(m)       ((m)->sm->current->id)
+#define tcpm_prevstate(m)   ((m)->sm->prev->id)
 #define tcpm_canbind(m)     (tcpm_state(m) == ST_CLOSED)
 #define tcpm_estab(m)       (tcpm_state(m) == ST_ESTAB)
 #define tcpm_canrecv(m)     (tcpm_estab(m) || (tcpm_state(m) == ST_FIN_WAIT1) || (tcpm_state(m) == ST_FIN_WAIT2)) // RECENTLY CHANGED
