@@ -474,6 +474,12 @@ void switch_to_tab(int t) {
 
 int init_display(int use_curses) {
 
+	pthread_mutexattr_init(&output.lock_attr);
+	pthread_mutexattr_init(&output.nloglock_attr);
+
+	pthread_mutexattr_settype(&output.lock_attr, PTHREAD_MUTEX_ERRORCHECK_NP);
+	pthread_mutexattr_settype(&output.nloglock_attr, PTHREAD_MUTEX_ERRORCHECK_NP);
+
 	pthread_mutex_init(&output.lock,0);
 	pthread_mutex_init(&output.nloglock,0);
 	pthread_mutex_lock(&output.lock);
