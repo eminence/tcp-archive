@@ -10,10 +10,11 @@
 
 *	[DONE] 		Closing a listening socket currently locks shit up; close waits for OK, we never send.
 *	[DONE]  		Also, CLOSE never works in any case because we never notify.
-*				  	{{achin}} race condition in ncurses (you said something about a separate mutices -- one for nlog one for all else)
 *	[DONE]		CLOSE IS WRONG!! SHOULD WAKE UP AFTER INITIAL FIN SENT   SO USER CAN RECV!!! ONCE OTHER USER CLOSES, READ SHOULD RETURN -1, INDICATING FULL CLOSE.
 *					WHEN SOCKET IS RESET (BY CLOSE, BY ERROR...) MUST __REINIT STATUS! AND SEQ! AND POINTERS?
 *	[DONE]		SENDING RESET AND FAIL FOR "LISTEN" ROOT STATE MACHINES DOESN'T GO TO CLOSE-- GOES TO LISTEN!
 *	[DONE]		if we step from established to established (i.e. we receive a data packet), do NOT try to "notify the user"
 *	[DONE]		IF A CONNECTION DOES NOT EXIST, THEN A RESET IS SENT IN RESPONSE TO ANY INCOMING SEGMENT EXCEPT 
-*					Listen -> Close (by means of 'x') currently locks up
+*	[DONE]		Listen -> Close (by means of 'x') currently locks up
+*					ADD NONE AND ACK TRANSISTIONS IN STATES AFTER ESTAB THAT CAN RECV DATA, OTHERWISE, INVALID TRANSISTION
+*				  	{{achin}} race condition in ncurses (you said something about a separate mutices -- one for nlog one for all else)

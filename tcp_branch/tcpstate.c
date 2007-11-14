@@ -61,7 +61,7 @@ tcp_machine_t* tcpm_new(tcp_socket_t* context, uint8_t clone) {
   assert(machine);
   assert(machine->sm);
   
-  /* Add transitions. */
+  /* Add transitions. */ // TODO: XXX XXX XXX XXX ADD NONE AND ACK TRANSISTIONS IN STATES AFTER ESTAB THAT CAN RECV DATA, OTHERWISE, INVALID TRANSISTION
   assert(0 == state_transition(st_closed,      st_syn_sent,    ON_ACTIVE_OPEN,     do_send_flags,          alloc_byte(TCP_FLAG_SYN)));
   assert(0 == state_transition(st_closed,      st_listen,      ON_PASSIVE_OPEN,    do_listen,              NULL)); /* XXX init state. */
   assert(0 == state_transition(st_syn_sent,    st_closed,      ON_CLOSE,           NULL,                   NULL)); /* XXX free state. */
@@ -72,7 +72,7 @@ tcp_machine_t* tcpm_new(tcp_socket_t* context, uint8_t clone) {
   assert(0 == state_transition(st_syn_rcvd,    st_estab,       ON_RECV_ACK,        NULL,                   NULL));
   assert(0 == state_transition(st_estab,       st_fin_wait_1,  ON_CLOSE,           do_send_flags,          alloc_byte(TCP_FLAG_FIN)));
   assert(0 == state_transition(st_estab,       st_close_wait,  ON_RECV_FIN,        do_send_flags,          alloc_byte(TCP_FLAG_ACK))); /* XXX XXX do_recv_tcp DOESN'T sends ack anymore. XXX XXX*/
-  assert(0 == state_transition(st_estab,       st_estab,       ON_NONE,            NULL,                   NULL));
+  assert(0 == state_transition(st_estab,       st_estab,       ON_NONE,            NULL,                   NULL)); // can recv data
   assert(0 == state_transition(st_estab,       st_estab,       ON_RECV_ACK,        NULL,                   NULL));
   assert(0 == state_transition(st_fin_wait_1,  st_closing,     ON_RECV_FIN,        do_send_flags,          alloc_byte(TCP_FLAG_ACK)));
   assert(0 == state_transition(st_fin_wait_1,  st_time_wait,   ON_RECV_FIN_ACK,    do_send_flags,          alloc_byte(TCP_FLAG_ACK)));
