@@ -12,22 +12,25 @@
 int do_close(sid_t prev, sid_t next, void* context, void* close_type, void* argB) {
 	tcp_socket_t* sock = (tcp_socket_t*)context;
 
-	sock->last_packet = 0;
 
 	switch(*(int*)close_type) {
 		case CLOSE_ERROR:
+			nlog(MSG_XXX, "do_close", "close_type=CLOSE_ERROR");
 			notify(sock, TCP_ERROR);
 			break;
 		
 		case CLOSE_OK:
+			nlog(MSG_XXX, "do_close", "close_type=CLOSE_OK");
 			notify(sock, TCP_OK);
 			break;
 
 		case CLOSE_EOF:
+			nlog(MSG_XXX, "do_close", "close_type=CLOSE_EOF");
 			queue_eof(sock);
 			break;
 
 		case CLOSE_NIL:
+			nlog(MSG_XXX, "do_close", "close_type=CLOSE_NIL. wtf?");
 			/* nothing */
 			break;
 	}

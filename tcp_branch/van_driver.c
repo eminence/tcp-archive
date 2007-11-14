@@ -305,6 +305,9 @@ void *tcp_thread(void* arg) {
 		/* Pwnz0r. */
 		if (sock == NULL) {
 		  nlog(MSG_ERROR,"tcp_thread", "Ok, not a half socket either.  Discarding.");
+		  /* TODO TODO SEND A RESET, as there is not valid thingy here. */
+		  //send_dumb_packet(sock, packet, TCP_FLAG_RST);
+
 		  assert(packet);
 		  free(packet);
 
