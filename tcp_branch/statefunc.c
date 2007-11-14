@@ -98,6 +98,15 @@ int wait_for_event(tcp_socket_t *sock, int status_bits) {
 	return to_return;
 }
 
+void in_timewait(sid_t s, void *context, void *argA, void *argB) {
+	tcp_socket_t *sock = (tcp_socket_t*)context;
+
+	/* set a flag in sock, so this socket will move to ST_CLOSED*/
+	assert(s = ST_TIME_WAIT);
+	sock->time_wait_time = time(NULL);
+
+
+}
 void in_estab(sid_t s, void *context, void *argA, void *argB) {
 	tcp_socket_t *sock = (tcp_socket_t*)context;
 	sid_t prev_state = (sid_t)argB;

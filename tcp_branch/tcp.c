@@ -200,6 +200,7 @@ int sys_socket(int clone) {
 	sock->last_packet = 0;
 	sock->send_window_size = SEND_WINDOW_SIZE;
 	sock->recv_window_size = SEND_WINDOW_SIZE;
+	sock->time_wait_time = 0;
 
 	sock->send_una = 0;
 	sock->send_next = 0;

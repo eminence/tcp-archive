@@ -51,7 +51,8 @@ typedef struct tcp_socket__ {
 	int send_window_size; /* our window size we advertize in outgoing packets */
 
 	time_t last_packet; /* set this to time(NULL) when you're expecting a timely reply. a clocktick thread will alert someone of something when something happens */
-	
+	time_t time_wait_time; /* initialize to zero, set to time() when we want to start our timewaitwaittimetimewatertimer */
+								
 } tcp_socket_t;
 
 void v_tcp_init();

@@ -32,7 +32,7 @@ tcp_machine_t* tcpm_new(tcp_socket_t* context, uint8_t clone) {
                 *st_estab       = state_new(ST_ESTAB,       in_estab,	fail_with_reset,  NULL),
                 *st_fin_wait_1  = state_new(ST_FIN_WAIT1,   NULL, 		NULL,             NULL),
                 *st_fin_wait_2  = state_new(ST_FIN_WAIT2,   NULL, 		NULL,             NULL),
-                *st_time_wait   = state_new(ST_TIME_WAIT,   NULL, 		NULL,             NULL),
+                *st_time_wait   = state_new(ST_TIME_WAIT,   in_timewait,NULL,             NULL),
                 *st_closing     = state_new(ST_CLOSING,     NULL, 		NULL,             NULL),
                 *st_close_wait  = state_new(ST_CLOSE_WAIT,  NULL, 		NULL,             NULL),
                 *st_last_ack    = state_new(ST_LAST_ACK,    NULL, 		NULL,             NULL);

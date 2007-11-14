@@ -178,6 +178,14 @@ void *tcp_watchdog(void *arg) {
 			if (node->socket_table[i] == NULL) continue;
 			tcp_socket_t *sock = node->socket_table[i];
 			update_tcp_table(sock);
+
+			if (tcpm_state(sock->machine) == ST_TIME_WAIT) {
+				if (time(NULL) - sock->time_wait_time > 4) {
+					tcpm_event(sock->machine, ON_TIMEOUT, NULL, NULL);
+				}
+			}
+	
+
 			if ((sock->last_packet > 0) && (time(NULL) - sock->last_packet > 4/*XXX*/)) {
 				nlog(MSG_WARNING, "tcp_watchdog", "Watchdog timer on socket %d.  Doing something about it...", sock->fd);
 
