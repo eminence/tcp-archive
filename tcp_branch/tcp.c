@@ -64,6 +64,71 @@ tcp_socket_t *get_socket_from_int(int s) {
 	return sock;
 }
 
+
+int send_dumb_packet(tcp_socket_t *sock, char*packet, uint8_t AckOrRST) {
+
+	uint32_t seq = get_seqnum(ip_to_tcp(packet));
+	uint32_t ack = get_seqnum(ip_to_tcp(packet));
+	uint8_t flags = get_flags(ip_to_tcp(packet));
+
+	if (AckOrRST == TCP_FLAG_ACK) 
+		tcp_sendto_raw(socket, NULL, 0, TCP_FLAG_ACK, ack, sock->recv_next);
+	if (AckOrRST == TCP_FLAG_RST)
+		tcp_sendto_raw(socket, NULL, 0, TCP_FLAG_RST, ack, sock->recv_next);
+
+
+	return 0;
+
+}
+
+
+int tcp_sendto_raw(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags, uint32_t seq, uint32_t ack) {
+	assert(sock);
+
+	char *packet;
+
+	//XXX seqnum is obsolete and meaningless
+
+	//int packet_size = build_tcp_packet(data_buf, bufsize, sock->local_port, sock->remote_port ,
+	//		sock->seq_num, /*ack*/ sock->ack_num, flags, sock->send_window_size, &packet);
+	int packet_size = build_tcp_packet(data_buf, bufsize, sock->local_port, sock->remote_port ,
+			seq, ack, flags, sock->send_window_size, &packet);
+
+	nlog(MSG_LOG,"tcp_sendto", "now have a packet of size %d ready to be sent to dest_port %d", 
+			packet_size, sock->remote_port);
+
+	// put our tcp packet in an IP packet. woot!
+	//int ip_packet_size = buildPacket(sock->local_node, packet, packet_size, sock->remote_node, &ippacket, PROTO_TCP);
+
+	int retval = van_driver_sendto(sock->local_node, packet, packet_size, sock->remote_node, PROTO_TCP);
+
+	free(packet);
+
+	if (retval == -1) {
+		nlog(MSG_ERROR,"tcp_sendto", "van_driver_sendto returned -1! A tcp packet just got lost!");
+		return -1;
+	}
+
+	/* Increase seq_num by buffer size; add 1 for each special flag. */
+	sock->seq_num += bufsize + !!(flags & TCP_FLAG_SYN)
+		+ !!(flags & TCP_FLAG_FIN)
+		+ !!(flags & TCP_FLAG_RST);
+
+
+	/* as long as the packet is not a pure ACK (where pure ACK == only ACK, and no payload), then
+	 * we'll be expecting a reply for this packet */
+	if (flags != TCP_FLAG_ACK) {
+		sock->last_packet = time(NULL);
+	} else {
+		sock->last_packet = 0;
+
+	}
+
+	return retval;
+}
+
+
+
 /* master tcp sender function
  */
 int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) {
