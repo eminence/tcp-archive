@@ -11,14 +11,14 @@
 #include "fancy_display.h"
 #include "notify.h"
 
-void* alloc_byte(uint8_t flags) {
+void* alloc_byte(uint8_t ibyte) {
   void* byte = malloc(1);
 
   /* Ensure success. */
   assert(byte);
 
-  /* Set flags. */
-  *((uint8_t*)byte) = flags;
+  /* Set contents. */
+  *((uint8_t*)byte) = ibyte;
 
   return byte;
 }
