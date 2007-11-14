@@ -52,6 +52,8 @@ typedef struct tcp_socket__ {
 
 	time_t last_packet; /* set this to time(NULL) when you're expecting a timely reply. a clocktick thread will alert someone of something when something happens */
 	time_t time_wait_time; /* initialize to zero, set to time() when we want to start our timewaitwaittimetimewatertimer */
+
+	time_t ufunc_timeout; /*   */
 								
 } tcp_socket_t;
 
@@ -71,14 +73,14 @@ int sys_socket(int clone);
 int build_tcp_packet(char *data, int data_size, 
 		uint16_t source_port, uint16_t dest_port,
 		uint32_t seq_num, uint32_t ack_num,
-		uint8_t flags, uint16_t window, char **header);
+		uint8_t flags, uint16_t window, char **header, int dst);
 
 
 tcp_socket_t* get_tmp_socket(uint16_t local_port, int remote_node, uint16_t remote_port, uint16_t send_window_size);
 int queue_eof(tcp_socket_t *sock);
 int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags);
 tcp_socket_t *get_socket_from_int(int s);
-uint16_t calculate_tcp_checksum(char* packet);
+uint16_t calculate_tcp_checksum(char* packet, uint8_t src, uint8_t dst, int seg_len);
 int send_packet_with_flags(tcp_socket_t* sock, uint8_t flags, int ack_size); /* ack_size unused for fin/syn */
 int tcp_sendto_raw(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags, uint32_t seq, uint32_t ack);
 int send_dumb_packet(tcp_socket_t *sock, char*packet, uint8_t AckOrRST);

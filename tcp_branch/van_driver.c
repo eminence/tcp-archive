@@ -129,7 +129,7 @@ void do_recv_tcp(tcp_socket_t* sock, char* packet) {
 		/* IMPORTANT.  we need this line.  should it go here, though? */
 		updateFromWindowAnnounce(sock, get_window(ip_to_tcp(packet)));
 	
-		nlog(MSG_LOG, "do_rev_estab", "send_una=%d  send_next=%d  send_written=%d  send_remote_flow_window=%d", sock->send_una, sock->send_next, sock->send_written, sock->remote_flow_window);
+		nlog(MSG_LOG, "do_recv_estab", "send_una=%d  send_next=%d  send_written=%d  send_remote_flow_window=%d", sock->send_una, sock->send_next, sock->send_written, sock->remote_flow_window);
 	
 		/* if this data packet also contains an ACK, move forward unack pointer to reflect newly ACK'd data -- XXX NOTE: this catches 0-byte ACKs in the can_recv states */
 		processPacketForAck(sock, packet); 
@@ -137,8 +137,9 @@ void do_recv_tcp(tcp_socket_t* sock, char* packet) {
 		/* If we recieved a control packet, ack 1 byte of data. */
 		if(is_control(packet)) {
 			nlog(MSG_XXX, "do_recv_tcp", "Got a SYN or a FIN; increasing recv_next by one");
-			ackData(sock, 1); // *** DOESN'T SEND AN ACK PACKET!!!!!!
-		  	sock->recv_read++; // XXX hackity hack: increase last seq number "user" read by 1 so that the user won't read our control packets next read request
+			ackData(sock, 1); // *** DOESN'T SEND AN ACK PACKET
+			// XXX let's put this hack on hold and try to do this a little nicer.
+		  	//sock->recv_read++; // XXX hackity hack: increase last seq number "user" read by 1 so that the user won't read our control packets next read request
 		}
 
 		/* We can do this even though we might toss the packet because data packets don't affect state (and these are the only droppable packets.) */
@@ -150,14 +151,12 @@ void do_recv_tcp(tcp_socket_t* sock, char* packet) {
 		int room=1;
 		
 		if(is_data(packet) && (room=haveRoomToReceive(sock, data_size)) && tcpm_canrecv(sock->machine)) { // if data packet AND can fit AND valid state (note: wont have cntl flag!)
-		  /* TODO copy data into cbuffer with copy datasometsomethiasfdA() */
-
 		  nlog(MSG_XXX, "do_recv_tcp", "Got REAL data; increasing recv_next by len %d", data_size);
 
-			/* copy data into the buffer BEFOR sending out an ack.    word */
+			/* copy data into the buffer BEFORE sending out an ack.    word */
 			dataFromNetworkToBuffer(sock, ip_to_tcp(packet) + TCP_HEADER_SIZE, data_size);
 
-		  ackThisPacket(sock, data_size); // *** SENDS AN ACK PACKET!!!!
+		  ackThisPacket(sock, data_size); // *** SENDS AN ACK PACKET
 		}
 
 		/* This is ugly, but adds valuable debugging output. */
@@ -389,8 +388,6 @@ void *link_state_thread (void *arg) {
 
   nlog(MSG_LOG,"linkstate","Now monitoring the link state for %d interfaces...", nifs);
 	
-  fprintf(stderr, "\n\n\nIN LINK STATE THREAD 2.0\n\n\n\n");
-
   while (1) {
 	 pthread_testcancel();
 	 sleep(1);
@@ -767,13 +764,13 @@ void *listener (void *arg) {
 			 /* Clear checksum field. */
 			 set_tcpchecksum(ip_to_tcp(buf), 0);
 
-			 if((calced_checksum = calculate_tcp_checksum((unsigned char*)ip_to_tcp(buf))) != packet_checksum) {
+			 if((calced_checksum = calculate_tcp_checksum((unsigned char*)ip_to_tcp(buf), src, dest, get_data_len(buf) + TCP_HEADER_SIZE)) != packet_checksum) {
 				nlog(MSG_ERROR,"listener", "Error: tcp checksum mismatch.  compute_tcp_checksum returned %d, we think it should be %d", calced_checksum, packet_checksum);
 				continue;
 			 } else {
 				//nlog(MSG_LOG,"listener","Checksum match.");
 				/* Restore checksum. */
-				set_checksum(buf, packet_checksum);
+				set_tcpchecksum(ip_to_tcp(buf), packet_checksum);
 			 }
 
 			 memcpy(packet, buf, total_length);

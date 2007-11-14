@@ -282,7 +282,6 @@ void tcp_table_new(ip_node_t *node, int fd) {
 	int i, retval;
 	ITEM **new_items;
 
-
 	// new memory for our new updated list of items
 	unpost_menu(output.tcp_menu);
 	new_items = (ITEM**)calloc(output.tcp_menu_num_items+1,sizeof(ITEM*));
@@ -652,12 +651,14 @@ int get_fd_from_menu() {
 }
 
 void handle_tcp_menu_input(int c) {
+		
 	pthread_mutex_lock(&output.lock);
 
 	if (output.toptab != 1) {
 		pthread_mutex_unlock(&output.lock);
 		return; /* ignore if we're not on the tcp tab */
 	}
+
 	switch (c) {
 		case KEY_DOWN:
 			menu_driver(output.tcp_menu, REQ_DOWN_ITEM);
@@ -820,5 +821,4 @@ void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *t
 
 	va_end(args);
 	pthread_mutex_unlock(&output.lock);
-
 }

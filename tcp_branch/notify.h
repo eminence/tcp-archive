@@ -6,6 +6,7 @@
 
 #define TCP_OK              0x01
 #define TCP_ERROR			  	 0x02
+#define TCP_TIMEOUT			 0x04
 
 struct tcp_socket__;
 

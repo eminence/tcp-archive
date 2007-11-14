@@ -49,7 +49,11 @@ int do_connect(sid_t prev, sid_t next, void* context, void* rflags, void* packet
 	 * we'll want to have the latest ack pointer if we should send a packet while in the state machine. */
 
   sock->recv_next += incoming_seq_num;
-  sock->recv_read = incoming_seq_num; //**** (recv_read is the next byte to read so it should stay the same)
+  sock->recv_read = incoming_seq_num; // we bump past the initial syn BEFORE this assignment; thus, we must also bump here!
+  
+  /* XXX Let's put this hack on hold. */
+  //sock->recv_read = incoming_seq_num +1; // we bump past the initial syn BEFORE this assignment; thus, we must also bump here!
+
   //sock->send_window_size = sock->recv_read + sock->recv_window_size - sock->recv_next;
 
   /* manually bump up pointers, to represent the SYN that we sent, and that got ACKd */

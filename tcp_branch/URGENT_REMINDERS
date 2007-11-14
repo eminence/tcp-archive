@@ -18,3 +18,4 @@
 *	[DONE]		Listen -> Close (by means of 'x') currently locks up
 *					ADD NONE AND ACK TRANSISTIONS IN STATES AFTER ESTAB THAT CAN RECV DATA, OTHERWISE, INVALID TRANSISTION
 *				  	{{achin}} race condition in ncurses (you said something about a separate mutices -- one for nlog one for all else)
+*					recv_read should NOT be a hack; instead, when we read data, skip flags

@@ -16,45 +16,6 @@
 
 static ip_node_t *this_node;
 
-/* calculate something that looks like a TCP checksum 
- *
- * loosely copied from http://www.netfor2.com/tcpsum.htm
- * */
-uint16_t tcp_sum_calc(char *buf, int len) {
-	uint16_t padd = 0;
-	uint16_t word16;
-	uint32_t sum;
-	int i;
-
-	// if size is odd, add padding byte
-	if (len%2 == 1) {
-		padd = 1;
-	}
-
-	sum = 0;
-
-	// make 16 bit words out of every tow adjacent 8 bit words and
-	// calculate the sum of all 16 bit words
-	for (i = 0; i<len;i=i+2) {
-
-		if ((i=len-1) && (padd)) {
-			word16 = ((buf[i]<<8)&0xFF00)+(0&0xff);
-		} else {
-			word16 = ((buf[i]<<8)&0xFF00)+(buf[i+1]&0xff);
-		}
-		sum = sum + (uint32_t)word16;
-	}
-
-	while (sum >> 16)
-		sum = (sum & 0xFFFF) + (sum >> 16);
-
-	sum = ~sum;
-
-	return (uint16_t)sum;
-
-}
-
-
 tcp_socket_t* get_tmp_socket(uint16_t local_port, int remote_node, uint16_t remote_port, uint16_t send_window_size) {
 	tcp_socket_t* sock = malloc(sizeof(tcp_socket_t));
 
@@ -143,7 +104,7 @@ int tcp_sendto_raw(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t fla
 	//int packet_size = build_tcp_packet(data_buf, bufsize, sock->local_port, sock->remote_port ,
 	//		sock->seq_num, /*ack*/ sock->ack_num, flags, sock->send_window_size, &packet);
 	int packet_size = build_tcp_packet(data_buf, bufsize, sock->local_port, sock->remote_port ,
-			seq, ack, flags, sock->send_window_size, &packet);
+			seq, ack, flags, sock->send_window_size, &packet, sock->remote_node);
 
 	nlog(MSG_LOG,"tcp_sendto", "now have a packet of size %d ready to be sent to dest_port %d", 
 			packet_size, sock->remote_port);
@@ -190,7 +151,7 @@ int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) 
 	//int packet_size = build_tcp_packet(data_buf, bufsize, sock->local_port, sock->remote_port ,
 	//		sock->seq_num, /*ack*/ sock->ack_num, flags, sock->send_window_size, &packet);
 	int packet_size = build_tcp_packet(data_buf, bufsize, sock->local_port, sock->remote_port ,
-			sock->send_next, /*ack*/ sock->recv_next, flags, sock->recv_read + sock->recv_window_size - sock->recv_next, &packet);
+			sock->send_next, /*ack*/ sock->recv_next, flags, sock->recv_read + sock->recv_window_size - sock->recv_next, &packet, sock->remote_node);
 
 	nlog(MSG_LOG,"tcp_sendto", "now have a packet of size %d ready to be sent to dest_port %d", 
 			packet_size, sock->remote_port);
@@ -235,7 +196,7 @@ int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) 
 int build_tcp_packet(char *data, int data_size, 
 		uint16_t source_port, uint16_t dest_port,
 		uint32_t seq_num, uint32_t ack_num,
-		uint8_t flags, uint16_t window, char **header) {
+		uint8_t flags, uint16_t window, char **header, int dst) {
 
 	int total_packet_length = data_size + TCP_HEADER_SIZE; // fixed header size of 20 bytes
 
@@ -259,18 +220,30 @@ int build_tcp_packet(char *data, int data_size,
 	// memcpy the data into the packet, if there is any
 	if (data) memcpy(*header+TCP_HEADER_SIZE,data,data_size);
 
-	uint16_t csum;
+	uint16_t csum = calculate_tcp_checksum(*header, this_node->van_node->vn_num, dst, data_size + TCP_HEADER_SIZE);
 
-	set_tcpchecksum(*header, (csum = calculate_tcp_checksum(tcp_to_ip(*header)))); 
+	set_tcpchecksum(*header, csum); 
 	assert(csum == get_tcpchecksum(*header));
+
+	nlog(MSG_XXX, "build_tcp_packet", "computed checksum: %d\n", csum);
 
 	return data_size + TCP_HEADER_SIZE;
 }
 
-uint16_t calculate_tcp_checksum(char* packet) {
+uint16_t calculate_tcp_checksum(char* packet, uint8_t src, uint8_t dst, int seg_len) {
+	uint16_t csum, csum_o;
+	
+	nlog(MSG_LOG, "tcp_checksum", "src = %d, dst = %d, seg_len = %d, partial = %d", src, dst, seg_len, csum_partial(packet, seg_len, 0));
 
+	csum_o = get_tcpchecksum(packet);
 	set_tcpchecksum(packet, 0);
-	return tcp_sum_calc(packet, get_total_len(tcp_to_ip(packet)));
+
+	csum = csum_tcpudp_magic(src, dst, seg_len + HEADER_SIZE, 6 /* TCP PROTO */,
+							 		 csum_partial(packet, seg_len, 0));	
+
+	set_tcpchecksum(packet, csum_o);
+
+	return csum;
 }
 
 /* destroy global tcp structures.
@@ -420,7 +393,7 @@ int v_connect(int socket, int node, uint16_t port) {
 		return -1;
 	}
 
-	int status = wait_for_event(sock, TCP_OK | TCP_ERROR);
+	int status = wait_for_event(sock, TCP_OK | TCP_ERROR | TCP_TIMEOUT);
 
 	if (status == TCP_OK) return 0;
 	else { return -1; }
@@ -458,16 +431,17 @@ int v_read(int socket, unsigned char *buf, int nbyte) {
 
 	if (nbyte == 0) return 0;
 
-	int amount;
+	/* XXX let's rely more on getDataFromBuffer -- to fast forward past control flags */
 
-	if ((amount=amountOfDataToRead(sock)) == 0) return 0;
-	else {
+	//int amount;
+	//if ((amount=amountOfDataToRead(sock)) == 0) return 0;
+	//else {
 
 		memset(buf, 0, nbyte); /* memset... always a good decision */
-		int retval = getDataFromBuffer(sock, buf, amount);
+		int retval = getDataFromBuffer(sock, buf, nbyte); //nbyte was amount before
 		return retval;
 
-	}
+	//}
 
 	// TODO make sure we're in the established state;
 

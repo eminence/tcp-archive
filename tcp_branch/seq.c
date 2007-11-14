@@ -58,29 +58,55 @@ int getDataFromBuffer(tcp_socket_t *sock, char *buf, int max_size) {
 	assert(buf);
 	int amount = MIN(max_size, amountOfDataToRead(sock));
 
-	assert(amount > 0);
+	assert(0 <= amount);
+
+	if(0 == amount) {
+		return 0;
+	}
+
+
 	char *d;
 	int toreturn;
 
+	nlog(MSG_LOG, "getDataFromBuffer", "reading max_size: %d, amount: %d, recv_read: %d", max_size, amount, sock->recv_read);
+
 	int retval = cbuf_get_range(sock->r_buf, sock->recv_read, amount, &d);
 	if (retval < 0) {
+		/* // On second thought, let's just be smart enough to skip flags. *
+		nlog(MSG_ERROR, "read", "UH OH! %d", *(int*)d);
 		assert(0 && "Got a CONTROL FLAG in our recv buffer!");
-		/* this is a flag */
-		//toreturn = *(int*)d;  /* these are the flags */
+		
+		// this is a flag
+		//toreturn = *(int*)d;  // these are the flags
 		toreturn = 0;
+		*/
+	
+		/************** NEW ***************/
 
+		nlog(MSG_LOG, "getDataFromBuffer", "oops, flag at %d, bumping by one; recurse", sock->recv_read);
+
+		// fast forward past flag
+		sock->recv_read++;
+
+		// try again
+		toreturn = getDataFromBuffer(sock, buf, max_size);
+		
 	} else {
 		/* Check if we read a (special) EOF */
 		if(!d) {
+			nlog(MSG_LOG, "getDataFromBuffer", "found a NULL byte, updating recv_read and returning -1");
+			sock->recv_read++;
 			return -1;
 		}
 
 		memcpy(buf, d, retval);
 
-		sock->recv_read += amount;
+		sock->recv_read += retval;
 		//sock->recv_window_size += amount;
 		assert(sock->recv_read <= sock->recv_next);
-		toreturn = amount;
+		toreturn = retval;
+		
+		nlog(MSG_LOG, "getDataFromBuffer", "read %d characters, finished", toreturn);
 	}
 
 	free(d); /*hazzzxxxxxxx*/

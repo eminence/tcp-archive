@@ -26,17 +26,17 @@ void* alloc_byte(uint8_t ibyte) {
 /* Core functionality. */
 tcp_machine_t* tcpm_new(tcp_socket_t* context, uint8_t clone) {
   tcp_machine_t *machine        = malloc(sizeof(tcp_machine_t));
-  state_t       *st_closed      = state_new(ST_CLOSED,      in_closed,	NULL,             NULL),
+  state_t       *st_closed      = state_new(ST_CLOSED,      in_closed,	NULL,             NULL), // was null (error func)
                 *st_syn_sent    = state_new(ST_SYN_SENT,    NULL, 		fail_with_reset,  NULL),
                 *st_syn_rcvd    = state_new(ST_SYN_RCVD,    NULL, 		fail_with_reset,  NULL),
-                *st_listen      = state_new(ST_LISTEN,      NULL, 		NULL,             NULL),
+                *st_listen      = state_new(ST_LISTEN,      NULL, 		fail_with_reset,  NULL), // was null
                 *st_estab       = state_new(ST_ESTAB,       in_estab,	fail_with_reset,  NULL),
-                *st_fin_wait_1  = state_new(ST_FIN_WAIT1,   NULL, 		NULL,             NULL),
-                *st_fin_wait_2  = state_new(ST_FIN_WAIT2,   NULL, 		NULL,             NULL),
-                *st_time_wait   = state_new(ST_TIME_WAIT,   in_timewait,NULL,             NULL),
-                *st_closing     = state_new(ST_CLOSING,     NULL, 		NULL,             NULL),
-                *st_close_wait  = state_new(ST_CLOSE_WAIT,  NULL, 		NULL,             NULL), // TODO -- push EOF on recv 
-                *st_last_ack    = state_new(ST_LAST_ACK,    NULL, 		NULL,             NULL);
+                *st_fin_wait_1  = state_new(ST_FIN_WAIT1,   NULL, 		fail_with_reset,  NULL), // was null
+                *st_fin_wait_2  = state_new(ST_FIN_WAIT2,   NULL, 		fail_with_reset,  NULL), // was null
+                *st_time_wait   = state_new(ST_TIME_WAIT,   in_timewait,fail_with_reset,  NULL), // was null
+                *st_closing     = state_new(ST_CLOSING,     NULL, 		fail_with_reset,  NULL), // was null
+                *st_close_wait  = state_new(ST_CLOSE_WAIT,  NULL, 		fail_with_reset,  NULL), // was null
+                *st_last_ack    = state_new(ST_LAST_ACK,    NULL, 		fail_with_reset,  NULL); // was null
   
   /* Initialize state machine. */
   machine->sm = machine_new(st_closed, context);
@@ -61,26 +61,39 @@ tcp_machine_t* tcpm_new(tcp_socket_t* context, uint8_t clone) {
   assert(machine);
   assert(machine->sm);
   
-  /* Add transitions. */ // TODO: XXX XXX XXX XXX ADD NONE AND ACK TRANSISTIONS IN STATES AFTER ESTAB THAT CAN RECV DATA, OTHERWISE, INVALID TRANSISTION
+  /* Add transitions. */
   assert(0 == state_transition(st_closed,      st_syn_sent,    ON_ACTIVE_OPEN,     do_send_flags,          alloc_byte(TCP_FLAG_SYN)));
   assert(0 == state_transition(st_closed,      st_listen,      ON_PASSIVE_OPEN,    do_listen,              NULL)); /* XXX init state. */
+
   assert(0 == state_transition(st_syn_sent,    st_closed,      ON_CLOSE,           NULL,                   NULL)); /* XXX free state. */
   assert(0 == state_transition(st_syn_sent,    st_syn_rcvd,    ON_RECV_SYN,        do_send_flags,          alloc_byte(TCP_FLAG_ACK)));
   assert(0 == state_transition(st_syn_sent,    st_estab,       ON_RECV_SYN_ACK,    do_connect,             alloc_byte(TCP_FLAG_ACK)));
+
   assert(0 == state_transition(st_listen,      st_closed,      ON_CLOSE,           do_close,               alloc_byte(CLOSE_OK))); /* notify close call THAT CLOSED in listen state. */
   assert(0 == state_transition(st_listen,      st_syn_rcvd,    ON_RECV_SYN,        do_send_flags,          alloc_byte(TCP_FLAG_SYN | TCP_FLAG_ACK)));
+
   assert(0 == state_transition(st_syn_rcvd,    st_estab,       ON_RECV_ACK,        NULL,                   NULL));
+
   assert(0 == state_transition(st_estab,       st_fin_wait_1,  ON_CLOSE,           do_send_flags,          alloc_byte(TCP_FLAG_FIN)));
   assert(0 == state_transition(st_estab,       st_close_wait,  ON_RECV_FIN,        do_send_flags,          alloc_byte(TCP_FLAG_ACK))); /* XXX XXX do_recv_tcp DOESN'T sends ack anymore. XXX XXX*/
-  assert(0 == state_transition(st_estab,       st_estab,       ON_NONE,            NULL,                   NULL)); // can recv data
-  assert(0 == state_transition(st_estab,       st_estab,       ON_RECV_ACK,        NULL,                   NULL));
+  assert(0 == state_transition(st_estab,       st_estab,       ON_NONE,            NULL,                   NULL)); // can recv data -- noop
+  assert(0 == state_transition(st_estab,       st_estab,       ON_RECV_ACK,        NULL,                   NULL)); // can ack/send data  -- noop
+
   assert(0 == state_transition(st_fin_wait_1,  st_closing,     ON_RECV_FIN,        do_send_flags,          alloc_byte(TCP_FLAG_ACK)));
   assert(0 == state_transition(st_fin_wait_1,  st_time_wait,   ON_RECV_FIN_ACK,    do_send_flags,          alloc_byte(TCP_FLAG_ACK)));
   assert(0 == state_transition(st_fin_wait_1,  st_fin_wait_2,  ON_RECV_ACK,        do_close,               alloc_byte(CLOSE_OK))); /* first close, initial notify; close succeeds, can still recv. */
-  assert(0 == state_transition(st_close_wait,  st_last_ack,    ON_CLOSE,           do_send_flags,          alloc_byte(TCP_FLAG_FIN)));
+  assert(0 == state_transition(st_fin_wait_1,  st_fin_wait_1,  ON_NONE,            NULL,                   NULL)); // can recv data -- noop
+
   assert(0 == state_transition(st_fin_wait_2,  st_time_wait,   ON_RECV_FIN,        do_send_flags,          alloc_byte(TCP_FLAG_ACK)));
+  assert(0 == state_transition(st_fin_wait_2,  st_fin_wait_2,  ON_NONE,            NULL,                   NULL)); // can recv data -- noop
+ 
+  assert(0 == state_transition(st_close_wait,  st_last_ack,    ON_CLOSE,           do_send_flags,          alloc_byte(TCP_FLAG_FIN)));
+  assert(0 == state_transition(st_close_wait,  st_close_wait,  ON_RECV_ACK,        NULL,                   NULL)); // can ack/send data  -- noop
+
   assert(0 == state_transition(st_closing,     st_time_wait,   ON_RECV_ACK,        NULL,                   NULL));
+
   assert(0 == state_transition(st_time_wait,   st_closed,      ON_TIMEOUT,         do_close,               alloc_byte(CLOSE_EOF))); /* first close, final notify: next read fails. */ 
+
   assert(0 == state_transition(st_last_ack,    st_closed,		ON_RECV_ACK,        do_close,					  alloc_byte(CLOSE_OK))); /* second close: just returns OK and socket is fully closed. */
 
   return machine;
