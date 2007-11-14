@@ -1,7 +1,7 @@
 *	[DONE]		notify and sleep stuff
 *	[DONE]		always wake on error and return -1 
 *					add mutexes to all sockets; any time we touch a socket, lock mutex
-*					DO WE SET AND CHECK TCP CHECKSUMS????? (if not, we need to)
+*	[DONE]		DO WE SET AND CHECK TCP CHECKSUMS????? (if not, we need to)
 *					blocking user ops HAVE TO TIMEOUT! (use tcpm reset)
 *					don't allow write or read in not estab state MAKE SURE In the user code that we disallow state transitions that are currently illegal.
 *	[DONE] 		TIMEWAIT -- add kill_me field -1 is safe, 0 kill, >0 dec watchdog
@@ -16,6 +16,7 @@
 *	[DONE]		if we step from established to established (i.e. we receive a data packet), do NOT try to "notify the user"
 *	[DONE]		IF A CONNECTION DOES NOT EXIST, THEN A RESET IS SENT IN RESPONSE TO ANY INCOMING SEGMENT EXCEPT 
 *	[DONE]		Listen -> Close (by means of 'x') currently locks up
-*					ADD NONE AND ACK TRANSISTIONS IN STATES AFTER ESTAB THAT CAN RECV DATA, OTHERWISE, INVALID TRANSISTION
-*				  	{{achin}} race condition in ncurses (you said something about a separate mutices -- one for nlog one for all else)
-*					recv_read should NOT be a hack; instead, when we read data, skip flags
+*	[DONE]		ADD NONE AND ACK TRANSISTIONS IN STATES AFTER ESTAB THAT CAN RECV DATA, OTHERWISE, INVALID TRANSISTION
+*	[DONE]	  	{{achin}} race condition in ncurses (you said something about a separate mutices -- one for nlog one for all else)
+*	[DONE]		recv_read should NOT be a hack; instead, when we read data, skip flags
+*      			reading from close wait end should yield -1
