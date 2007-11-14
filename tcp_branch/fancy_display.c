@@ -313,8 +313,8 @@ void update_tcp_table(tcp_socket_t *sock) {
 					sock->local_port,
 					sock->remote_port,
 					sock->remote_node,
-					sock->seq_num,
-					sock->ack_num
+					sock->send_next,
+					sock->recv_next
 					);
 
 			free((void*)output.tcp_items[i]->description.str);
