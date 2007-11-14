@@ -238,20 +238,20 @@ int build_tcp_packet(char *data, int data_size,
 		uint8_t flags, uint16_t window, char **header) {
 
 	int total_packet_length = data_size + TCP_HEADER_SIZE; // fixed header size of 20 bytes
-	
+
 	*header = malloc(total_packet_length);
 	memset(*header, 0, total_packet_length); // zero out everything
 
-  nlog(MSG_LOG, "build_tcp_packet", "src_port = %d, dest_port = %d, seq_num = %d, ack_num = %d, flags = %s%s%s%s , window = %d, len = %d",
-    source_port, dest_port, seq_num, ack_num, flags & TCP_FLAG_SYN ? " SYN" : "", flags & TCP_FLAG_ACK ? " ACK" : "", flags & TCP_FLAG_RST ? " RST" : "", flags & TCP_FLAG_FIN ? " FIN" : "", window, data_size);
+	nlog(MSG_LOG, "build_tcp_packet", "src_port = %d, dest_port = %d, seq_num = %d, ack_num = %d, flags = %s%s%s%s , window = %d, len = %d",
+			source_port, dest_port, seq_num, ack_num, flags & TCP_FLAG_SYN ? " SYN" : "", flags & TCP_FLAG_ACK ? " ACK" : "", flags & TCP_FLAG_RST ? " RST" : "", flags & TCP_FLAG_FIN ? " FIN" : "", window, data_size);
 
 	set_srcport(*header, source_port);
 	set_destport(*header, dest_port);
 	set_seqnum(*header, seq_num);
 	set_acknum(*header, ack_num);
 
-  assert(get_seqnum(*header) == seq_num);
-  assert(get_acknum(*header) == ack_num);
+	assert(get_seqnum(*header) == seq_num);
+	assert(get_acknum(*header) == ack_num);
 
 	set_flags(*header, flags);
 	set_window(*header, window);
@@ -259,7 +259,10 @@ int build_tcp_packet(char *data, int data_size,
 	// memcpy the data into the packet, if there is any
 	if (data) memcpy(*header+TCP_HEADER_SIZE,data,data_size);
 
-  set_tcpchecksum(*header, calculate_tcp_checksum(tcp_to_ip(*header))); 
+	uint16_t csum;
+
+	set_tcpchecksum(*header, (csum = calculate_tcp_checksum(tcp_to_ip(*header)))); 
+	assert(csum == get_tcpchecksum(*header));
 
 	return data_size + TCP_HEADER_SIZE;
 }

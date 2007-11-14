@@ -56,9 +56,9 @@ void scroll_logwin(int i) {
 
 void nlog_set_menu(const char *msg, ...) {
 
+	pthread_mutex_lock(&output.lock);
 	va_list args;
 	va_start(args, msg);
-	pthread_mutex_lock(&output.lock);
 	wmove(output.menu_win,0,0);
 	vwprintw(output.menu_win, msg, args);
 	update_panels(); doupdate();
@@ -69,12 +69,12 @@ void nlog_set_menu(const char *msg, ...) {
 
 
 void display_msg(char *msg, ...) {
+	pthread_mutex_lock(&output.lock);
 	va_list args;
 	//int l = strlen(msg);
 	WINDOW *my_form_win;
 	PANEL *my_form_pan;
 
-	pthread_mutex_lock(&output.lock);
 	int c=0;
 	int n = 0;
 	while (msg[c] != 0) {
@@ -119,7 +119,6 @@ void display_msg(char *msg, ...) {
 
 
 int get_text(char *msg, char* return_, int len) {
-	
 	
 	pthread_mutex_lock(&output.lock);
 	
@@ -258,11 +257,11 @@ void test_tcp_menu_update() {
 
 void tcp_table_new(ip_node_t *node, int fd) {
 
+	pthread_mutex_lock(&output.lock);
 	output.tcp_menu_num_items++;
 	int i, retval;
 	ITEM **new_items;
 
-	pthread_mutex_lock(&output.lock);
 
 	// new memory for our new updated list of items
 	unpost_menu(output.tcp_menu);
@@ -337,6 +336,8 @@ void update_tcp_table(tcp_socket_t *sock) {
 
 int get_number(char *msg) {
 	
+	pthread_mutex_lock(&output.lock);
+
 	FIELD *field[2];
 	FORM  *my_form;
 	int rows, cols,ch, num;
@@ -422,12 +423,14 @@ int get_number(char *msg) {
 	del_panel(my_form_pan);
 	delwin(my_form_win);
 	update_panels(); doupdate();
+	pthread_mutex_unlock(&output.lock);
 
 	return num;
 }
 
 void switch_to_tab(int t) {
-		unsigned int max_size = 0;
+	pthread_mutex_lock(&output.lock);
+	unsigned int max_size = 0;
 		int total_tabs = 0;
 		while (output.tabs[total_tabs] != NULL) {
 			if (strlen(output.tabs[total_tabs]) > max_size) {
@@ -470,18 +473,16 @@ void switch_to_tab(int t) {
 		}
 
 		output.toptab = t;
+	pthread_mutex_unlock(&output.lock);
 }
 
 int init_display(int use_curses) {
 
 	pthread_mutexattr_init(&output.lock_attr);
-	pthread_mutexattr_init(&output.nloglock_attr);
 
-	pthread_mutexattr_settype(&output.lock_attr, PTHREAD_MUTEX_ERRORCHECK_NP);
-	pthread_mutexattr_settype(&output.nloglock_attr, PTHREAD_MUTEX_ERRORCHECK_NP);
+	pthread_mutexattr_settype(&output.lock_attr, PTHREAD_MUTEX_RECURSIVE_NP);
 
-	pthread_mutex_init(&output.lock,0);
-	pthread_mutex_init(&output.nloglock,0);
+	pthread_mutex_init(&output.lock,&output.lock_attr);
 	pthread_mutex_lock(&output.lock);
 
 	output.use_curses = use_curses;
@@ -610,12 +611,18 @@ int init_display(int use_curses) {
 }
 
 int get_fd_from_menu() {
+	pthread_mutex_lock(&output.lock);
 	tcp_socket_t *sock = (tcp_socket_t*) item_userptr(current_item(output.tcp_menu));
+	pthread_mutex_unlock(&output.lock);
 	if (sock == NULL) return -1; else return sock->fd;
 }
 
 void handle_tcp_menu_input(int c) {
-	if (output.toptab != 1) return; /* ignore if we're not on the tcp tab */
+	pthread_mutex_lock(&output.lock);
+	if (output.toptab != 1) {
+	pthread_mutex_unlock(&output.lock);
+		return; /* ignore if we're not on the tcp tab */
+	}
 	switch (c) {
 		case KEY_DOWN:
 			menu_driver(output.tcp_menu, REQ_DOWN_ITEM);
@@ -633,6 +640,7 @@ void handle_tcp_menu_input(int c) {
 			break;
 	}
 	update_panels(); doupdate();
+	pthread_mutex_unlock(&output.lock);
 	return;
 }
 
@@ -671,8 +679,8 @@ void clear_rtable_display() {
 }
 
 void rtable_print( char *text, ...) {
-	va_list args;
 	pthread_mutex_lock(&output.lock);
+	va_list args;
 	va_start(args, text);
 	vwprintw(output.rtable_win, text, args);
 	wprintw(output.rtable_win,"\n");
@@ -681,16 +689,18 @@ void rtable_print( char *text, ...) {
 	pthread_mutex_unlock(&output.lock);
 }
 int get_key() {
+	pthread_mutex_lock(&output.lock);
 	return wgetch(stdscr);
+	pthread_mutex_unlock(&output.lock);
 }
 
 
 void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *text, ...) {
+	pthread_mutex_lock(&output.lock);
 	int c = output.use_curses;
 	WINDOW *log = output.log_win;
 	va_list args;
 	va_start(args, text);
-	pthread_mutex_lock(&output.nloglock);
 
 
 
@@ -757,6 +767,6 @@ void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *t
 	}
 
 	va_end(args);
-	pthread_mutex_unlock(&output.nloglock);
+	pthread_mutex_unlock(&output.lock);
 
 }

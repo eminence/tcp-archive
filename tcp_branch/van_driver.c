@@ -765,7 +765,7 @@ void *listener (void *arg) {
 			 /* Clear checksum field. */
 			 set_tcpchecksum(ip_to_tcp(buf), 0);
 
-			 if((calced_checksum = calculate_tcp_checksum((unsigned char*)buf)) != packet_checksum) {
+			 if((calced_checksum = calculate_tcp_checksum((unsigned char*)ip_to_tcp(buf))) != packet_checksum) {
 				nlog(MSG_ERROR,"listener", "Error: tcp checksum mismatch.  compute_tcp_checksum returned %d, we think it should be %d", calced_checksum, packet_checksum);
 				continue;
 			 } else {
@@ -972,10 +972,6 @@ ip_node_t *van_driver_init(char *fname, int num) {
   // init TCP stufffs:
   v_tcp_init(node);
 
-  nlog (MSG_LOG,"init","Node %d running", vn->vn_num);	
-  nlog_set_menu("[node %d]  1:Send data   2:Receive Data   3:Toggle Link State   q:Quit", vn->vn_num);
-  // start sending thread
-
 
   node->tcp_thread = malloc(sizeof(pthread_t));
   pthread_create(node->tcp_thread, 0, tcp_thread, (void*)node);
@@ -986,9 +982,6 @@ ip_node_t *van_driver_init(char *fname, int num) {
   nlog (MSG_LOG,"init","Node %d running", vn->vn_num);	
   nlog_set_menu("[node %d]  1:Send data   2:Receive Data   3:Toggle Link State   q:Quit", vn->vn_num);
   // start sending thread
-
-  // init TCP stufffs:
-  v_tcp_init(node);
 
   return node;
 
