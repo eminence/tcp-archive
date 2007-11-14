@@ -15,6 +15,7 @@ typedef struct {
 
 	int use_curses;
 	pthread_mutex_t lock; /* lock! every function that outputs to the screen should use this */
+	pthread_mutex_t nloglock; /* lock! nlog uses this */
 
 	WINDOW *rtable_win;
 	PANEL	*rtable_pan;

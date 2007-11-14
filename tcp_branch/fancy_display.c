@@ -476,10 +476,11 @@ void switch_to_tab(int t) {
 
 int init_display(int use_curses) {
 
+	pthread_mutex_init(&output.lock,0);
+	pthread_mutex_init(&output.nloglock,0);
 	pthread_mutex_lock(&output.lock);
 
 	output.use_curses = use_curses;
-	pthread_mutex_init(&output.lock,0);
 	output.tabs[0] = "IP";
 	output.tabs[1] = "TCP";
 	output.tabs[2] = NULL;
@@ -677,7 +678,7 @@ void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *t
 	WINDOW *log = output.log_win;
 	va_list args;
 	va_start(args, text);
-	pthread_mutex_lock(&output.lock);
+	pthread_mutex_lock(&output.nloglock);
 
 
 
@@ -744,6 +745,6 @@ void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *t
 	}
 
 	va_end(args);
-	pthread_mutex_unlock(&output.lock);
+	pthread_mutex_unlock(&output.nloglock);
 
 }
