@@ -337,7 +337,9 @@ int v_socket() {
 int v_bind(int socket, int node, uint16_t port) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
   uint16_t old_port;
-  
+
+	if (!(tcpm_canbind(sock->machine))) return -1;
+
 	assert(sock->machine);
 	if (tcpm_state(sock->machine) == ST_CLOSED) {
 		sock->local_port = port;
@@ -355,8 +357,9 @@ int v_listen(int socket, int backlog /* optional */) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
 
 	assert(sock->machine);
+	if (!(tcpm_canlisten(sock->machine))) return -1;
 
-  sock->seq_num = 1000;
+	sock->seq_num = 1000;
   
 	if (tcpm_event(sock->machine, ON_PASSIVE_OPEN, this_node, NULL)) {
 		nlog(MSG_ERROR,"socket:listen", "Uhh. error.  Couldn't transition states.  noob");
@@ -372,8 +375,7 @@ int v_listen(int socket, int backlog /* optional */) {
 int v_connect(int socket, int node, uint16_t port) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
 
-	// TODO make sure we can call connect
-	// TODO transition into connection state
+	if (!(tcpm_canconnect(sock->machine))) return -1;
 
 	sock->remote_node = node;
 	sock->remote_port = port;
@@ -412,6 +414,8 @@ int v_connect(int socket, int node, uint16_t port) {
 int v_accept(int socket) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
 
+	if (!(tcpm_canaccept(sock->machine))) return -1;
+
 	// TODO make sure we can call accept
 
 	sock->can_handshake = 1;
@@ -433,6 +437,8 @@ int v_accept(int socket) {
  * return num types read or negative number on failure or 0 on EOF */
 int v_read(int socket, unsigned char *buf, int nbyte) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
+
+	if (!(tcpm_canrecv(sock->machine))) return -1;
 
 	/* XXX NOTE! XXX v_read is NON BLOCKING! WOOT! */
 
@@ -458,6 +464,8 @@ int v_read(int socket, unsigned char *buf, int nbyte) {
  * retursn num bytes written or negative number on failure */
 int v_write(int socket, const unsigned char *buf, int nbytes) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
+
+	if (!(tcpm_cansend(sock->machine))) return -1;
 
 	int can_send = getAmountAbleToAccept(sock);
 	int will_send = MIN(can_send, nbytes);
