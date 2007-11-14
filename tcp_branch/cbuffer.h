@@ -6,6 +6,7 @@
 
 #define CBUF_DATA     0x01
 #define CBUF_FLAG     0x02
+#define CBUF_EOF		 0x04
 
 typedef struct {
   char* data;
@@ -20,6 +21,7 @@ void cbuf_destroy(cbuf_t* buf);
 int   cbuf_put_range(cbuf_t* buf, char* buffer, int start, int len);
 int   cbuf_put_flag(cbuf_t* buf, int start, uint8_t flags);
 int   cbuf_get_range(cbuf_t* buf, int start, int len, void** data);
+int	cbuf_put_eof(cbuf_t* buf, int start);
 void  cbuf_print(cbuf_t* buf);
 
 /* Private function. */

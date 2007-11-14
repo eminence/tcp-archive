@@ -40,4 +40,15 @@ TIMEWAIT -- add kill_me field -1 is safe, 0 kill, >0 dec watchdog
 
 
 
+
+
+
+
+
+ ************ WHEN SOCKET IS RESET (BY CLOSE, BY ERROR...) MUST __REINIT STATUS! AND SEQ! AND POINTERS? ----- CAN WE REUSE A SOCKET THAT HAS BEEN CLOSED???            IF SO WE REALLY NEED TO CLEAN UP BETTER? OTHERWISE, WE CAN JUST FORGET IT.
+
+== SENDING RESET AND FAIL FOR "LISTEN" ROOT STATE MACHINES DOESN'T GO TO CLOSE-- GOES TO LISTEN!
+
+
+
 	if we step from established to established (i.e. we receive a data packet), do NOT try to "notify the user"

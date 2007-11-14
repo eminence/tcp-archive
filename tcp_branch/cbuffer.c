@@ -68,6 +68,12 @@ int cbuf_put_range(cbuf_t* buf, char* buffer, int start, int len) {
   return 0;
 }
 
+int cbuf_put_eof(cbuf_t* buf, int start) {
+   __cbuf_put(buf, start, 0, CBUF_EOF);
+
+   return 0;
+}
+
 int cbuf_put_flag(cbuf_t* buf, int start, uint8_t flags) {
    __cbuf_put(buf, start, (char)flags, CBUF_FLAG);
 
@@ -93,10 +99,16 @@ int cbuf_get_range(cbuf_t* buf, int start, int len, void** vdata) {
   } cbuf_iterate_values_end();
   
   *data = realloc(*data, cnt);
-  
   assert(*data);
 
-  return t == CBUF_DATA ? cnt : -1;
+  /* If we just read an EOF, set data to be NULL */
+  if(t == CBUF_EOF) {
+	free(*data);
+
+	*data = NULL;
+  }
+
+  return (t & CBUF_DATA|CBUF_EOF) ? cnt : -1;
 }
 
 void cbuf_print(cbuf_t* buf) {

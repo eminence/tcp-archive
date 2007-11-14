@@ -74,6 +74,7 @@ int build_tcp_packet(char *data, int data_size,
 		uint8_t flags, uint16_t window, char **header);
 
 
+int queue_eof(tcp_socket_t *sock);
 int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags);
 tcp_socket_t *get_socket_from_int(int s);
 uint16_t calculate_tcp_checksum(char* packet);

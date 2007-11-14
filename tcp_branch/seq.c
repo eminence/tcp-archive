@@ -58,11 +58,17 @@ int getDataFromBuffer(tcp_socket_t *sock, char *buf, int max_size) {
 
 	int retval = cbuf_get_range(sock->r_buf, sock->recv_read, amount, &d);
 	if (retval < 0) {
+		assert(0 && "Got a CONTROL FLAG in our recv buffer!");
 		/* this is a flag */
 		//toreturn = *(int*)d;  /* these are the flags */
 		toreturn = 0;
 
 	} else {
+		/* Check if we read a (special) EOF */
+		if(!d) {
+			return -1;
+		}
+
 		memcpy(buf, d, retval);
 
 		sock->recv_read += amount;
@@ -130,9 +136,10 @@ int sendFlagNext(tcp_socket_t *sock) {
 		toreturn = 1;
 
 	} else {
+		assert(d); // we should never get an EOF in our send buffer!
 		toreturn = 0;
 	}
-
+	
 	free(d); /*hazzzxxxxxxx*/
 	
 	return toreturn;
@@ -152,9 +159,10 @@ int getFlagToSend(tcp_socket_t *sock) {
 		/* this is a flag */
 		toreturn = *(int*)d;  /* these are the flags */
 	} else {
-		assert(retval < 0);
+		assert(retval < 0); // XXX PANIC
+		assert(d); // ensure that we didn't get an EOF flag in our send buffer
 	}
-
+	
 	free(d); /*hazzzxxxxxxx*/
 
 	return toreturn;
@@ -184,6 +192,7 @@ int getAmountAbleToSend(tcp_socket_t *sock) {
 		toreturn = 1;
 
 	} else {
+		assert(d); // ensure that we didn't just read an EOF in our send buffer-- this is illegal
 		toreturn = retval;
 	}
 
@@ -272,6 +281,7 @@ int dataFromBufferToNetwork(tcp_socket_t *sock, char *data, int size) {
 		toreturn = 0;
 
 	} else {
+		assert(d); // ensure that we didn't just read an EOF to send across network; illegal
 		memcpy(data, d, retval);
 		
 		assert(retval == size);

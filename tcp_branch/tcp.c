@@ -12,8 +12,18 @@
 #include "socktable.h"
 #include "ippacket.h"
 #include "seq.h"
+#include "notify.h"
 
 static ip_node_t *this_node;
+
+int queue_eof(tcp_socket_t *sock) {
+  /* WARNING: increasing ack number. This should be fine because we SHOULD NOT be in a recv state
+	* (we just received a FIN). However, if there are bugs later, remember to look at this code.
+	*/
+  cbuf_put_eof(sock->r_buf, sock->recv_next++);
+
+  return 0;
+}
 
 int queue_up_flags(tcp_socket_t *sock, uint8_t flags) {
 	nlog(MSG_LOG, "queue_up_flags", "queueing flags for send: %p", flags);
@@ -290,7 +300,7 @@ int v_connect(int socket, int node, uint16_t port) {
 		return -1;
 	}
 
-	int status = wait_for_event(sock, TCP_OK | TCP_CONNECT_FAILED);
+	int status = wait_for_event(sock, TCP_OK | TCP_ERROR);
 
 	if (status == TCP_OK) return 0;
 	else { return -1; }
@@ -305,7 +315,7 @@ int v_accept(int socket) {
 	// TODO make sure we can call accept
 
 	sock->can_handshake = 1;
-	int status = wait_for_event(sock, TCP_OK | TCP_CONNECT_FAILED);
+	int status = wait_for_event(sock, TCP_OK | TCP_ERROR);
 	sock->can_handshake = 0;
 
 	//tcp_table_new(this_node, sock->new_fd);

@@ -6,20 +6,29 @@
 #include "tcp.h"
 #include "socktable.h"
 #include "fancy_display.h"
+#include "notify.h"
+#include "cbuffer.h"
 
-void notify(tcp_socket_t *sock, int status) {
+int do_close(sid_t prev, sid_t next, void* context, void* close_type, void* argB) {
+	tcp_socket_t* sock = (tcp_socket_t*)context;
 
-	nlog(MSG_LOG,"notify", "attempting to get socket lock");
-	pthread_mutex_lock(&sock->lock);
-	sock->cond_status = status;
-	nlog(MSG_LOG,"notify", "calling pthread_cond_signal (for socket %d)", sock->fd);
-	pthread_cond_signal(&sock->cond);
-	pthread_mutex_unlock(&sock->lock);
+	switch(*(int*)close_type) {
+		case CLOSE_ERROR:
+			notify(sock, TCP_ERROR);
+			break;
+		
+		case CLOSE_OK:
+			notify(sock, TCP_OK);
+			break;
 
-}
+		case CLOSE_EOF:
+			queue_eof(sock);
+			break;
 
-int do_close(sid_t prev, sid_t next, void* context, void* argA, void* argB) {
-	notify((tcp_socket_t*)context, TCP_OK);
+		case CLOSE_NIL:
+			/* nothing */
+			break;
+	}
 
 	return 0;
 }
@@ -76,28 +85,6 @@ void fail_with_reset(sid_t id, void* context, void* args) {
 	return; 
 }
 
-int has_status(int want, int have) {
-	return !!(want & have);
-}
-
-int wait_for_event(tcp_socket_t *sock, int status_bits) {	
-	pthread_mutex_lock(&sock->lock);
-  
-  nlog(MSG_LOG, "wait_for_event", "want: %#x, have: %#x", status_bits, sock->cond_status);
-
-	while (!(has_status(status_bits, sock->cond_status))) {
-		nlog(MSG_LOG,"wait_for_event", "sleeping on cond var");
-		pthread_cond_wait(&sock->cond, &sock->lock);
-		nlog(MSG_LOG,"wait_for_event", "cond var woke me up");
-
-	}
-	pthread_mutex_unlock(&sock->lock);
-	int to_return = sock->cond_status;
-	sock->cond_status = 0;
-
-	return to_return;
-}
-
 void in_timewait(sid_t s, void *context, void *argA, void *argB) {
 	tcp_socket_t *sock = (tcp_socket_t*)context;
 
@@ -132,3 +119,7 @@ void in_estab(sid_t s, void *context, void *argA, void *argB) {
 	return;
 }
 
+/* Queue an EOF in recv buffer; we should NOT receive any new packets. */
+void in_closewait(sid_t s, void *context, void *argA, void *argB) {
+	queue_eof(context);
+}
