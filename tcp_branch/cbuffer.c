@@ -108,7 +108,7 @@ int cbuf_get_range(cbuf_t* buf, int start, int len, void** vdata) {
 	*data = NULL;
   }
 
-  return (t & CBUF_DATA|CBUF_EOF) ? cnt : -1;
+  return (t & (CBUF_DATA|CBUF_EOF)) ? cnt : -1;
 }
 
 void cbuf_print(cbuf_t* buf) {
