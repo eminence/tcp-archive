@@ -1,6 +1,6 @@
 # link definitions
 # link <type> <drop> <garble> <delay base [secs]> <delay delta [msecs]> <mtu>
-link  p2p 0.0 0.0 0.2 0.1 1024 localhost 10003
+link  p2p 0.5 0.0 0.2 0.1 1024 localhost 10003
 link  p2p 0.0 0.0 0.2 0.1 1024 localhost 10004
 link  p2p 0.0 0.0 0.2 0.1 1024 localhost 10005
 link  p2p 0.0 0.0 0.2 0.1 1024 localhost 10006

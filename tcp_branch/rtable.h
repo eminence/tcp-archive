@@ -6,7 +6,7 @@
 
 #define DEFAULT_ROUTE VAN_MAXNODES
 #define INFINITY 16
-#define RIP_SLEEP 30
+#define RIP_SLEEP 3
 #define LINK_TIMEOUT	61
 
 /* Route table entry. */

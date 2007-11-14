@@ -151,7 +151,12 @@ void do_recv_tcp(tcp_socket_t* sock, char* packet) {
 		
 		if(is_data(packet) && (room=haveRoomToReceive(sock, data_size)) && tcpm_canrecv(sock->machine)) { // if data packet AND can fit AND valid state (note: wont have cntl flag!)
 		  /* TODO copy data into cbuffer with copy datasometsomethiasfdA() */
+
 		  nlog(MSG_XXX, "do_recv_tcp", "Got REAL data; increasing recv_next by len %d", data_size);
+
+			/* copy data into the buffer BEFOR sending out an ack.    word */
+			dataFromNetworkToBuffer(sock, ip_to_tcp(packet) + TCP_HEADER_SIZE, data_size);
+
 		  ackThisPacket(sock, data_size); // *** SENDS AN ACK PACKET!!!!
 		}
 
@@ -192,12 +197,16 @@ void *tcp_watchdog(void *arg) {
 				if (tcpm_state(sock->machine) == ST_SYN_SENT) {
 					/* we havn't gotten a SYNACK, so resend the SYN */
 					nlog(MSG_WARNING, "tcp_watchdog", "We're in SYN_SENT.  assuming packetloss, and retransmitting the SYN");
-					send_packet_with_flags((void*)sock, TCP_FLAG_SYN, 0); 
+					/* NOOOOO! DONT DO THIS:
+					 * send_packet_with_flags((void*)sock, TCP_FLAG_SYN, 0); 
+					 */
+					sock->send_next--;
 
 				} else if (tcpm_state(sock->machine) == ST_SYN_RCVD) {
 					/* we haven't gotten an ACK, so resend the SYNACK */
 					nlog(MSG_WARNING, "tcp_watchdog", "We're in SYN_RCVD.  assuming packetloss, and retransmitting the SYNACK");
-					send_packet_with_flags((void*)sock, TCP_FLAG_SYN | TCP_FLAG_ACK, 0); 
+					/* ERROR: SUCK send_packet_with_flags((void*)sock, TCP_FLAG_SYN | TCP_FLAG_ACK, 0);  */
+					sock->send_next--;
 
 				} else {
 					nlog(MSG_WARNING, "tcp_watchdog", "We're in state %s, but not sure what to do!  Disabling watchdog for now...", tcpm_strstate(tcpm_state(sock->machine)));
