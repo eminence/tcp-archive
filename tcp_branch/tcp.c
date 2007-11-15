@@ -269,6 +269,7 @@ void v_tcp_init(ip_node_t *node) {
 	nlog(MSG_LOG, "v_tcp_init", "Creating tuple table: %p", node->tuple_table);
 }
 
+/* Initialize socket globals _ONCE_. */
 int sys_socket(int clone) {
 	int s = -1;
 	tcp_socket_t *sock = NULL;
@@ -284,44 +285,17 @@ int sys_socket(int clone) {
 		return -1;
 	}
 
-	sock = malloc(sizeof(tcp_socket_t) );
+	// init our socket globals
+	sock = malloc(sizeof(tcp_socket_t));
 	assert(sock);
 	this_node->socket_table[s] = sock;
 
+	// provide essential data and start things off
+	sock->local_node = this_node;
 	sock->machine = tcpm_new(sock, clone); 
 
-	/* see tcp.h for some descriptions of what these are */
-	sock->fd = s;
-	sock->local_port = rand()%65535;
-	sock->remote_port = 0;
-	sock->local_node = this_node;
-	sock->remote_node = 0;
-	sock->seq_num = 0;
-	sock->ack_num = 0;
-	sock->can_handshake = 0;
-	sock->parent = NULL;
-	sock->cond_status = 0;
-	sock->last_packet = 0;
-	sock->send_window_size = SEND_WINDOW_SIZE;
-	sock->recv_window_size = SEND_WINDOW_SIZE;
-	sock->time_wait_time = 0;
-	sock->ufunc_timeout = 0;
-
-	sock->send_una = 0;
-	sock->send_next = 0;
-	sock->send_written = 0;
-	sock->remote_flow_window = sock->send_next + SEND_WINDOW_SIZE; /* a reasonable default? je pense que oui */
-
-	sock->recv_next = 0;
-	sock->recv_read = 0;
-
-	sock->r_buf = cbuf_new(SEND_WINDOW_SIZE*2  + 2);
-	sock->s_buf = cbuf_new(SEND_WINDOW_SIZE*2  + 2);
-	
-	tcp_table_new(this_node, s);	
-
-	pthread_cond_init(&sock->cond, NULL);
-	pthread_mutex_init(&sock->lock, NULL);
+	// order is important!
+	tcp_table_new(sock->local_node, s);	
 
 	return s;
 }
@@ -336,7 +310,7 @@ int v_socket() {
  * returns 0 on success or negative number on failure */
 int v_bind(int socket, int node, uint16_t port) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
-  uint16_t old_port;
+	uint16_t old_port;
 
 	if (!(tcpm_canbind(sock->machine))) return -1;
 

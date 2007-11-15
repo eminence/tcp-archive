@@ -142,23 +142,54 @@ void in_closed(sid_t s, void *context, void *argA, void *reason) {
 	tcp_socket_t* sock = (tcp_socket_t*)context;
 
 	switch((int)reason) {
-		case RESTART_INIT:
-			// initialize socket
-			nlog(MSG_LOG, "in_closed", "state machine entered Closed state: Init");
-			break;
+	  case RESTART_INIT:
+			pthread_cond_init(&sock->cond, NULL);
+			pthread_mutex_init(&sock->lock, NULL);
+		 	sock->r_buf = 0;
+		 	sock->s_buf = 0;
 
-		case RESTART_OK:
-			// Re-initialize socket
-			nlog(MSG_LOG, "in_closed", "state machine entered Closed state: OK");
-			sock->last_packet = 0;
-			break;
+	  case RESTART_OK:
+	  case RESTART_ABORT:
+		 /* see tcp.h for some descriptions of what these are */
+			sock->fd = s;
+			sock->local_port = rand()%65535;
+			sock->remote_port = 0;
+			sock->remote_node = 0;
+			sock->seq_num = 0;
+			sock->ack_num = 0;
+			sock->can_handshake = 0;
+		 	sock->parent = NULL;
+		 	sock->cond_status = 0;
+		 	sock->last_packet = 0;
+		 	sock->send_window_size = SEND_WINDOW_SIZE;
+		 	sock->recv_window_size = SEND_WINDOW_SIZE;
+		 	sock->time_wait_time = 0;
+		 	sock->ufunc_timeout = 0;
 
-		case RESTART_ABORT:
-			// Closed on error (RST,...)
-			nlog(MSG_LOG, "in_closed", "state machine entered Closed state: Abort");
-			sock->last_packet = 0;
-			notify(sock, TCP_ERROR); // cause associated sock call to fail
-			break;
+		 	sock->send_una = 0;
+		 	sock->send_next = 0;
+		 	sock->send_written = 0;
+		 	sock->remote_flow_window = sock->send_next + SEND_WINDOW_SIZE; /* a reasonable default? je pense que oui */
+
+		 	sock->recv_next = 0;
+		 	sock->recv_read = 0;
+
+			if(sock->r_buf)
+				cbuf_destroy(sock->r_buf);
+
+			if(sock->s_buf)
+				cbuf_destroy(sock->s_buf);
+
+		 	sock->r_buf = cbuf_new(SEND_WINDOW_SIZE*2  + 2);
+		 	sock->s_buf = cbuf_new(SEND_WINDOW_SIZE*2  + 2);
+
+		 	nlog(MSG_LOG, "in_closed", "state machine entered Closed state: %s", (int)reason == RESTART_INIT ? "Init" : 
+																										(int)reason == RESTART_OK ? "OK" : "Abort");
+
+			/* If error, send signal */
+			if((int)reason == RESTART_ABORT) {
+			  notify(sock, TCP_ERROR); // cause associated sock call to fail
+			}
 	}
 	
 	// TODO fill this up (allow this function to initialize sock by calling on new machine? and free data maybe? or something? */
