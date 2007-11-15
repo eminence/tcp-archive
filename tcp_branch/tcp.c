@@ -292,16 +292,11 @@ int sys_socket(int clone) {
 
 	// provide essential data and start things off
 	sock->local_node = this_node;
+	sock->fd = s;
 	sock->machine = tcpm_new(sock, clone); 
 
 	/* see tcp.h for some descriptions of what these are */
-	sock->fd = s;
-	sock->local_node = this_node;
-	
 	tcp_table_new(this_node, s);	
-
-	pthread_cond_init(&sock->cond, NULL);
-	pthread_mutex_init(&sock->lock, NULL);
 
 	return s;
 }

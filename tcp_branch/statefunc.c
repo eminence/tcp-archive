@@ -137,35 +137,6 @@ void in_closewait(sid_t s, void *context, void *argA, void *argB) {
   nlog(MSG_LOG, "in_closewait", "remote host closed output; end receive stream");
 }
 
-void __sock_init(tcp_socket_t *sock) {
-
-	sock->local_port = rand()%65535;
-	sock->remote_port = 0;
-	sock->remote_node = 0;
-	sock->seq_num = 0;
-	sock->ack_num = 0;
-	sock->can_handshake = 0;
-	sock->parent = NULL;
-	sock->cond_status = 0;
-	sock->last_packet = 0;
-	sock->send_window_size = SEND_WINDOW_SIZE;
-	sock->recv_window_size = SEND_WINDOW_SIZE;
-	sock->time_wait_time = 0;
-	sock->ufunc_timeout = 0;
-
-	sock->send_una = 0;
-	sock->send_next = 0;
-	sock->send_written = 0;
-	sock->remote_flow_window = sock->send_next + SEND_WINDOW_SIZE; /* a reasonable default? je pense que oui */
-
-	sock->recv_next = 0;
-	sock->recv_read = 0;
-
-	sock->r_buf = cbuf_new(SEND_WINDOW_SIZE*2  + 2);
-	sock->s_buf = cbuf_new(SEND_WINDOW_SIZE*2  + 2);
-
-}
-
 /* Called when we enter close state (but not the first time through... yet. */
 void in_closed(sid_t s, void *context, void *argA, void *reason) {
 	tcp_socket_t* sock = (tcp_socket_t*)context;
@@ -174,7 +145,6 @@ void in_closed(sid_t s, void *context, void *argA, void *reason) {
 		case RESTART_INIT:
 			// initialize socket
 			nlog(MSG_LOG, "in_closed", "state machine entered Closed state: Init");
-			__sock_init(sock);
 			pthread_cond_init(&sock->cond, NULL);
 			pthread_mutex_init(&sock->lock, NULL);
 		 	sock->r_buf = 0;
@@ -185,15 +155,28 @@ void in_closed(sid_t s, void *context, void *argA, void *reason) {
 			// Re-initialize socket
 			nlog(MSG_LOG, "in_closed", "state machine entered Closed state: OK");
 			sock->last_packet = 0;
-			__sock_init(sock);
 
-		 	sock->send_una = 0;
-		 	sock->send_next = 0;
-		 	sock->send_written = 0;
-		 	sock->remote_flow_window = sock->send_next + SEND_WINDOW_SIZE; /* a reasonable default? je pense que oui */
+			sock->local_port = rand()%65535;
+			sock->remote_port = 0;
+			sock->remote_node = 0;
+			sock->seq_num = 0;
+			sock->ack_num = 0;
+			sock->can_handshake = 0;
+			sock->parent = NULL;
+			sock->cond_status = 0;
+			sock->last_packet = 0;
+			sock->send_window_size = SEND_WINDOW_SIZE;
+			sock->recv_window_size = SEND_WINDOW_SIZE;
+			sock->time_wait_time = 0;
+			sock->ufunc_timeout = 0;
 
-		 	sock->recv_next = 0;
-		 	sock->recv_read = 0;
+			sock->send_una = 0;
+			sock->send_next = 0;
+			sock->send_written = 0;
+			sock->remote_flow_window = sock->send_next + SEND_WINDOW_SIZE; /* a reasonable default? je pense que oui */
+
+			sock->recv_next = 0;
+			sock->recv_read = 0;
 
 			if(sock->r_buf)
 				cbuf_destroy(sock->r_buf);

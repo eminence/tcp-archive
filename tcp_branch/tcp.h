@@ -40,17 +40,17 @@ typedef struct tcp_socket__ {
 	cbuf_t *r_buf;
 	cbuf_t *s_buf;
 
-	int send_una; /* data before this is acked.  after this is sent, but unacked */
-	int send_next; /* data before this is send, but unakced.   after this is not sent, but OK to send */
-	int send_written; /* points to the next location in the buffer we can write incoming data */
+	uint32_t send_una; /* data before this is acked.  after this is sent, but unacked */
+	uint32_t send_next; /* data before this is send, but unakced.   after this is not sent, but OK to send */
+	uint32_t send_written; /* points to the next location in the buffer we can write incoming data */
 
-	int remote_flow_window; /* the point were we cant send any more due to the remote side flowing off */
+	uint32_t remote_flow_window; /* the point were we cant send any more due to the remote side flowing off */
 
-	int recv_next; /* data before this already recvd and ackd.  after this, not yet, but ok to receive*/
-	int recv_read; /* points to the next data in the buffer to be returned via a v_read() call.  any data before this can be overwritten */
+	uint32_t recv_next; /* data before this already recvd and ackd.  after this, not yet, but ok to receive*/
+	uint32_t recv_read; /* points to the next data in the buffer to be returned via a v_read() call.  any data before this can be overwritten */
 
-	int recv_window_size;
-	int send_window_size; /* our window size we advertize in outgoing packets */
+	uint16_t recv_window_size;
+	uint16_t send_window_size; /* our window size we advertize in outgoing packets */
 
 	time_t last_packet; /* set this to time(NULL) when you're expecting a timely reply. a clocktick thread will alert someone of something when something happens */
 	time_t time_wait_time; /* initialize to zero, set to time() when we want to start our timewaitwaittimetimewatertimer */

@@ -19,7 +19,7 @@
 *	[DONE]		ADD NONE AND ACK TRANSISTIONS IN STATES AFTER ESTAB THAT CAN RECV DATA, OTHERWISE, INVALID TRANSISTION
 *	[DONE]	  	{{achin}} race condition in ncurses (you said something about a separate mutices -- one for nlog one for all else)
 *	[DONE]		recv_read should NOT be a hack; instead, when we read data, skip flags
-*      			reading from close wait end should yield -1
-*					all pointers should be unsigned and 32 bit
+*  [DONE]		reading from close wait end should yield -1
+*	[DONE]		all pointers should be unsigned and 32 bit (NOTE: fixed but our buffer size should be equal to seq num space so they wrap at same point)
 *					test wrap around
 *					currently, when we alter a socket, it only affects the FIRST one in the list...
