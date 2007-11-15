@@ -63,6 +63,7 @@ const char* tcpm_strstate(int state);
 #define tcpm_canaccept(m)	 (tcpm_state(m) == ST_LISTEN)
 #define tcpm_canlisten(m)	 (tcpm_state(m) == ST_CLOSED)
 #define tcpm_canconnect(m)  (tcpm_state(m) == ST_CLOSED)
+#define tcpm_canclose(m)	 (tcpm_state(m) == ST_LISTEN || tcpm_state(m) == ST_ESTAB || tcpm_state(m) == ST_CLOSE_WAIT)
 
 
 #endif

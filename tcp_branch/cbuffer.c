@@ -113,8 +113,6 @@ int cbuf_get_range(cbuf_t* buf, int start, int len, void** vdata) {
 
 void cbuf_print(cbuf_t* buf) {
   uint8_t c;
-  int i=1;
-  int t;
 
   printf("[...] ");
   cbuf_r_iterate_values(buf, 0, cbuf_size(buf), c) {

@@ -1,6 +1,6 @@
 *	[DONE]		notify and sleep stuff
 *	[DONE]		always wake on error and return -1 
-*					add mutexes to all sockets; any time we touch a socket, lock mutex
+*	[DONE]		add mutexes to all sockets; any time we touch a socket, lock mutex
 *	[DONE]		DO WE SET AND CHECK TCP CHECKSUMS????? (if not, we need to)
 *	[DONE]		blocking user ops HAVE TO TIMEOUT! (use tcpm reset)
 *  [DONE]		don't allow write or read in not estab state MAKE SURE In the user code that we disallow state transitions that are currently illegal.
@@ -11,7 +11,7 @@
 *	[DONE] 		Closing a listening socket currently locks shit up; close waits for OK, we never send.
 *	[DONE]  		Also, CLOSE never works in any case because we never notify.
 *	[DONE]		CLOSE IS WRONG!! SHOULD WAKE UP AFTER INITIAL FIN SENT   SO USER CAN RECV!!! ONCE OTHER USER CLOSES, READ SHOULD RETURN -1, INDICATING FULL CLOSE.
-*					WHEN SOCKET IS RESET (BY CLOSE, BY ERROR...) MUST __REINIT STATUS! AND SEQ! AND POINTERS?
+*	[DONE]		WHEN SOCKET IS RESET (BY CLOSE, BY ERROR...) MUST __REINIT STATUS! AND SEQ! AND POINTERS?
 *	[DONE]		SENDING RESET AND FAIL FOR "LISTEN" ROOT STATE MACHINES DOESN'T GO TO CLOSE-- GOES TO LISTEN!
 *	[DONE]		if we step from established to established (i.e. we receive a data packet), do NOT try to "notify the user"
 *	[DONE]		IF A CONNECTION DOES NOT EXIST, THEN A RESET IS SENT IN RESPONSE TO ANY INCOMING SEGMENT EXCEPT 
@@ -24,3 +24,7 @@
 *					test wrap around
 *					currently, when we alter a socket, it only affects the FIRST one in the list...
 *				   currently doing window size send_next to send_next + send_window_size; instead, should be send_una to send_una + window_sized
+*					probes
+*					dont close in fin wait etc
+*					randomize sequence numbers
+*					hint connection time is huge for debugging

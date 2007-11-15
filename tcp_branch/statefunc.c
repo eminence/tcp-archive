@@ -157,6 +157,7 @@ void in_closed(sid_t s, void *context, void *argA, void *reason) {
 			pthread_mutex_init(&sock->protect, NULL);
 		 	sock->r_buf = 0;
 		 	sock->s_buf = 0;
+			sock->cond_status = 0;
 
 		case RESTART_OK:
 		case RESTART_ABORT:
@@ -170,7 +171,6 @@ void in_closed(sid_t s, void *context, void *argA, void *reason) {
 			sock->ack_num = 0;
 			sock->can_handshake = 0;
 			sock->parent = NULL;
-			sock->cond_status = 0;
 			sock->last_packet = 0;
 			sock->send_window_size = SEND_WINDOW_SIZE;
 			sock->recv_window_size = SEND_WINDOW_SIZE;

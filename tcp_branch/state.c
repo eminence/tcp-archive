@@ -99,7 +99,7 @@ state_t* machine_step(machine_t* machine, input_t input, void* argt, void* args)
   /* Invoke state action, if provided. */
   if(machine->current->action) {
   	 // IF we are returning to the root state, do not pass state argument; instead, notify that restart is occuring naturally.
-    machine->current->action(machine->current->id, machine->context, machine->current == machine->root ? RESTART_OK : machine->current->argd, args);
+    machine->current->action(machine->current->id, machine->context, machine->current->argd, machine->current == machine->root ? RESTART_OK : args);
   }
  
   /* Alert GUI of transition. */

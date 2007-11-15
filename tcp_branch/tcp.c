@@ -118,7 +118,7 @@ int tcp_sendto_raw(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t fla
 
 	if (retval == -1) {
 		nlog(MSG_ERROR,"tcp_sendto", "van_driver_sendto returned -1! A tcp packet just got lost!");
-		tcpm_reset(sock);
+		tcpm_reset(sock->machine);
 		return -1;
 	}
 
@@ -168,7 +168,7 @@ int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) 
 
 	if (retval == -1) {
 		nlog(MSG_ERROR,"tcp_sendto", "van_driver_sendto returned -1! A tcp packet just got lost!");
-		return -1;
+		/* This packet was dropped... we'll figure that out eventually... */
 	}
 
 	/* Increase seq_num by buffer size; add 1 for each special flag. */
@@ -461,11 +461,9 @@ int v_write(int socket, const unsigned char *buf, int nbytes) {
  * returns 0 on success, or negative number on failure */
 int v_close(int socket) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
+	
+	if (!(tcpm_canclose(sock->machine))) return -1;
 
-  /* Update tuple table with FULL socket. */
-  socktable_put(this_node->tuple_table, sock, FULL_SOCKET);
-
-	assert(sock->machine);
 	if (tcpm_event(sock->machine, ON_CLOSE, NULL, NULL)) {
 		nlog(MSG_ERROR,"socket:close","Couldn't close socket.  noob");
 		return -1;
