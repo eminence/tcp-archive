@@ -15,22 +15,22 @@ int do_close(sid_t prev, sid_t next, void* context, void* close_type, void* argB
 
 	switch(*(int*)close_type) {
 		case CLOSE_ERROR:
-			nlog(MSG_XXX, "do_close", "close_type=CLOSE_ERROR");
+			nlog(MSG_LOG, "do_close", "close_type=CLOSE_ERROR");
 			notify(sock, TCP_ERROR);
 			break;
 		
 		case CLOSE_OK:
-			nlog(MSG_XXX, "do_close", "close_type=CLOSE_OK");
+			nlog(MSG_LOG, "do_close", "close_type=CLOSE_OK");
 			notify(sock, TCP_OK);
 			break;
 
 		case CLOSE_EOF:
-			nlog(MSG_XXX, "do_close", "close_type=CLOSE_EOF");
+			nlog(MSG_LOG, "do_close", "close_type=CLOSE_EOF");
 			queue_eof(sock);
 			break;
 
 		case CLOSE_NIL:
-			nlog(MSG_XXX, "do_close", "close_type=CLOSE_NIL. wtf?");
+			nlog(MSG_LOG, "do_close", "close_type=CLOSE_NIL. wtf?");
 			/* nothing */
 			break;
 	}
@@ -133,7 +133,8 @@ void in_estab(sid_t s, void *context, void *argA, void *argB) {
 
 /* Queue an EOF in recv buffer; we should NOT receive any new packets. */
 void in_closewait(sid_t s, void *context, void *argA, void *argB) {
-	queue_eof(context);
+  queue_eof((tcp_socket_t*)context);
+  nlog(MSG_LOG, "in_closewait", "remote host closed output; end receive stream");
 }
 
 /* Called when we enter close state (but not the first time through... yet. */

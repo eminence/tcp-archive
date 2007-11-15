@@ -21,5 +21,6 @@ void in_estab(sid_t s, void *context, void *argA, void *argB);
 void in_closewait(sid_t s, void *context, void *argA, void *argB);
 void in_timewait(sid_t s, void *context, void *argA, void *argB);
 void in_closed(sid_t s, void *context, void *argA, void *argB);
+void in_closewait(sid_t s, void *context, void *argA, void *argB);
 
 #endif

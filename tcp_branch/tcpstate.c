@@ -26,17 +26,17 @@ void* alloc_byte(uint8_t ibyte) {
 /* Core functionality. */
 tcp_machine_t* tcpm_new(tcp_socket_t* context, uint8_t clone) {
   tcp_machine_t *machine        = malloc(sizeof(tcp_machine_t));
-  state_t       *st_closed      = state_new(ST_CLOSED,      in_closed,	NULL,             NULL), // was null (error func)
-                *st_syn_sent    = state_new(ST_SYN_SENT,    NULL, 		fail_with_reset,  NULL),
-                *st_syn_rcvd    = state_new(ST_SYN_RCVD,    NULL, 		fail_with_reset,  NULL),
-                *st_listen      = state_new(ST_LISTEN,      NULL, 		fail_with_reset,  NULL), // was null
-                *st_estab       = state_new(ST_ESTAB,       in_estab,	fail_with_reset,  NULL),
-                *st_fin_wait_1  = state_new(ST_FIN_WAIT1,   NULL, 		fail_with_reset,  NULL), // was null
-                *st_fin_wait_2  = state_new(ST_FIN_WAIT2,   NULL, 		fail_with_reset,  NULL), // was null
-                *st_time_wait   = state_new(ST_TIME_WAIT,   in_timewait,fail_with_reset,  NULL), // was null
-                *st_closing     = state_new(ST_CLOSING,     NULL, 		fail_with_reset,  NULL), // was null
-                *st_close_wait  = state_new(ST_CLOSE_WAIT,  NULL, 		fail_with_reset,  NULL), // was null
-                *st_last_ack    = state_new(ST_LAST_ACK,    NULL, 		fail_with_reset,  NULL); // was null
+  state_t       *st_closed      = state_new(ST_CLOSED,      in_closed,		NULL,             NULL), // was null (error func)
+                *st_syn_sent    = state_new(ST_SYN_SENT,    NULL, 			fail_with_reset,  NULL),
+                *st_syn_rcvd    = state_new(ST_SYN_RCVD,    NULL, 			fail_with_reset,  NULL),
+                *st_listen      = state_new(ST_LISTEN,      NULL, 			fail_with_reset,  NULL), // was null
+                *st_estab       = state_new(ST_ESTAB,       in_estab,		fail_with_reset,  NULL),
+                *st_fin_wait_1  = state_new(ST_FIN_WAIT1,   NULL, 			fail_with_reset,  NULL), // was null
+                *st_fin_wait_2  = state_new(ST_FIN_WAIT2,   NULL, 			fail_with_reset,  NULL), // was null
+                *st_time_wait   = state_new(ST_TIME_WAIT,   in_timewait,	fail_with_reset,  NULL), // was null
+                *st_closing     = state_new(ST_CLOSING,     NULL, 			fail_with_reset,  NULL), // was null
+                *st_close_wait  = state_new(ST_CLOSE_WAIT,  in_closewait, 	fail_with_reset,  NULL), // was null
+                *st_last_ack    = state_new(ST_LAST_ACK,    NULL, 			fail_with_reset,  NULL); // was null
   
   /* Initialize state machine. */
   machine->sm = machine_new(st_closed, context);
