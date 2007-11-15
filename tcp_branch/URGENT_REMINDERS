@@ -23,3 +23,4 @@
 *	[DONE]		all pointers should be unsigned and 32 bit (NOTE: fixed but our buffer size should be equal to seq num space so they wrap at same point)
 *					test wrap around
 *					currently, when we alter a socket, it only affects the FIRST one in the list...
+*				   currently doing window size send_next to send_next + send_window_size; instead, should be send_una to send_una + window_sized

@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <errno.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "fancy_display.h"
 
@@ -749,7 +751,7 @@ int get_key() {
 void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *text, ...) {
 
 	pthread_mutex_lock(&output.lock);
-
+	
 	int c = output.use_curses;
 	WINDOW *log = output.log_win;
 	va_list args;
@@ -818,6 +820,17 @@ void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *t
 		}
 
 	}
+
+	char fname[255] = {0};
+	sprintf(fname, "logs/tcp%d.log", getpid());
+	
+	FILE* log_file = fopen(fname, "a");
+	
+	fprintf(log_file, "[%s] ", slug);
+	vfprintf(log_file, text, args);
+	fprintf(log_file, "\n");
+
+	fclose(log_file);
 
 	va_end(args);
 	pthread_mutex_unlock(&output.lock);
