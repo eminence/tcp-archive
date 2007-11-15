@@ -219,13 +219,13 @@ void *tcp_watchdog(void *arg) {
 		  sock->last_packet = 0;
 		}
 
-		if ( (sock->ufunc_timeout > 0) && (  (time(NULL) - sock->ufunc_timeout) > CONNECT_TIMEOUT_TIME) && (tcpm_state(sock->machine) == ST_SYN_SENT)) {
+		if (sock->ufunc_timeout && ((time(NULL) - sock->ufunc_timeout) > CONNECT_TIMEOUT_TIME) && (tcpm_state(sock->machine) == ST_SYN_SENT)) {
 			nlog(MSG_WARNING, "watchdog", "connect timeout.  resetting");
-			//sock->ufunc_timeout = 0;
+			//notify(sock, TCP_TIMEOUT);
 			tcpm_reset(sock->machine);
-			notify(sock, TCP_TIMEOUT);
 		
 		}
+
 		//nlog(MSG_XXX, "watchdog", "unlocking");
 		pthread_mutex_unlock(&sock->protect);
 

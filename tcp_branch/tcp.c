@@ -357,7 +357,7 @@ int v_connect(int socket, int node, uint16_t port) {
 	sock->remote_node = node;
 	sock->remote_port = port;
 
-	sock->seq_num = rand(); /* an arbitrary inital seq number. TODO make this random */ 
+	sock->seq_num = rand(); 
 	sock->ack_num = 0;
 	sock->can_handshake = 1;
 
@@ -378,8 +378,8 @@ int v_connect(int socket, int node, uint16_t port) {
 	int status = wait_for_event(sock, TCP_OK | TCP_ERROR | TCP_TIMEOUT);
 	sock->ufunc_timeout = 0;
 
-	if (status == TCP_TIMEOUT) 
-		nlog(MSG_WARNING, "v_connect", "Connection Timed Out");
+	//if (status == TCP_TIMEOUT) 
+		//nlog(MSG_WARNING, "v_connect", "Connection Timed Out");
 
 	if (status == TCP_OK) return 0;
 	else { return -1; }
