@@ -21,10 +21,11 @@
 *	[DONE]		recv_read should NOT be a hack; instead, when we read data, skip flags
 *  [DONE]		reading from close wait end should yield -1
 *	[DONE]		all pointers should be unsigned and 32 bit (NOTE: fixed but our buffer size should be equal to seq num space so they wrap at same point)
-*					test wrap around
+*	         	test wrap around
 *	[DONE]		currently, when we alter a socket, it only affects the FIRST one in the list...
 *				   currently doing window size send_next to send_next + send_window_size; instead, should be send_una to send_una + window_sized
 *					probes
 *	[DONE]		dont close in fin wait etc
-*					randomize sequence numbers
+*	[DONE]		randomize sequence numbers
 *	[DONE]		hint connection time is huge for debugging
+*					simultaneous  closes are not really handled correctly
