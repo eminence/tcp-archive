@@ -49,6 +49,7 @@ int do_connect(sid_t prev, sid_t next, void* context, void* rflags, void* packet
 	 * we'll want to have the latest ack pointer if we should send a packet while in the state machine. */
 
   sock->recv_next += incoming_seq_num;
+  sock->recv_ack += incoming_seq_num;
   sock->recv_read = incoming_seq_num; // we bump past the initial syn BEFORE this assignment; thus, we must also bump here!
   
   /* XXX Let's put this hack on hold. */
@@ -133,8 +134,14 @@ void in_estab(sid_t s, void *context, void *argA, void *argB) {
 
 /* Queue an EOF in recv buffer; we should NOT receive any new packets. */
 void in_closewait(sid_t s, void *context, void *argA, void *argB) {
-  //queue_eof((tcp_socket_t*)context);
-  nlog(MSG_LOG, "in_closewait", "remote host closed output; end receive stream");
+	tcp_socket_t *sock = (tcp_socket_t*)context;
+	sid_t prev_state = tcpm_prevstate(sock->machine);
+	assert(sock);
+
+	if(s != prev_state) {
+	  queue_eof((tcp_socket_t*)context);
+	  nlog(MSG_LOG, "in_closewait", "remote host closed output!");
+	}
 }
 
 /* Called when we enter close state (but not the first time through... yet. */
@@ -175,6 +182,7 @@ void in_closed(sid_t s, void *context, void *argA, void *reason) {
 			sock->send_written = 0;
 			sock->remote_flow_window = sock->send_next + SEND_WINDOW_SIZE; /* a reasonable default? je pense que oui */
 
+			sock->recv_ack = 0;
 			sock->recv_next = 0;
 			sock->recv_read = 0;
 
@@ -197,6 +205,9 @@ void in_closed(sid_t s, void *context, void *argA, void *reason) {
 			}
 
 			break;
+
+			default:
+				assert(0 && "Invalid reason.");
 	}
 	
 	// TODO fill this up (allow this function to initialize sock by calling on new machine? and free data maybe? or something? */

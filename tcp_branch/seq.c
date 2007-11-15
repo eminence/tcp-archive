@@ -6,22 +6,25 @@
 /* RECEVING FUNCTIONS */
 
 
+// XXX: UPDATED ALL REFERENCES TO RECV_NEXT TO RECV_ACK
 int isOldSeqNum(tcp_socket_t *sock, int num, int size, char* packet) {
-	return cbuf_lt(sock->r_buf, num, sock->recv_next); // return true if seqnum preceeds our current sequence number
+	return cbuf_lt(sock->r_buf, num, sock->recv_ack); // return true if seqnum preceeds our current sequence number
 }
 
+// XXX: UPDATED ALL REFERENCES TO RECV_NEXT TO RECV_ACK
 int isValidSeqNum(tcp_socket_t *sock, int num, int length, char* packet) {
 	/* if BOTH num and (num + length) is in the range that we're willing to receive */
-	nlog(MSG_LOG, "isValidSeqNum", "sock->recv_next=%d, sock->recv_window_end=%d, num=%d, length=%d", sock->recv_next, sock->recv_read + sock->recv_window_size, num, length);
+	nlog(MSG_LOG, "isValidSeqNum", "sock->recv_ack=%d, sock->recv_window_end=%d, num=%d, length=%d", sock->recv_ack, sock->recv_read + sock->recv_window_size, num, length);
 
-	return cbuf_btm_contains(sock->r_buf, sock->recv_next, sock->recv_read + sock->recv_window_size, num) &&
-		cbuf_btm_contains(sock->r_buf, sock->recv_next, sock->recv_read + sock->recv_window_size, num+length);
+	return cbuf_btm_contains(sock->r_buf, sock->recv_ack, sock->recv_read + sock->recv_window_size, num) &&
+		cbuf_btm_contains(sock->r_buf, sock->recv_ack, sock->recv_read + sock->recv_window_size, num+length);
 
 }
 
+// XXX: UPDATED ALL REFERENCES TO RECV_NEXT TO RECV_ACK
 /* return true is this sequence number is the next one we're expecting */
 int isNextSeqNum(tcp_socket_t *sock, int num) {
-	return (num == sock->recv_next);
+	return (num == sock->recv_ack);
 }
 
 
@@ -39,8 +42,10 @@ int haveRoomToReceive(tcp_socket_t *sock, int size) {
  *	int size - size of the data we're acking
  * */
 void ackData(tcp_socket_t *sock, int size) {
-	nlog(MSG_WARNING, "ackData", "bumping recv_next from %d to %d", sock->recv_next, sock->recv_next + size);
+	nlog(MSG_WARNING, "ackData", "bumping recv_next from %d to %d, recv_ack from %d to %d", sock->recv_next, sock->recv_next + size, sock->recv_ack, sock->recv_ack + size);
 	sock->recv_next += size;
+	sock->recv_ack += size;
+
 	sock->send_window_size = sock->recv_read + sock->recv_window_size - sock->recv_next;
 	//sock->seq_num += size; // XXX seq_num is obsolete and meaningless
 }

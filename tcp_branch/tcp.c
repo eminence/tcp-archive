@@ -32,7 +32,7 @@ int queue_eof(tcp_socket_t *sock) {
   /* WARNING: increasing ack number. This should be fine because we SHOULD NOT be in a recv state
 	* (we just received a FIN). However, if there are bugs later, remember to look at this code.
 	*/
-  cbuf_put_eof(sock->r_buf, sock->recv_next);
+  cbuf_put_eof(sock->r_buf, sock->recv_next++); // PUT the thing in the right spot, but DON'T ACK IT
 
   return 0;
 }
@@ -84,9 +84,9 @@ int send_dumb_packet(tcp_socket_t *sock, char*packet, uint8_t AckOrRST) {
 	uint8_t flags = get_flags(ip_to_tcp(packet));
 
 	if (AckOrRST == TCP_FLAG_ACK) 
-		tcp_sendto_raw(sock, NULL, 0, TCP_FLAG_ACK, ack, sock->recv_next);
+		tcp_sendto_raw(sock, NULL, 0, TCP_FLAG_ACK, ack, sock->recv_ack);
 	if (AckOrRST == TCP_FLAG_RST)
-		tcp_sendto_raw(sock, NULL, 0, TCP_FLAG_RST, ack, sock->recv_next);
+		tcp_sendto_raw(sock, NULL, 0, TCP_FLAG_RST, ack, sock->recv_ack);
 
 
 	return 0;
@@ -147,14 +147,14 @@ int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) 
 
 	char *packet;
 
-	nlog(MSG_XXX, "xxxxxxxxxxxx", "recv_next: %d", sock->recv_next);
+	nlog(MSG_XXX, "xxxxxxxxxxxx", "  -- --  recv_next: %d, recv_ack: %d", sock->recv_next, sock->recv_ack);
 
 	//XXX seqnum is obsolete and meaningless
 
 	//int packet_size = build_tcp_packet(data_buf, bufsize, sock->local_port, sock->remote_port ,
 	//		sock->seq_num, /*ack*/ sock->ack_num, flags, sock->send_window_size, &packet);
 	int packet_size = build_tcp_packet(data_buf, bufsize, sock->local_port, sock->remote_port ,
-			sock->send_next, /*ack*/ sock->recv_next, flags, sock->recv_read + sock->recv_window_size - sock->recv_next, &packet, sock->remote_node);
+			sock->send_next, /*ack*/ sock->recv_ack, flags, sock->recv_read + sock->recv_window_size - sock->recv_next, &packet, sock->remote_node);
 
 	nlog(MSG_LOG,"tcp_sendto", "now have a packet of size %d ready to be sent to dest_port %d", 
 			packet_size, sock->remote_port);

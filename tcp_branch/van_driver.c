@@ -191,7 +191,7 @@ void *tcp_watchdog(void *arg) {
   int i;
 
   while (1) {
-	 sleep(1); /* every second check our list of sockets */
+	 sleep(3); /* every second check our list of sockets */
 	 for (i = 0; i < MAXSOCKETS; i++) {
 		if (node->socket_table[i] == NULL) continue;
 		tcp_socket_t *sock = node->socket_table[i];
@@ -393,6 +393,7 @@ void *tcp_thread(void* arg) {
 			sock->send_next = sock->seq_num + 0;
 			sock->send_written = sock->seq_num + 0;
 
+			sock->recv_ack = incoming_seq_num + 0;
 			sock->recv_next = incoming_seq_num + 0;
 			sock->recv_read = incoming_seq_num + 0;
 			/* END:      IF THIS DOESN'T WORK              FIX THE ABOVE TO +1 !!!!!!!!!!!!!!!! FOR ALL OF THEM!!!!!!! */

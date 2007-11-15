@@ -48,6 +48,7 @@ typedef struct tcp_socket__ {
 
 	uint32_t remote_flow_window; /* the point were we cant send any more due to the remote side flowing off */
 
+	uint32_t recv_ack;
 	uint32_t recv_next; /* data before this already recvd and ackd.  after this, not yet, but ok to receive*/
 	uint32_t recv_read; /* points to the next data in the buffer to be returned via a v_read() call.  any data before this can be overwritten */
 
