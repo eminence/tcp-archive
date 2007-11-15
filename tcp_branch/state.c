@@ -48,7 +48,7 @@ void machine_reset(machine_t* machine, uint8_t reason) {
 	
 	/* Invoke state action, if provided. */
   	if(machine->current->action) {
-   	machine->current->action(machine->current->id, machine->context, machine->current->argd, reason);
+   	machine->current->action(machine->current->id, machine->context, machine->current->argd, (void*)reason);
   	}
 }
 

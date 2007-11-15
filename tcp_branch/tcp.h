@@ -65,12 +65,12 @@ typedef struct tcp_socket__ {
 void v_tcp_init();
 void v_tcp_destroy();
 int v_socket();
-int v_bind(int socket, int node, uint16_t port);
+int v_bind(int socket, uint16_t port);
 int v_listen(int socket, int backlog /* optional */);
 int v_connect(int socket, int node, uint16_t port);
 int v_accept(int socket);
-int v_read(int socket, unsigned char *buf, int nbyte);
-int v_write(int socket, const unsigned char *buf, int nbyte);
+int v_read(int socket,  char *buf, int nbyte);
+int v_write(int socket, char *buf, int nbyte);
 int v_close(int socket);
 
 int sys_socket(int clone);

@@ -118,9 +118,9 @@ void ackThisPacket(tcp_socket_t* sock, int len) {
 
 /* Handle recv events in estab state. */
 void do_recv_tcp(tcp_socket_t* sock, char* packet) {
-	uint8_t flags = get_flags(ip_to_tcp(packet));
+	/* UNSUED: uint8_t flags = get_flags(ip_to_tcp(packet)); */
 	uint32_t seq_num = get_seqnum(ip_to_tcp(packet));
-	uint32_t ack_num = get_acknum(ip_to_tcp(packet));
+	/* UNUSED: uint32_t ack_num = get_acknum(ip_to_tcp(packet)); */
 	uint32_t data_size = get_data_len(packet);
 
 	/* Check sequence number */
@@ -233,7 +233,7 @@ void *tcp_watchdog(void *arg) {
 }
 
 /* tcp send thread */
-void *tcp_send_thread(void* arg) {
+void *tcp_send_thread(__attribute__((unused)) void* arg) {
   int fd;
   tcp_socket_t* sock;
   int amount=0;
@@ -815,7 +815,7 @@ void *listener (void *arg) {
 			 /* Clear checksum field. */
 			 set_tcpchecksum(ip_to_tcp(buf), 0);
 
-			 if((calced_checksum = calculate_tcp_checksum((unsigned char*)ip_to_tcp(buf), src, dest, get_data_len(buf) + TCP_HEADER_SIZE)) != packet_checksum) {
+			 if((calced_checksum = calculate_tcp_checksum((char*)ip_to_tcp(buf), src, dest, get_data_len(buf) + TCP_HEADER_SIZE)) != packet_checksum) {
 				nlog(MSG_ERROR,"listener", "Error: tcp checksum mismatch.  compute_tcp_checksum returned %d, we think it should be %d", calced_checksum, packet_checksum);
 				continue;
 			 } else {
@@ -1031,7 +1031,7 @@ ip_node_t *van_driver_init(char *fname, int num) {
 	  nlog(MSG_WARNING, "init", "Could not create the tcp thread!");
 
   node->tcp_send_thread = malloc(sizeof(pthread_t));
-  if (pthread_create(node->tcp_send_thread, 0, tcp_send_thread, (void*)node) != 0)
+  if (pthread_create(node->tcp_send_thread, 0, tcp_send_thread, (void*)NULL) != 0)
 	  printf("Can't create tcp send thread!\n");
 
   nlog (MSG_LOG,"init","Node %d running", vn->vn_num);	

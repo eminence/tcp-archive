@@ -7,12 +7,12 @@
 
 
 // XXX: UPDATED ALL REFERENCES TO RECV_NEXT TO RECV_ACK
-int isOldSeqNum(tcp_socket_t *sock, int num, int size, char* packet) {
+int isOldSeqNum(tcp_socket_t *sock, unsigned int num, __attribute__((unused)) unsigned int size, __attribute__((unused)) char* packet) {
 	return cbuf_lt(sock->r_buf, num, sock->recv_ack); // return true if seqnum preceeds our current sequence number
 }
 
 // XXX: UPDATED ALL REFERENCES TO RECV_NEXT TO RECV_ACK
-int isValidSeqNum(tcp_socket_t *sock, int num, int length, char* packet) {
+int isValidSeqNum(tcp_socket_t *sock, unsigned int num, unsigned int length, __attribute__((unused)) char* packet) {
 	/* if BOTH num and (num + length) is in the range that we're willing to receive */
 	nlog(MSG_LOG, "isValidSeqNum", "sock->recv_ack=%d, sock->recv_window_end=%d, num=%d, length=%d", sock->recv_ack, sock->recv_read + sock->recv_window_size, num, length);
 
@@ -23,14 +23,14 @@ int isValidSeqNum(tcp_socket_t *sock, int num, int length, char* packet) {
 
 // XXX: UPDATED ALL REFERENCES TO RECV_NEXT TO RECV_ACK
 /* return true is this sequence number is the next one we're expecting */
-int isNextSeqNum(tcp_socket_t *sock, int num) {
+int isNextSeqNum(tcp_socket_t *sock, int unsigned num) {
 	return (num == sock->recv_ack);
 }
 
 
 
 /* do we have room to copy incoming data into our cbuffer? */
-int haveRoomToReceive(tcp_socket_t *sock, int size) {
+int haveRoomToReceive(tcp_socket_t *sock, unsigned int size) {
 	return (sock->recv_read + sock->recv_window_size - sock->recv_next) >= size;
 }
 
@@ -75,7 +75,7 @@ int getDataFromBuffer(tcp_socket_t *sock, char *buf, int max_size) {
 
 	nlog(MSG_LOG, "getDataFromBuffer", "reading max_size: %d, amount: %d, recv_read: %d", max_size, amount, sock->recv_read);
 
-	int retval = cbuf_get_range(sock->r_buf, sock->recv_read, amount, &d);
+	int retval = cbuf_get_range(sock->r_buf, sock->recv_read, amount, (void**)&d);
 	if (retval < 0) {
 		/* // On second thought, let's just be smart enough to skip flags. *
 		nlog(MSG_ERROR, "read", "UH OH! %d", *(int*)d);
@@ -127,7 +127,7 @@ int amountWeCanReceive(tcp_socket_t *sock) {
 }
 
 /* copy data from network into our cbuffer */
-int dataFromNetworkToBuffer(tcp_socket_t *sock, char *data, int size) {
+int dataFromNetworkToBuffer(tcp_socket_t *sock, char *data, unsigned int size) {
 	assert (size <= (sock->recv_read + sock->recv_window_size - sock->recv_next));
 	
 	cbuf_put_range(sock->r_buf, data, sock->recv_next, size);
@@ -145,7 +145,7 @@ void updateFromWindowAnnounce(tcp_socket_t *sock, int window) {
 }
 
 /* do we have room in our cbuffer to accept new data to send from the user */
-int canAcceptDataToSend(tcp_socket_t *sock, int size) {
+int canAcceptDataToSend(tcp_socket_t *sock, __attribute__((unused)) int size) {
 	return (sock->send_una + sock->send_window_size - sock->send_written) > 0;
 }
 
@@ -239,10 +239,10 @@ int getAmountAbleToSend(tcp_socket_t *sock) {
 
 }
 
-int isDupAck(tcp_socket_t *sock, int num) {
-
+/* UNUSED:
+int isDupAck(tcp_socket_t *sock, unsigned int num) {
 	return (num == sock->last_ack);
-}
+} */
 
 
 
@@ -256,7 +256,7 @@ void processPacketForAck(tcp_socket_t *sock, char*packet) {
 
 	int flags = get_flags(ip_to_tcp(packet));
 	if ((flags & TCP_FLAG_ACK) == TCP_FLAG_ACK) {
-		int ack_num = get_acknum(ip_to_tcp(packet));
+		unsigned int ack_num = get_acknum(ip_to_tcp(packet));
 		if (ack_num > sock->send_una) {
 			nlog(MSG_LOG, "processPacketForAck", "This packet has acknum=%d, which moves forward our send_una pointer (which was at %d)", ack_num, sock->send_una);
 			sock->send_una = ack_num;
@@ -288,7 +288,7 @@ void gotAckFor(tcp_socket_t *sock, int num /*, int len*/) {
 }
 
 /* take data from the user and copy it into our cbuffer */
-int copyDataFromUser(tcp_socket_t *sock, const char *data, int size) {
+int copyDataFromUser(tcp_socket_t *sock,  char *data, int size) {
 	assert(canAcceptDataToSend(sock, size));
 	assert(sock->send_written >= sock->send_next); 
 	assert(sock->send_written + size <= sock->send_una + sock->send_window_size);
@@ -316,7 +316,7 @@ int dataFromBufferToNetwork(tcp_socket_t *sock, char *data, int size) {
 	int toreturn;
 	char *d;
 
-	int retval = cbuf_get_range(sock->s_buf, sock->send_next, amount, &d);
+	int retval = cbuf_get_range(sock->s_buf, sock->send_next, amount, (void**)&d);
 	if (retval < 0) {
 		/* this is a flag */
 		//toreturn = *(int*)d;  /* these are the flags */

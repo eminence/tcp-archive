@@ -10,7 +10,7 @@
 
 typedef struct {
   char* data;
-  int size;
+  unsigned int size;
 } cbuf_t;
 
 /* Creation. */
@@ -18,9 +18,9 @@ cbuf_t* cbuf_new(int size);
 void cbuf_destroy(cbuf_t* buf);
 
 /* Operations. */
-int   cbuf_put_range(cbuf_t* buf, char* buffer, int start, int len);
+int   cbuf_put_range(cbuf_t* buf, char* buffer, unsigned int start, unsigned int len);
 int   cbuf_put_flag(cbuf_t* buf, int start, uint8_t flags);
-int   cbuf_get_range(cbuf_t* buf, int start, int len, void** data);
+int   cbuf_get_range(cbuf_t* buf, int start, unsigned int len, void** data);
 int	cbuf_put_eof(cbuf_t* buf, int start);
 void  cbuf_print(cbuf_t* buf);
 

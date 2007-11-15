@@ -50,7 +50,7 @@ int queue_up_flags(tcp_socket_t *sock, uint8_t flags) {
 	return 0;
 }
 
-int send_packet_with_flags(tcp_socket_t* sock, uint8_t flags, int ack_len) {
+int send_packet_with_flags(tcp_socket_t* sock, uint8_t flags, __attribute__((unused)) int ack_len) {
 	nlog(MSG_LOG,"spwf", "socket %d, flags are %p", sock->fd, flags);
 
   /* Send ACK raw; they don't live in seq. num space. */
@@ -79,9 +79,9 @@ tcp_socket_t *get_socket_from_int(int s) {
 
 int send_dumb_packet(tcp_socket_t *sock, char*packet, uint8_t AckOrRST) {
 
-	uint32_t seq = get_seqnum(ip_to_tcp(packet));
+	/* UNUSED: uint32_t seq = get_seqnum(ip_to_tcp(packet)); */
 	uint32_t ack = get_acknum(ip_to_tcp(packet));
-	uint8_t flags = get_flags(ip_to_tcp(packet));
+	/* UNUSED: uint8_t flags = get_flags(ip_to_tcp(packet)); */
 
 	if (AckOrRST == TCP_FLAG_ACK) 
 		tcp_sendto_raw(sock, NULL, 0, TCP_FLAG_ACK, ack, sock->recv_ack);
@@ -236,13 +236,13 @@ int build_tcp_packet(char *data, int data_size,
 uint16_t calculate_tcp_checksum(char* packet, uint8_t src, uint8_t dst, int seg_len) {
 	uint16_t csum, csum_o;
 	
-	nlog(MSG_LOG, "tcp_checksum", "src = %d, dst = %d, seg_len = %d, partial = %d", src, dst, seg_len, csum_partial(packet, seg_len, 0));
+	nlog(MSG_LOG, "tcp_checksum", "src = %d, dst = %d, seg_len = %d, partial = %d", src, dst, seg_len, csum_partial((unsigned char *)packet, seg_len, 0));
 
 	csum_o = get_tcpchecksum(packet);
 	set_tcpchecksum(packet, 0);
 
 	csum = csum_tcpudp_magic(src, dst, seg_len + HEADER_SIZE, 6 /* TCP PROTO */,
-							 		 csum_partial(packet, seg_len, 0));	
+							 		 csum_partial((unsigned char*)packet, seg_len, 0));	
 
 	set_tcpchecksum(packet, csum_o);
 
@@ -311,9 +311,9 @@ int v_socket() {
 
 /* binds a socket to a port
  * returns 0 on success or negative number on failure */
-int v_bind(int socket, int node, uint16_t port) {
+int v_bind(int socket, uint16_t port) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
-	uint16_t old_port;
+	/* UNUSED: uint16_t old_port; */
 
 	if (!(tcpm_canbind(sock->machine))) return -1;
 
@@ -330,7 +330,7 @@ int v_bind(int socket, int node, uint16_t port) {
 
 /* moves a socket into listen state
  * returns 0 on success or negative number on failure */
-int v_listen(int socket, int backlog /* optional */) {
+int v_listen(int socket, __attribute__((unused)) int backlog /* optional */) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
 
 	assert(sock->machine);
@@ -412,7 +412,7 @@ int v_accept(int socket) {
 
 /* read on an open socket
  * return num types read or negative number on failure or 0 on EOF */
-int v_read(int socket, unsigned char *buf, int nbyte) {
+int v_read(int socket, char *buf, int nbyte) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
 
 	if (!(tcpm_canread(sock->machine))) return -1;
@@ -439,7 +439,7 @@ int v_read(int socket, unsigned char *buf, int nbyte) {
 
 /* write on an open socket
  * retursn num bytes written or negative number on failure */
-int v_write(int socket, const unsigned char *buf, int nbytes) {
+int v_write(int socket,  char *buf, int nbytes) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
 
 	if (!(tcpm_cansend(sock->machine))) return -1;

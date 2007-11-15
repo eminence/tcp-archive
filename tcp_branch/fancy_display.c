@@ -131,8 +131,8 @@ int get_text(char *msg, char* return_, int len) {
 	
 	FIELD *field[2];
 	FORM  *my_form;
-	int rows, cols,ch, num;
-	int l = strlen(msg);
+	int rows, cols,ch;
+	/* UNUSED int l = strlen(msg); */
 	WINDOW *my_form_win;
 	PANEL *my_form_pan;
 	char *buff = NULL;

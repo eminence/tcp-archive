@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #include "van_driver.h"
 #include "statefunc.h"
@@ -9,7 +10,7 @@
 #include "notify.h"
 #include "cbuffer.h"
 
-int do_close(sid_t prev, sid_t next, void* context, void* close_type, void* argB) {
+int do_close(__attribute__((unused)) sid_t prev, __attribute__((unused)) sid_t next, void* context, void* close_type, __attribute__((unused)) void* argB) {
 	tcp_socket_t* sock = (tcp_socket_t*)context;
 
 
@@ -38,7 +39,7 @@ int do_close(sid_t prev, sid_t next, void* context, void* close_type, void* argB
 	return 0;
 }
 
-int do_connect(sid_t prev, sid_t next, void* context, void* rflags, void* packet) {
+int do_connect(__attribute__((unused)) sid_t prev, __attribute__((unused)) sid_t next, void* context, void* rflags, void* packet) {
   tcp_socket_t* sock = (tcp_socket_t*)context;
   uint32_t incoming_seq_num = get_seqnum(ip_to_tcp((char*)packet)) ;
   
@@ -65,11 +66,11 @@ int do_connect(sid_t prev, sid_t next, void* context, void* rflags, void* packet
   return send_packet_with_flags((tcp_socket_t*)context, *((uint8_t*)rflags), 0);
 }
 
-int do_send_flags(sid_t prev, sid_t next, void* context, void *arg, void *tran_arg) {
+int do_send_flags(__attribute__((unused)) sid_t prev,__attribute__((unused))  sid_t next, void* context, void *arg, __attribute__((unused)) void *tran_arg) {
   return send_packet_with_flags((tcp_socket_t*)context, *((uint8_t*)arg), 0);
 }
 
-int do_listen(sid_t prev, sid_t next, void* context, void *arg, void *tran_arg) {
+int do_listen(__attribute__((unused)) sid_t prev,__attribute__((unused))  sid_t next, void* context,__attribute__((unused))  void *arg, void *tran_arg) {
 	tcp_socket_t *sock = (tcp_socket_t*)context;
 	assert(sock);
 
@@ -85,7 +86,7 @@ int do_listen(sid_t prev, sid_t next, void* context, void *arg, void *tran_arg) 
 }
 
 
-void fail_with_reset(sid_t id, void* context, void* packet) {
+void fail_with_reset(__attribute__((unused)) sid_t id, void* context, void* packet) {
 	tcp_socket_t *sock = (tcp_socket_t*)context;
 	assert(sock);
 
@@ -98,7 +99,7 @@ void fail_with_reset(sid_t id, void* context, void* packet) {
 	return; 
 }
 
-void in_timewait(sid_t s, void *context, void *argA, void *argB) {
+void in_timewait(sid_t s, void *context, __attribute__((unused)) void *argA, __attribute__((unused)) void *argB) {
 	tcp_socket_t *sock = (tcp_socket_t*)context;
 
 	/* set a flag in sock, so this socket will move to ST_CLOSED*/
@@ -107,7 +108,7 @@ void in_timewait(sid_t s, void *context, void *argA, void *argB) {
 
 
 }
-void in_estab(sid_t s, void *context, void *argA, void *argB) {
+void in_estab(sid_t s, void *context, __attribute__((unused)) void *argA, __attribute__((unused)) void *argB) {
 	tcp_socket_t *sock = (tcp_socket_t*)context;
 	sid_t prev_state = tcpm_prevstate(sock->machine);
 	assert(sock);
@@ -133,7 +134,7 @@ void in_estab(sid_t s, void *context, void *argA, void *argB) {
 }
 
 /* Queue an EOF in recv buffer; we should NOT receive any new packets. */
-void in_closewait(sid_t s, void *context, void *argA, void *argB) {
+void in_closewait(sid_t s, void *context, __attribute__((unused)) void *argA, __attribute__((unused)) void *argB) {
 	tcp_socket_t *sock = (tcp_socket_t*)context;
 	sid_t prev_state = tcpm_prevstate(sock->machine);
 	assert(sock);
@@ -145,7 +146,7 @@ void in_closewait(sid_t s, void *context, void *argA, void *argB) {
 }
 
 /* Called when we enter close state (but not the first time through... yet. */
-void in_closed(sid_t s, void *context, void *argA, void *reason) {
+void in_closed(__attribute__((unused)) sid_t s, void *context, __attribute__((unused)) void *argA, void *reason) {
 	tcp_socket_t* sock = (tcp_socket_t*)context;
 
 	switch((int)reason) {

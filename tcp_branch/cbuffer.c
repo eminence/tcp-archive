@@ -25,7 +25,7 @@ void cbuf_destroy(cbuf_t* buf) {
   free(buf);
 }
 
-void __cbuf_put(cbuf_t* buf, int index, char value, uint8_t type) {
+void __cbuf_put(cbuf_t* buf, int index,  char value, uint8_t type) {
   assert(0 <= index);
   
   //assert(type & (CBUF_DATA | CBUF_FLAG));
@@ -54,11 +54,9 @@ char __cbuf_get(cbuf_t* buf, int index, uint8_t* type) {
   return data;
 }
 
-int cbuf_put_range(cbuf_t* buf, char* buffer, int start, int len) {
-  int cnt = 0, i;
+int cbuf_put_range(cbuf_t* buf,  char* buffer, unsigned int start, unsigned int len) {
+  unsigned int cnt = 0, i;
 
-  assert(0 <= start);
-  assert(0 <= len);
   assert(len <= cbuf_size(buf));
 
   cbuf_r_iterate_indices(buf, start, len, i) {
@@ -80,14 +78,13 @@ int cbuf_put_flag(cbuf_t* buf, int start, uint8_t flags) {
    return 0;
 }
 
-int cbuf_get_range(cbuf_t* buf, int start, int len, void** vdata) {
+int cbuf_get_range(cbuf_t* buf, int start, unsigned int len, void** vdata) {
   char** data = (char**)vdata;
   char v;
   int cnt = 0;
   uint8_t t;
 
   assert(0 <= start);
-  assert(0 <= len);
   assert(len <= cbuf_size(buf));
 
   /* safe bet: never read more than len bytes */

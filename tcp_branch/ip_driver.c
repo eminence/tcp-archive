@@ -88,9 +88,10 @@ int main( int argc, char* argv[] ) {
 				handle_tcp_menu_input(i);
 				break;
 
-			case '-':
+			/*case '-':
 				test_tcp_menu_update();
 				break;
+				*/
 
 			case 'b':
 				{
@@ -104,7 +105,7 @@ int main( int argc, char* argv[] ) {
 						//node = get_number("enter this node number");
 						port = get_number("Local port to bind to");
 						nlog(MSG_LOG, "socket", "binding socket %d to local port %d", socket, port);
-						retval = v_bind(socket, nodenum, port);
+						retval = v_bind(socket, port);
 						display_msg("v_bind() returned %d", retval);
 					}
 				}

@@ -70,6 +70,8 @@ typedef enum {
 #define USE_CURSES 1
 #define NO_USE_CURSES 0
 
+struct ip_node__;
+
 int init_display(int use_curses);
 //void nlog(msg_type msg, const char *slug, char *text, ...);
 void nlog_s(const char *wfile, int wline,msg_type msg, const char *slug, char *text, ...);
@@ -87,5 +89,6 @@ int get_text(char *msg, char* buf, int len);
 void handle_tcp_menu_input(int c);
 int get_fd_from_menu();
 void update_tcp_table(struct tcp_socket__ *sock);
+void tcp_table_new(struct ip_node__ *node, int fd);
 
 #endif
