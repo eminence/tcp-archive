@@ -294,8 +294,14 @@ int sys_socket(int clone) {
 	sock->local_node = this_node;
 	sock->machine = tcpm_new(sock, clone); 
 
-	// order is important!
-	tcp_table_new(sock->local_node, s);	
+	/* see tcp.h for some descriptions of what these are */
+	sock->fd = s;
+	sock->local_node = this_node;
+	
+	tcp_table_new(this_node, s);	
+
+	pthread_cond_init(&sock->cond, NULL);
+	pthread_mutex_init(&sock->lock, NULL);
 
 	return s;
 }
@@ -412,7 +418,7 @@ int v_accept(int socket) {
 int v_read(int socket, unsigned char *buf, int nbyte) {
 	tcp_socket_t *sock = get_socket_from_int(socket);
 
-	if (!(tcpm_canrecv(sock->machine))) return -1;
+	if (!(tcpm_canread(sock->machine))) return -1;
 
 	/* XXX NOTE! XXX v_read is NON BLOCKING! WOOT! */
 

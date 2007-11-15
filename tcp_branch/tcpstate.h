@@ -56,6 +56,7 @@ const char* tcpm_strstate(int state);
 #define tcpm_canbind(m)     (tcpm_state(m) == ST_CLOSED)
 #define tcpm_estab(m)       (tcpm_state(m) == ST_ESTAB)
 #define tcpm_canrecv(m)     (tcpm_estab(m) || (tcpm_state(m) == ST_FIN_WAIT1) || (tcpm_state(m) == ST_FIN_WAIT2)) // RECENTLY CHANGED
+#define tcpm_canread(m)		 (tcpm_state(m) != ST_CLOSED && tcpm_state(m) != ST_SYN_SENT && tcpm_state(m) != ST_SYN_RCVD && tcpm_state(m) != ST_LISTEN)
 #define tcpm_cansend(m)     (tcpm_estab(m) || tcpm_state(m) == ST_CLOSE_WAIT)
 #define tcpm_firstrecv(m)   (tcpm_state(m) == ST_LISTEN)
 #define tcpm_synsent(m)     (tcpm_state(m) == ST_SYN_SENT)
