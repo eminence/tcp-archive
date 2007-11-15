@@ -17,7 +17,7 @@ int do_close(__attribute__((unused)) sid_t prev, __attribute__((unused)) sid_t n
 	switch(*(int*)close_type) {
 		case CLOSE_ERROR:
 			nlog(MSG_LOG, "do_close", "close_type=CLOSE_ERROR");
-			notify(sock, TCP_ERROR);
+			notify(sock, TCP_ERROR | TCP_OK);
 			break;
 		
 		case CLOSE_OK:

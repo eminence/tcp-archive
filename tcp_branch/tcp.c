@@ -396,10 +396,14 @@ int v_accept(int socket) {
 	// TODO make sure we can call accept
 
 	sock->can_handshake = 1;
-	int status = wait_for_event(sock, TCP_OK | TCP_ERROR);
+	sock->ufunc_timeout = time(NULL);
+	int status = wait_for_event(sock, TCP_OK | TCP_ERROR | TCP_TIMEOUT);
+	sock->ufunc_timeout = 0;
 	sock->can_handshake = 0;
 
 	//tcp_table_new(this_node, sock->new_fd);
+	if (status == TCP_TIMEOUT) 
+		nlog(MSG_WARNING, "v_accept", "Connection Timed Out");
 
   if(status == TCP_OK) {
   	return sock->new_fd;
