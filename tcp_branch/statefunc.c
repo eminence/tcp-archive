@@ -133,7 +133,7 @@ void in_estab(sid_t s, void *context, void *argA, void *argB) {
 
 /* Queue an EOF in recv buffer; we should NOT receive any new packets. */
 void in_closewait(sid_t s, void *context, void *argA, void *argB) {
-  queue_eof((tcp_socket_t*)context);
+  //queue_eof((tcp_socket_t*)context);
   nlog(MSG_LOG, "in_closewait", "remote host closed output; end receive stream");
 }
 
@@ -144,7 +144,6 @@ void in_closed(sid_t s, void *context, void *argA, void *reason) {
 	switch((int)reason) {
 		case RESTART_INIT:
 			// initialize socket
-			nlog(MSG_LOG, "in_closed", "state machine entered Closed state: Init");
 			pthread_cond_init(&sock->cond, NULL);
 			pthread_mutex_init(&sock->lock, NULL);
 			nlog(MSG_XXX, "in_closed (lock)", "init mutexes! for sock %d", sock->fd);
@@ -155,7 +154,6 @@ void in_closed(sid_t s, void *context, void *argA, void *reason) {
 		case RESTART_OK:
 		case RESTART_ABORT:
 			// Re-initialize socket
-			nlog(MSG_LOG, "in_closed", "state machine entered Closed state: OK");
 			sock->last_packet = 0;
 
 			sock->local_port = rand()%65535;

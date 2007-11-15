@@ -147,6 +147,8 @@ int tcp_sendto(tcp_socket_t* sock, char * data_buf, int bufsize, uint8_t flags) 
 
 	char *packet;
 
+	nlog(MSG_XXX, "xxxxxxxxxxxx", "recv_next: %d", sock->recv_next);
+
 	//XXX seqnum is obsolete and meaningless
 
 	//int packet_size = build_tcp_packet(data_buf, bufsize, sock->local_port, sock->remote_port ,
