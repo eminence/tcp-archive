@@ -147,6 +147,8 @@ void in_closed(sid_t s, void *context, void *argA, void *reason) {
 			nlog(MSG_LOG, "in_closed", "state machine entered Closed state: Init");
 			pthread_cond_init(&sock->cond, NULL);
 			pthread_mutex_init(&sock->lock, NULL);
+			nlog(MSG_XXX, "in_closed (lock)", "init mutexes! for sock %d", sock->fd);
+			pthread_mutex_init(&sock->protect, NULL);
 		 	sock->r_buf = 0;
 		 	sock->s_buf = 0;
 

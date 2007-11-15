@@ -195,6 +195,11 @@ void *tcp_watchdog(void *arg) {
 	 for (i = 0; i < MAXSOCKETS; i++) {
 		if (node->socket_table[i] == NULL) continue;
 		tcp_socket_t *sock = node->socket_table[i];
+
+		//nlog(MSG_XXX, "watchdog", "trying to get lock");
+		pthread_mutex_lock(&sock->protect);
+		//nlog(MSG_XXX, "watchdog", "got lock");
+
 		update_tcp_table(sock);
 
 		if (tcpm_state(sock->machine) == ST_CLOSED) { sock->last_packet = 0; /* turn off, incase we forgot to do so later */ }
@@ -220,6 +225,8 @@ void *tcp_watchdog(void *arg) {
 			notify(sock, TCP_TIMEOUT);
 		
 		}
+		//nlog(MSG_XXX, "watchdog", "unlocking");
+		pthread_mutex_unlock(&sock->protect);
 
 	 }
   }
@@ -240,7 +247,15 @@ void *tcp_send_thread(void* arg) {
 		  continue;
 		}
 
-		if (getAmountAbleToSend(sock) == 0) continue;
+		//nlog(MSG_XXX, "tcp_sernd_thread", "trying to get lock");
+		pthread_mutex_lock(&sock->protect);
+		//nlog(MSG_XXX, "tcp_send_thread", "got lock");
+
+		if (getAmountAbleToSend(sock) == 0) {
+			//nlog(MSG_XXX, "tcp_send_thread", "unlock");
+			pthread_mutex_unlock(&sock->protect);
+			continue;
+		}
 
 		if (sendFlagNext(sock)) {
 		  nlog(MSG_LOG, "tcp_send_thread", "there is a flag to send next ");
@@ -267,6 +282,9 @@ void *tcp_send_thread(void* arg) {
 		  assert(sock->send_next <= sock->send_written);
 		}
 
+		//nlog(MSG_XXX, "tcp_sernd_thread", "unlocking");
+		pthread_mutex_unlock(&sock->protect);
+
 		/* TODO: Update sequence numbers (send might do this automatically... it prolly does) */
 	 }
 	 sleep(1); /* temporary fix to prevent CPU starvation */
@@ -277,114 +295,137 @@ void *tcp_send_thread(void* arg) {
 
 /* tcp thread */
 void *tcp_thread(void* arg) {
-  ip_node_t *node = (ip_node_t*)arg;
-  tcp_socket_t *old_sock;
-  char *packet;
-  uint16_t src_port;
-  uint16_t dest_port;
-  uint8_t src;
-  uint8_t dest;
-  uint8_t flags;
-  uint32_t incoming_seq_num;
+	ip_node_t *node = (ip_node_t*)arg;
+	tcp_socket_t *old_sock;
+	char *packet;
+	uint16_t src_port;
+	uint16_t dest_port;
+	uint8_t src;
+	uint8_t dest;
+	uint8_t flags;
+	uint32_t incoming_seq_num;
 
-  while (1) {
-	 pthread_cleanup_push((void(*)(void*))bqueue_poorly_implemented_cleanup, node->tcp_q);
-	 bqueue_dequeue(node->tcp_q, (void*)&packet); /* this will block */
-	 pthread_cleanup_pop(0);
+	while (1) {
+		pthread_cleanup_push((void(*)(void*))bqueue_poorly_implemented_cleanup, node->tcp_q);
+		bqueue_dequeue(node->tcp_q, (void*)&packet); /* this will block */
+		pthread_cleanup_pop(0);
 
-	 nlog(MSG_LOG,"tcp", "tcp thread dequeued a tcp packet");
+		nlog(MSG_LOG,"tcp", "tcp thread dequeued a tcp packet");
 
-	 src_port = get_srcport(ip_to_tcp(packet));
-	 dest_port = get_destport(ip_to_tcp(packet));
-	 src = get_src(packet);
-	 dest = get_dst(packet);
-	 flags = get_flags(ip_to_tcp(packet));
-	 incoming_seq_num = get_seqnum(ip_to_tcp(packet));
+		src_port = get_srcport(ip_to_tcp(packet));
+		dest_port = get_destport(ip_to_tcp(packet));
+		src = get_src(packet);
+		dest = get_dst(packet);
+		flags = get_flags(ip_to_tcp(packet));
+		incoming_seq_num = get_seqnum(ip_to_tcp(packet));
 
-	 nlog(MSG_LOG, "tcp", "source = %d, dest = %d, src_port = %d, dest_port = %d, flags = %s%s%s%s , window = %d, len = %d, seqnum=%d, acknum=%d",
-		  src, dest, src_port, dest_port, flags & TCP_FLAG_SYN ? " SYN" : "", flags & TCP_FLAG_ACK ? " ACK" : "", flags & TCP_FLAG_RST ? " RST" : "", flags & TCP_FLAG_FIN ? " FIN" : "", get_window(ip_to_tcp(packet)), get_data_len(packet), get_seqnum(ip_to_tcp(packet)), get_acknum(ip_to_tcp(packet)));
+		nlog(MSG_LOG, "tcp", "source = %d, dest = %d, src_port = %d, dest_port = %d, flags = %s%s%s%s , window = %d, len = %d, seqnum=%d, acknum=%d",
+				src, dest, src_port, dest_port, flags & TCP_FLAG_SYN ? " SYN" : "", flags & TCP_FLAG_ACK ? " ACK" : "", flags & TCP_FLAG_RST ? " RST" : "", flags & TCP_FLAG_FIN ? " FIN" : "", get_window(ip_to_tcp(packet)), get_data_len(packet), get_seqnum(ip_to_tcp(packet)), get_acknum(ip_to_tcp(packet)));
 
-	 tcp_socket_t *sock = socktable_get(node->tuple_table, dest, dest_port, src, src_port, FULL_SOCKET);
-	 //nlog(MSG_LOG,"tcp_thread", "dest=%d, dest_port=%d, src=%d, src_port=%d flags=%d", dest, dest_port, src, src_port, flags);
-	 //nlog(MSG_LOG,"tcp_thread", "about to dump socktable in tcp_thread");
-	 //socktable_dump(node->tuple_table, FULL_SOCKET);      
-	 //socktable_dump(node->tuple_table, HALF_SOCKET);
 
-	 /* If no match, may still be valid; ensure socket not listening on requested port. */
-	 if (sock == NULL) {
-		nlog(MSG_WARNING, "tcp_thread", "We got a tcp packet, but it doesn't seem to have a full socket associated with it.  Halfchecking...");
+		tcp_socket_t *sock = socktable_get(node->tuple_table, dest, dest_port, src, src_port, FULL_SOCKET);
+		//nlog(MSG_LOG,"tcp_thread", "dest=%d, dest_port=%d, src=%d, src_port=%d flags=%d", dest, dest_port, src, src_port, flags);
+		//nlog(MSG_LOG,"tcp_thread", "about to dump socktable in tcp_thread");
+		//socktable_dump(node->tuple_table, FULL_SOCKET);      
+		//socktable_dump(node->tuple_table, HALF_SOCKET);
 
-		sock = socktable_get(node->tuple_table, dest, dest_port, 0, 0, HALF_SOCKET);
-
-		/* Pwnz0r. */
+		/* If no match, may still be valid; ensure socket not listening on requested port. */
 		if (sock == NULL) {
-		  tcp_socket_t* tmp_sock = get_tmp_socket(dest_port, src, src_port, SEND_WINDOW_SIZE);
+			nlog(MSG_WARNING, "tcp_thread", "We got a tcp packet, but it doesn't seem to have a full socket associated with it.  Halfchecking...");
 
-		  nlog(MSG_ERROR,"tcp_thread", "Ok, not a half socket either.  Discarding.");
-		  /* TODO TODO SEND A RESET, as there is not valid thingy here. */
-		  
-		  send_dumb_packet(tmp_sock, packet, TCP_FLAG_RST);
-		  free(tmp_sock);
+			sock = socktable_get(node->tuple_table, dest, dest_port, 0, 0, HALF_SOCKET);
 
-		  assert(packet);
-		  free(packet);
+			/* Pwnz0r. */
+			if (sock == NULL) {
+				tcp_socket_t* tmp_sock = get_tmp_socket(dest_port, src, src_port, SEND_WINDOW_SIZE);
 
-		  continue;
-		} 
+				nlog(MSG_ERROR,"tcp_thread", "Ok, not a half socket either.  Discarding.");
+				/* TODO TODO SEND A RESET, as there is not valid thingy here. */
 
-		/* Found half-socket. Ensure ready for accept. */
-		if(!sock->can_handshake) {
-		  tcp_socket_t* tmp_sock = get_tmp_socket(dest_port, src, src_port, SEND_WINDOW_SIZE);
-		  nlog(MSG_ERROR, "tcp_thread", "Found a half socket, but socket not in accept state. Discarding.");
+				send_dumb_packet(tmp_sock, packet, TCP_FLAG_RST);
+				free(tmp_sock);
 
-		  assert(packet);
-		  send_dumb_packet(tmp_sock, packet, TCP_FLAG_RST);
+				assert(packet);
+				free(packet);
 
-		  free(tmp_sock);
-		  free(packet);
+				continue;
+			} 
 
-		  continue;
-		} 
+			/* Found half-socket. Ensure ready for accept. */
+			if(!sock->can_handshake) {
+				tcp_socket_t* tmp_sock = get_tmp_socket(dest_port, src, src_port, SEND_WINDOW_SIZE);
+				nlog(MSG_ERROR, "tcp_thread", "Found a half socket, but socket not in accept state. Discarding.");
 
-		/* Construct new full socket. */
-		sock->new_fd = sys_socket(1);
+				assert(packet);
+				send_dumb_packet(tmp_sock, packet, TCP_FLAG_RST);
 
-		old_sock = sock;
-		sock = get_socket_from_int(sock->new_fd);
+				free(tmp_sock);
+				free(packet);
 
-		assert(sock);
+				continue;
+			} 
 
-		sock->parent = old_sock;
-		sock->local_node = old_sock->local_node;
-		sock->local_port = old_sock->local_port;
-		sock->remote_port = src_port;
-		sock->remote_node = src;
-		sock->seq_num = 1000;
+			//nlog(MSG_XXX, "tcp_thread", "trying to get lock");
+			pthread_mutex_lock(&sock->protect);
+			//nlog(MSG_XXX, "tcp_thread", "got lock");
 
-		/* BEGIN: XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX      these used to all be PLUS ONE +1!!!!!!!!!!!!!!! */
-		sock->send_una = sock->seq_num + 0;
-		sock->send_next = sock->seq_num + 0;
-		sock->send_written = sock->seq_num + 0;
+			/* Construct new full socket. */
+			sock->new_fd = sys_socket(1);
 
-		sock->recv_next = incoming_seq_num + 0;
-		sock->recv_read = incoming_seq_num + 0;
-		/* END:      IF THIS DOESN'T WORK              FIX THE ABOVE TO +1 !!!!!!!!!!!!!!!! FOR ALL OF THEM!!!!!!! */
+			old_sock = sock;
+			sock = get_socket_from_int(sock->new_fd);
 
-		socktable_put(node->tuple_table, sock, FULL_SOCKET);
-	 }
+			//nlog(MSG_XXX, "tcp_thread", "trying to get lock");
+			pthread_mutex_lock(&sock->protect);
+			//nlog(MSG_XXX, "tcp_thread", "got lock");
 
-	 if(flags & TCP_FLAG_RST) {
-		/* Bail out by signaling user and closing stuff up. */
-		nlog(MSG_WARNING, "tcp_thread", "got a RESET; bailing out");
-		tcpm_reset(sock->machine);
+			assert(sock);
 
+			sock->parent = old_sock;
+			sock->local_node = old_sock->local_node;
+			sock->local_port = old_sock->local_port;
+			sock->remote_port = src_port;
+			sock->remote_node = src;
+			sock->seq_num = 1000;
+
+			/* BEGIN: XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX      these used to all be PLUS ONE +1!!!!!!!!!!!!!!! */
+			sock->send_una = sock->seq_num + 0;
+			sock->send_next = sock->seq_num + 0;
+			sock->send_written = sock->seq_num + 0;
+
+			sock->recv_next = incoming_seq_num + 0;
+			sock->recv_read = incoming_seq_num + 0;
+			/* END:      IF THIS DOESN'T WORK              FIX THE ABOVE TO +1 !!!!!!!!!!!!!!!! FOR ALL OF THEM!!!!!!! */
+
+			//nlog(MSG_XXX, "tcp_thread", "trying to get lock");
+			pthread_mutex_unlock(&sock->protect);
+			//nlog(MSG_XXX, "tcp_thread", "got lock");
+
+			socktable_put(node->tuple_table, sock, FULL_SOCKET);
+			//nlog(MSG_XXX, "tcp_thread", "unlocked mutex");
+			pthread_mutex_unlock(&old_sock->protect);
+		}
+
+		//nlog(MSG_XXX, "tcp_thread", "trying to get lock");
+		pthread_mutex_lock(&sock->protect);
+		//nlog(MSG_XXX, "tcp_thread", "got lock");
+
+		if(flags & TCP_FLAG_RST) {
+			/* Bail out by signaling user and closing stuff up. */
+			nlog(MSG_WARNING, "tcp_thread", "got a RESET; bailing out");
+			tcpm_reset(sock->machine);
+
+			free(packet);
+			//nlog(MSG_XXX, "tcp_thread", "unlocked mutex");
+			pthread_mutex_unlock(&sock->protect);
+			continue;
+		}
+
+		do_recv_tcp(sock, packet);
 		free(packet);
-		continue;
-	 }
-
-	 do_recv_tcp(sock, packet);
-	 free(packet);
-  }
+		//nlog(MSG_XXX, "tcp_thread", "unlocked mutex");
+		pthread_mutex_unlock(&sock->protect);
+	}
 }
 
 /* query each interface and report when it goes down

@@ -34,6 +34,8 @@ typedef struct tcp_socket__ {
 	pthread_mutex_t lock;
 	int cond_status;
 
+	pthread_mutex_t protect;
+
 	int new_fd;
 	struct tcp_socket__ *parent;
 
