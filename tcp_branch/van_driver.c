@@ -219,8 +219,9 @@ void *tcp_watchdog(void *arg) {
 		  sock->last_packet = 0;
 		}
 
-		if ((  (time(NULL) - sock->ufunc_timeout) > CONNECT_TIMEOUT_TIME) && (tcpm_state(sock->machine) == ST_SYN_SENT)) {
+		if ( (sock->ufunc_timeout > 0) && (  (time(NULL) - sock->ufunc_timeout) > CONNECT_TIMEOUT_TIME) && (tcpm_state(sock->machine) == ST_SYN_SENT)) {
 			nlog(MSG_WARNING, "watchdog", "connect timeout.  resetting");
+			sock->ufunc_timeout = 0;
 			tcpm_reset(sock->machine);
 			notify(sock, TCP_TIMEOUT);
 		

@@ -140,7 +140,7 @@ int dataFromNetworkToBuffer(tcp_socket_t *sock, char *data, unsigned int size) {
 
 /* when we get a window announcement, pass the window into this function */
 void updateFromWindowAnnounce(tcp_socket_t *sock, int window) {
-	sock->remote_flow_window = sock->send_next + window;
+	sock->remote_flow_window = sock->send_una + window;
 		/* XXX we might want to use send_una instead of send_next */
 }
 

@@ -181,7 +181,7 @@ void in_closed(__attribute__((unused)) sid_t s, void *context, __attribute__((un
 			sock->send_una = 0;
 			sock->send_next = 0;
 			sock->send_written = 0;
-			sock->remote_flow_window = sock->send_next + SEND_WINDOW_SIZE; /* a reasonable default? je pense que oui */
+			sock->remote_flow_window = sock->send_una + SEND_WINDOW_SIZE; /* a reasonable default? je pense que oui */
 
 			sock->recv_ack = 0;
 			sock->recv_next = 0;
