@@ -386,7 +386,7 @@ void *tcp_thread(void* arg) {
 			sock->local_port = old_sock->local_port;
 			sock->remote_port = src_port;
 			sock->remote_node = src;
-			sock->seq_num = 1000;
+			sock->seq_num = rand();
 
 			/* BEGIN: XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX      these used to all be PLUS ONE +1!!!!!!!!!!!!!!! */
 			sock->send_una = sock->seq_num + 0;

@@ -336,7 +336,7 @@ int v_listen(int socket, __attribute__((unused)) int backlog /* optional */) {
 	assert(sock->machine);
 	if (!(tcpm_canlisten(sock->machine))) return -1;
 
-	sock->seq_num = 1000;
+	sock->seq_num = rand();
   
 	if (tcpm_event(sock->machine, ON_PASSIVE_OPEN, this_node, NULL)) {
 		nlog(MSG_ERROR,"socket:listen", "Uhh. error.  Couldn't transition states.  noob");
@@ -357,7 +357,7 @@ int v_connect(int socket, int node, uint16_t port) {
 	sock->remote_node = node;
 	sock->remote_port = port;
 
-	sock->seq_num = 100; /* an arbitrary inital seq number. TODO make this random */ 
+	sock->seq_num = rand(); /* an arbitrary inital seq number. TODO make this random */ 
 	sock->ack_num = 0;
 	sock->can_handshake = 1;
 

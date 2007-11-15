@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
 
 #include "van_driver.h"
 #include "fancy_display.h"
@@ -27,6 +28,9 @@ int main( int argc, char* argv[] ) {
 		printf("usage: %s node_num netconfig\n",argv[0]);
 		return -1;
 	}
+
+	srand((unsigned)time(NULL));
+
 	nodenum = atoi(argv[1]);
 
 	strncpy(netconf,argv[2],256);
