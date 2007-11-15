@@ -9,7 +9,7 @@
 
 #define LOCALBUFSIZE 4096
 
-#define CONNECT_TIMEOUT_TIME 10000//30  /* HUGE for debugging */
+#define CONNECT_TIMEOUT_TIME 30 
 
 /* Forward declaration */
 struct tcp_machine__;

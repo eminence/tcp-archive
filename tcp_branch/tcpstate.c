@@ -26,7 +26,7 @@ void* alloc_byte(uint8_t ibyte) {
 /* Core functionality. */
 tcp_machine_t* tcpm_new(tcp_socket_t* context, uint8_t clone) {
   tcp_machine_t *machine        = malloc(sizeof(tcp_machine_t));
-  state_t       *st_closed      = state_new(ST_CLOSED,      in_closed,		NULL,             NULL), // was null (error func)
+  state_t       *st_closed      = state_new(ST_CLOSED,      in_closed,		fail_with_reset,  NULL), // was null (error func)
                 *st_syn_sent    = state_new(ST_SYN_SENT,    NULL, 			fail_with_reset,  NULL),
                 *st_syn_rcvd    = state_new(ST_SYN_RCVD,    NULL, 			fail_with_reset,  NULL),
                 *st_listen      = state_new(ST_LISTEN,      NULL, 			fail_with_reset,  NULL), // was null
