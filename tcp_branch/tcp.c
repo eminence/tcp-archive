@@ -32,7 +32,7 @@ int queue_eof(tcp_socket_t *sock) {
   /* WARNING: increasing ack number. This should be fine because we SHOULD NOT be in a recv state
 	* (we just received a FIN). However, if there are bugs later, remember to look at this code.
 	*/
-  cbuf_put_eof(sock->r_buf, sock->recv_next++);
+  cbuf_put_eof(sock->r_buf, sock->recv_next);
 
   return 0;
 }
